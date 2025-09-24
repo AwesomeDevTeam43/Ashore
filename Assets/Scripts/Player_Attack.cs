@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class Melee : MonoBehaviour
 {
+    [SerializeField] private Player_InputHandler player_InputHandler;
+    
     public Transform attackOrigin;
     public float attackRadius = 1f; 
     public LayerMask enemyLayer;
@@ -11,16 +13,9 @@ public class Melee : MonoBehaviour
         Gizmos.DrawWireSphere(attackOrigin.position, attackRadius);
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (player_InputHandler.AttackTriggered)
         {
             Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackOrigin.position, attackRadius, enemyLayer);
             foreach (var enemyLayer in hitEnemies)
