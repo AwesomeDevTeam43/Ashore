@@ -48,13 +48,14 @@ public class Player_Movement : MonoBehaviour
 
     private void HandleJump()
     {
-        if (player_InputHandler.JumpTriggered)
+        if (player_InputHandler.JumpTriggered && IsGrounded())
         {
-            if (IsGrounded())
-            {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpingPower);
-            }
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpingPower);
+
         }
-        //implement press control https://www.youtube.com/watch?v=K1xZ-rycYY8
+        if (!player_InputHandler.JumpTriggered && rb.linearVelocity.y > 0f)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
+        }
     }
 }
