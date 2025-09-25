@@ -475,6 +475,7 @@ GameObject:
   - component: {fileID: 686674741}
   - component: {fileID: 686674740}
   - component: {fileID: 686674739}
+  - component: {fileID: 686674743}
   m_Layer: 7
   m_Name: Enemy
   m_TagString: Untagged
@@ -625,6 +626,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &686674743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 686674738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 752dfa1b386ce134bbd50dbaba198260, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  health: 3
+  speed: 1
+  knockbackForce: 5
+  knockbackDuration: 0.2
 --- !u!1 &841942480
 GameObject:
   m_ObjectHideFlags: 0
@@ -1030,9 +1047,11 @@ MonoBehaviour:
   player_InputHandler: {fileID: 1225151854}
   attackOrigin: {fileID: 19052141}
   attackRadius: 1.14
+  damage: 1
   enemyLayer:
     serializedVersion: 2
     m_Bits: 128
+  cooldownTime: 0.5
 --- !u!114 &1225151853
 MonoBehaviour:
   m_ObjectHideFlags: 0
