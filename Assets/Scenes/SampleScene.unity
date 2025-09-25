@@ -1334,6 +1334,7 @@ GameObject:
   - component: {fileID: 1225151855}
   - component: {fileID: 1225151854}
   - component: {fileID: 1225151853}
+  - component: {fileID: 1225151856}
   - component: {fileID: 1225151852}
   m_Layer: 3
   m_Name: Player
@@ -1566,6 +1567,22 @@ PolygonCollider2D:
       - {x: 0.29296875, y: 0.90234375}
       - {x: 0.15234375, y: 0.97265625}
   m_UseDelaunayMesh: 0
+--- !u!114 &1225151856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1225151845}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 862f78142ac444e45b7959c06dbbb52d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player_InputHandler: {fileID: 1225151854}
+  cam: {fileID: 1192490512}
+  maxOffset: 3
+  smooth: 5
 --- !u!1 &1291055440
 GameObject:
   m_ObjectHideFlags: 0
