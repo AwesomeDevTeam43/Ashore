@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 19052141}
   m_Layer: 3
   m_Name: DamageZone
-  m_TagString: Untagged
+  m_TagString: AttackZone
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -960,8 +960,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   health: 3
   speed: 1
-  knockbackForce: 5
-  knockbackDuration: 0.2
 --- !u!1 &841942480
 GameObject:
   m_ObjectHideFlags: 0
@@ -1481,6 +1479,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   cooldownTime: 0.5
+  knockbackForce: 0
 --- !u!114 &1225151853
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1494,6 +1493,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player_InputHandler: {fileID: 1225151854}
+  attackZone: {fileID: 0}
   rb: {fileID: 1225151846}
   groundCheck: {fileID: 1559979685}
   groundLayer:
@@ -1602,6 +1602,8 @@ MonoBehaviour:
   cam: {fileID: 1192490512}
   maxOffset: 3
   smooth: 5
+  hitAmplitudeGain: 2
+  hitFrequencyGain: 2
 --- !u!1 &1291055440
 GameObject:
   m_ObjectHideFlags: 0

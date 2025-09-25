@@ -4,7 +4,7 @@ using UnityEngine;
 public class Player_Movement : MonoBehaviour
 {
     [SerializeField] private Player_InputHandler player_InputHandler;
-
+    [SerializeField] private GameObject attackZone;
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
@@ -12,10 +12,13 @@ public class Player_Movement : MonoBehaviour
     private float moveSpeed = 5f;
     private float jumpingPower = 15f;
     private bool isFacingRight = true;
+    private Vector3 vertAtk = new Vector3 (0.0f, 1.5f, 0.0f);
+    private Vector3 startPos;
 
     void Start()
     {
-
+      attackZone = GameObject.FindGameObjectWithTag("AttackZone");
+      startPos = attackZone.transform.localPosition;
     }
 
     void FixedUpdate()
@@ -43,7 +46,23 @@ public class Player_Movement : MonoBehaviour
             Vector3 localScale = transform.localScale;
             localScale.x *= -1f;
             transform.localScale = localScale;
+
+
         }
+        if (player_InputHandler.MovementInput.y < 0f && !IsGrounded())
+        {
+          attackZone.transform.localPosition = -vertAtk;
+        }
+        else if (player_InputHandler.MovementInput.y > 0f)
+        {
+          attackZone.transform.localPosition = vertAtk; 
+        }
+        else
+        {
+          attackZone.transform.localPosition = startPos;
+        }
+      
+
     }
 
     private void HandleJump()
