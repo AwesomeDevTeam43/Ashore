@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 19052141}
   m_Layer: 3
   m_Name: DamageZone
-  m_TagString: Untagged
+  m_TagString: AttackZone
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1239,7 +1239,6 @@ GameObject:
   - component: {fileID: 1192490513}
   - component: {fileID: 1192490512}
   - component: {fileID: 1192490511}
-  - component: {fileID: 1192490514}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -1336,23 +1335,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1225151848}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1192490514
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1192490509}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68bb026fafb42b14791938953eaace77, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  NoiseProfile: {fileID: 11400000, guid: 69ce8388f6785dd4c8c39915efece2f4, type: 2}
-  PivotOffset: {x: 0, y: 0, z: 0}
-  AmplitudeGain: 0
-  FrequencyGain: 0
-  m_NoiseOffsets: {x: 0, y: 0, z: 0}
 --- !u!1 &1225151845
 GameObject:
   m_ObjectHideFlags: 0
@@ -1490,7 +1472,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player_InputHandler: {fileID: 1225151854}
-  player_Camera: {fileID: 1225151856}
   attackOrigin: {fileID: 19052141}
   attackRadius: 1.14
   damage: 1
@@ -1498,7 +1479,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   cooldownTime: 0.5
-  knockbackForce: 5
+  knockbackForce: 0
 --- !u!114 &1225151853
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1512,6 +1493,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player_InputHandler: {fileID: 1225151854}
+  attackZone: {fileID: 0}
   rb: {fileID: 1225151846}
   groundCheck: {fileID: 1559979685}
   groundLayer:
@@ -1620,9 +1602,8 @@ MonoBehaviour:
   cam: {fileID: 1192490512}
   maxOffset: 3
   smooth: 5
-  hitAmplitudeGain: 1
-  hitFrequencyGain: 1
-  shakeTime: 0.1
+  hitAmplitudeGain: 2
+  hitFrequencyGain: 2
 --- !u!1 &1291055440
 GameObject:
   m_ObjectHideFlags: 0
