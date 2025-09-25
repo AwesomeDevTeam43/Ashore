@@ -14,11 +14,6 @@ public class Melee : MonoBehaviour
     [Header("Knockback Settings")]
     public float knockbackForce;
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawWireSphere(attackOrigin.position, attackRadius);
-    }
-
     void Update()
     {
         if (cooldownTimer <= 0)
@@ -32,15 +27,7 @@ public class Melee : MonoBehaviour
                     if (enemy != null)
                     {
                         enemy.TakeDamage(damage);
-
-                        // knockback
-                        Rigidbody2D rb = enemy.GetComponent<Rigidbody2D>();
-                        if (rb != null)
-                        {
-                            Vector2 direcao = (enemy.transform.position - attackOrigin.position).normalized;
-                            rb.linearVelocity = Vector2.zero;
-                            rb.AddForce(direcao * knockbackForce, ForceMode2D.Impulse);
-                        }
+                        ApplyKnockback(hitEnemies[i].transform, hitEnemies[i].GetComponent<Rigidbody2D>());
                     }
                 }
                 cooldownTimer = cooldownTime;
@@ -50,5 +37,17 @@ public class Melee : MonoBehaviour
         {
             cooldownTimer -= Time.deltaTime;
         }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(attackOrigin.position, attackRadius);
+    }
+
+    public void ApplyKnockback(Transform enemyTransform, Rigidbody2D enemyRigidbody)
+    {
+        Vector2 direction = (enemyTransform.position - attackOrigin.position).normalized;
+        enemyRigidbody.linearVelocity = Vector2.zero; // Reset current velocity
+        enemyRigidbody.AddForce(direction * knockbackForce, ForceMode2D.Impulse);
     }
 }
