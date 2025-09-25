@@ -4,6 +4,8 @@ public class Melee : MonoBehaviour
 {
     [SerializeField] private Player_InputHandler player_InputHandler;
 
+    [SerializeField] private Player_Camera player_Camera;
+
     public Transform attackOrigin;
     public float attackRadius = 1f;
     public int damage;
@@ -26,6 +28,8 @@ public class Melee : MonoBehaviour
                     Enemy enemy = hitEnemies[i].GetComponent<Enemy>();
                     if (enemy != null)
                     {
+                        player_Camera.StartCameraShake();
+                        
                         enemy.TakeDamage(damage);
                         ApplyKnockback(hitEnemies[i].transform, hitEnemies[i].GetComponent<Rigidbody2D>());
                     }
