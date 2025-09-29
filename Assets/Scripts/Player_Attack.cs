@@ -10,11 +10,11 @@ public class Melee : MonoBehaviour
     public float attackRadius = 1f;
     public int damage;
     public LayerMask enemyLayer;
-    public float cooldownTime = .5f;
+    public float cooldownTime = 0.5f;
     private float cooldownTimer = 0f;
 
     [Header("Knockback Settings")]
-    public float knockbackForce;
+    public float knockbackForce = 6f;
 
     void Update()
     {
@@ -25,14 +25,14 @@ public class Melee : MonoBehaviour
                 Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackOrigin.position, attackRadius, enemyLayer);
                 for (int i = 0; i < hitEnemies.Length; i++)
                 {
-                    Enemy enemy = hitEnemies[i].GetComponent<Enemy>();
-                    if (enemy != null)
-                    {
+                  HealthSystem healthSystem= hitEnemies[i].GetComponent<HealthSystem>();
                         player_Camera.StartCameraShake();
-                        
-                        enemy.TakeDamage(damage);
+                        if (healthSystem != null)
+                        {
+                          healthSystem.TakeDamage(damage);
+                          Debug.Log("damage take");
+                        }
                         ApplyKnockback(hitEnemies[i].transform, hitEnemies[i].GetComponent<Rigidbody2D>());
-                    }
                 }
                 cooldownTimer = cooldownTime;
             }
