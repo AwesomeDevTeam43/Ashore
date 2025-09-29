@@ -5,7 +5,6 @@ public class Enemy : MonoBehaviour
 
     public int health;
     public float speed;
-    //public GameObject bloodEffect;
 
     private Rigidbody2D rb;
 
@@ -36,7 +35,6 @@ public class Enemy : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        //Instantiate(bloodEffect, transform.position, Quaternion.identity);
         health -= damage;
         Debug.Log("Enemy took " + damage + " damage.");
     }

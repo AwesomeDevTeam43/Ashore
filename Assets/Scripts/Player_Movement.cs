@@ -14,6 +14,7 @@ public class Player_Movement : MonoBehaviour
     private bool isFacingRight = true;
     private Vector3 vertAtk = new Vector3 (0.0f, 1.5f, 0.0f);
     private Vector3 startPos;
+    public bool IsFacingRight => isFacingRight;
 
     void Start()
     {
