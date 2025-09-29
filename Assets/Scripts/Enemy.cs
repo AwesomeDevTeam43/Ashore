@@ -30,15 +30,7 @@ public class Enemy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (health <= 0)
-        {
-            Destroy(gameObject);
-        }
-        else
-        {
-            transform.Translate(Vector2.left * speed * Time.deltaTime);
-
-        }
+        transform.Translate(Vector2.left * speed * Time.deltaTime);
     }
     
   void OnHealthChanged(float current, float max)
