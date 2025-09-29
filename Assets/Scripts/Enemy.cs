@@ -7,11 +7,19 @@ public class Enemy : MonoBehaviour
     public float speed;
     //public GameObject bloodEffect;
 
+    HealthSystem healthSystem;
+
     private Rigidbody2D rb;
 
+    void Awake()
+    {
+      healthSystem = GetComponent<HealthSystem>();
+      healthSystem.OnHealthChanged += OnHealthChanged;
+    }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+      healthSystem.Initialize(health);
         rb = GetComponent<Rigidbody2D>();
         if (rb == null)
         {
@@ -32,13 +40,13 @@ public class Enemy : MonoBehaviour
 
         }
     }
-
-
-    public void TakeDamage(int damage)
+    
+  void OnHealthChanged(float current, float max)
+  {
+    Debug.Log($"Health changed {current} {max}");
+    if (current <= 0)
     {
-        //Instantiate(bloodEffect, transform.position, Quaternion.identity);
-        health -= damage;
-        Debug.Log("Enemy took " + damage + " damage.");
+      Destroy(gameObject);
     }
-
+  }
 }
