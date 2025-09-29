@@ -10,11 +10,11 @@ public class Melee : MonoBehaviour
     public float attackRadius = 1f;
     public int damage;
     public LayerMask enemyLayer;
-    public float cooldownTime = .5f;
+    public float cooldownTime = 0.5f;
     private float cooldownTimer = 0f;
 
     [Header("Knockback Settings")]
-    public float knockbackForce;
+    public float knockbackForce = 6f;
 
     void Update()
     {
