@@ -35,6 +35,25 @@ public class Enemy : MonoBehaviour
 
   private void Update()
   {
+    if (player == null)
+      return;
+
+    CheckPlayerDistance();
+  }
+  private void FixedUpdate()
+  {
+    if (player == null)
+    {
+      return;
+    }
+    if (inRange)
+    {
+      transform.position = Vector2.MoveTowards(transform.position, player.position, speed * Time.fixedDeltaTime);
+    }
+  }
+
+  void CheckPlayerDistance()
+  {
     float distanceToPlayer = Vector2.Distance(transform.position, player.position);
     if (distanceToPlayer <= followPlayerRange)
     {
@@ -49,8 +68,8 @@ public class Enemy : MonoBehaviour
     {
       if (timeBtwAttack <= 0)
       {
-        Attack();
-        Debug.Log("Attack!");
+        CheckEnemyAttack();
+        Debug.Log("Levaste nos dentes do caranguejo");
         timeBtwAttack = startTimeBtwAttack;
       }
       else
@@ -59,37 +78,30 @@ public class Enemy : MonoBehaviour
       }
     }
   }
-  private void FixedUpdate()
+
+  void CheckEnemyAttack()
   {
-    if (inRange)
+
+    if (player != null)
     {
-      transform.position = Vector2.MoveTowards(transform.position, player.position, speed * Time.fixedDeltaTime);
+      HealthSystem playerHealth = player.GetComponent<HealthSystem>();
+      if (playerHealth != null)
+      {
+        playerHealth.TakeDamage(biteDamage);
+        Debug.Log("Player Hit!");
+        Debug.Log(playerHealth.CurrentHealth);
+      }
     }
   }
 
   void OnHealthChanged(int current, int max)
   {
-    Debug.Log($"Health changed {current} {max}");
+    Debug.Log($"Enemy Health changed {current} {max}");
     if (current <= 0)
     {
       Destroy(gameObject);
     }
   }
-
-  void Attack()
-  {
-    if (player != null)
-    {
-      HealthSystem playerHealthSystem = player.GetComponent<HealthSystem>();
-      if (playerHealthSystem != null)
-      {
-        playerHealthSystem.TakeDamage(biteDamage, gameObject);
-        Debug.Log("Player takes damage: " + biteDamage);
-        Debug.Log("Player current health: " + playerHealthSystem.CurrentHealth);
-      }
-    }
-  }
-
   void OnDrawGizmos()
   {
     Gizmos.color = Color.red;

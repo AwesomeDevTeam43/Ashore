@@ -37,5 +37,5 @@ public class HealthSystem : MonoBehaviour
       get => _maxHealth;
       set => _maxHealth = value;
     }
-    public bool IsAlive => _currentHealth <= 0;
+    public bool IsAlive => _currentHealth > 0;
 }
