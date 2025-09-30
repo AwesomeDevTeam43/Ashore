@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BigCrab : MonoBehaviour
+public class Enemy : MonoBehaviour
 {
 
   public int health;
@@ -27,7 +27,6 @@ public class BigCrab : MonoBehaviour
   {
     healthSystem.Initialize(health);
     rb = GetComponent<Rigidbody2D>();
-    player = GameObject.FindGameObjectWithTag("Player").transform;
     if (rb == null)
     {
       rb = gameObject.AddComponent<Rigidbody2D>();
@@ -35,27 +34,6 @@ public class BigCrab : MonoBehaviour
   }
 
   private void Update()
-  {
-    PlayerAggro();
-  }
-  private void FixedUpdate()
-  {
-    if (inRange)
-    {
-      transform.position = Vector2.MoveTowards(transform.position, player.position, speed * Time.fixedDeltaTime);
-    }
-  }
-
-  void OnHealthChanged(float current, float max)
-  {
-    Debug.Log($"Health changed {current} {max}");
-    if (current <= 0)
-    {
-      Destroy(gameObject);
-    }
-  }
-
-  private void PlayerAggro()
   {
     float distanceToPlayer = Vector2.Distance(transform.position, player.position);
     if (distanceToPlayer <= followPlayerRange)
@@ -79,6 +57,22 @@ public class BigCrab : MonoBehaviour
       {
         timeBtwAttack -= Time.deltaTime;
       }
+    }
+  }
+  private void FixedUpdate()
+  {
+    if (inRange)
+    {
+      transform.position = Vector2.MoveTowards(transform.position, player.position, speed * Time.fixedDeltaTime);
+    }
+  }
+
+  void OnHealthChanged(int current, int max)
+  {
+    Debug.Log($"Health changed {current} {max}");
+    if (current <= 0)
+    {
+      Destroy(gameObject);
     }
   }
 
