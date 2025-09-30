@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4294930200414580726}
   - component: {fileID: 5678628776275746746}
-  - component: {fileID: 7137210276579410982}
   - component: {fileID: 3200595835447464204}
   - component: {fileID: 8163727369856622961}
   - component: {fileID: 6451200338623469066}
@@ -91,52 +90,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!61 &7137210276579410982
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9135078294359319425}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
 --- !u!50 &3200595835447464204
 Rigidbody2D:
   serializedVersion: 5
@@ -178,6 +131,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   health: 3
   speed: 1
+  followPlayerRange: 0
+  attackRange: 0
+  startTimeBtwAttack: 0
+  biteDamage: 0
+  player: {fileID: 0}
 --- !u!114 &6451200338623469066
 MonoBehaviour:
   m_ObjectHideFlags: 0
