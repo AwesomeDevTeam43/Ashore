@@ -9,7 +9,7 @@ public class DeadZone : MonoBehaviour
 
     void Update()
     {
-        if (IsDeadZone())
+        if (IsDeadZone() && player != null && spawnPoint != null)
         {
             player.transform.localPosition = spawnPoint.transform.localPosition;
         }
@@ -17,6 +17,11 @@ public class DeadZone : MonoBehaviour
 
     private bool IsDeadZone()
     {
+        if (groundCheck == null)
+        {
+            return false;
+        }
+
         return Physics2D.OverlapCircle(groundCheck.position, 0.02f, deadZoneLayer);
     }
 }
