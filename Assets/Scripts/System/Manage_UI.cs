@@ -8,10 +8,6 @@ public class Manage_UI : MonoBehaviour
     [SerializeField] private Image _xpBar;
     [SerializeField] private TextMeshProUGUI _levelText;
 
-    [Header("Systems References")]
-   // [SerializeField] private XP_System xpSystem;
-    //[SerializeField] private HealthSystem healthSystem;
-    //
     private GameObject player;
     private XP_System xpSystem;
     private HealthSystem healthSystem;
@@ -35,7 +31,14 @@ public class Manage_UI : MonoBehaviour
         float currentXp = xpSystem.CurrentXp;
         float maxXp = xpSystem.MaxXpPerLevel;
 
-        _xpBar.fillAmount = currentXp / maxXp;
+        if (maxXp > 0)
+        {
+            _xpBar.fillAmount = Mathf.Clamp01(currentXp / maxXp);
+        }
+        else
+        {
+            _xpBar.fillAmount = 0f;
+        }
     }
 
     private void UpdateLevel(int newLevel)
