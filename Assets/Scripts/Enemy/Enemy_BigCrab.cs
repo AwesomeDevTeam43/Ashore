@@ -67,7 +67,7 @@ public class Enemy : MonoBehaviour
     }
   }
 
-  void OnHealthChanged(float current, float max)
+  void OnHealthChanged(int current, int max)
   {
     Debug.Log($"Health changed {current} {max}");
     if (current <= 0)
