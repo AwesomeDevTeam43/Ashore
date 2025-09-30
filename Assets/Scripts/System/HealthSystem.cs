@@ -8,6 +8,11 @@ public class HealthSystem : MonoBehaviour
     public event Action<float, float> OnHealthChanged;
     public event Action<GameObject> OnDamageTaken;
 
+    private void Update()
+    {
+      Debug.Log($"{_maxHealth}, {_currentHealth}");
+    }
+
     public void Initialize(float maxHealth)
     {
         _maxHealth = maxHealth;
@@ -32,6 +37,11 @@ public class HealthSystem : MonoBehaviour
     }
 
     public float CurrentHealth => _currentHealth;
-    public float MaxHealth => _maxHealth;
+    public float MaxHealth
+    {
+      get => _maxHealth;
+      set => _maxHealth = value;
+
+    }
     public bool IsAlive => _currentHealth <= 0;
 }
