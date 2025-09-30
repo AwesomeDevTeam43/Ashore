@@ -17,13 +17,13 @@ public class Enemy : MonoBehaviour
 
   private Rigidbody2D rb;
 
-  void Awake()
+  private void Awake()
   {
     healthSystem = GetComponent<HealthSystem>();
     healthSystem.OnHealthChanged += OnHealthChanged;
   }
   // Start is called once before the first execution of Update after the MonoBehaviour is created
-  void Start()
+  private void Start()
   {
     healthSystem.Initialize(health);
     rb = GetComponent<Rigidbody2D>();
@@ -33,7 +33,7 @@ public class Enemy : MonoBehaviour
     }
   }
 
-  void Update()
+  private void Update()
   {
     float distanceToPlayer = Vector2.Distance(transform.position, player.position);
     if (distanceToPlayer <= followPlayerRange)
@@ -49,7 +49,7 @@ public class Enemy : MonoBehaviour
     {
       if (timeBtwAttack <= 0)
       {
-        player.GetComponent<HealthSystem>().TakeDamage(biteDamage);
+        Attack();
         Debug.Log("Attack!");
         timeBtwAttack = startTimeBtwAttack;
       }
@@ -59,7 +59,7 @@ public class Enemy : MonoBehaviour
       }
     }
   }
-  void FixedUpdate()
+  private void FixedUpdate()
   {
     if (inRange)
     {
@@ -73,6 +73,20 @@ public class Enemy : MonoBehaviour
     if (current <= 0)
     {
       Destroy(gameObject);
+    }
+  }
+
+  void Attack()
+  {
+    if (player != null)
+    {
+      HealthSystem playerHealthSystem = player.GetComponent<HealthSystem>();
+      if (playerHealthSystem != null)
+      {
+        playerHealthSystem.TakeDamage(biteDamage, gameObject);
+        Debug.Log("Player takes damage: " + biteDamage);
+        Debug.Log("Player current health: " + playerHealthSystem.CurrentHealth);
+      }
     }
   }
 

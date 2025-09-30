@@ -31,7 +31,6 @@ public class BeeEnemy : MonoBehaviour
   private void Chase()
   {
     transform.position=Vector2.MoveTowards(transform.position, player.transform.position, speed*Time.deltaTime);
-
   }
 
   void OnHealthChanged(float current, float max)
