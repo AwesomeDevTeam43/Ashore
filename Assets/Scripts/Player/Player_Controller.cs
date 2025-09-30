@@ -13,7 +13,7 @@ public class Player_Controller : MonoBehaviour
     healthSystem.OnHealthChanged += OnPlayerHealthChanged;
   }
 
-  private void:w OnDisable()
+  private void OnDisable()
   {
     healthSystem.OnHealthChanged -= OnPlayerHealthChanged;
   }
