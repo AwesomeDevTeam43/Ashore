@@ -32,6 +32,10 @@ public class HealthSystem : MonoBehaviour
     }
 
     public int CurrentHealth => _currentHealth;
-    public int MaxHealth => _maxHealth;
+    public int MaxHealth
+    {
+      get => _maxHealth;
+      set => _maxHealth = value;
+    }
     public bool IsAlive => _currentHealth <= 0;
 }
