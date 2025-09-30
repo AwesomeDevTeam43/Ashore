@@ -9,11 +9,20 @@ public class Manage_UI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _levelText;
 
     [Header("Systems References")]
-    [SerializeField] private XP_System xpSystem;
+   // [SerializeField] private XP_System xpSystem;
     //[SerializeField] private HealthSystem healthSystem;
+    //
+    private GameObject player;
+    private XP_System xpSystem;
+    private HealthSystem healthSystem;
 
     void Start()
     {
+        player = GameObject.FindGameObjectWithTag("Player");
+
+        xpSystem = player.GetComponent<XP_System>();
+        healthSystem = player.GetComponent<HealthSystem>();
+
         xpSystem.OnCollectXP += UpdateXPBar;
         xpSystem.OnLevelUp += UpdateLevel;
 
