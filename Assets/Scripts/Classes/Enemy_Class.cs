@@ -1,6 +1,7 @@
 using UnityEngine;
 
-public class Enemy_Class : MonoBehaviour
+
+public class Enemy_Class : ScriptableObject
 {
     public readonly int Id;
     public int Health { get; set; }

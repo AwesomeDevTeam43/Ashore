@@ -2,15 +2,20 @@ using UnityEngine;
 
 public class Player_Controller : MonoBehaviour
 {
-  [SerializeField] private HealthSystem healthSystem;
-  [SerializeField] private XP_System xP_System;
+  [Header("Starting Stats")]
+  [SerializeField] private int Health = 5;
+  //[SerializeField] private int startingAttackPower = 1;
+  //[SerializeField] private int maxLevel = 20;
+  [SerializeField] private int baseXpOn1stLVL = 10;
 
-  private int playerHealth = 3;
+  private HealthSystem healthSystem;
+  private XP_System xP_System;
 
   private void Awake()
   {
     healthSystem = GetComponent<HealthSystem>();
     healthSystem.OnHealthChanged += OnPlayerHealthChanged;
+    xP_System = GetComponent<XP_System>();
   }
 
   private void OnDisable()
@@ -18,16 +23,15 @@ public class Player_Controller : MonoBehaviour
     healthSystem.OnHealthChanged -= OnPlayerHealthChanged;
   }
 
-
   private void Start()
   {
-    healthSystem.Initialize(playerHealth);
-    xP_System.Initialize(10);
+    healthSystem.Initialize(Health);
+    xP_System.Initialize(baseXpOn1stLVL);
   }
 
   private void Update()
   {
-      Debug.Log($"{healthSystem.MaxHealth}");
+
     if (Input.GetKeyDown(KeyCode.M))
     {
       healthSystem.MaxHealth++;
