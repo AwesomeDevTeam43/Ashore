@@ -34,14 +34,18 @@ public class Player_Controller : MonoBehaviour
 
     if (Input.GetKeyDown(KeyCode.M))
     {
-      healthSystem.MaxHealth++;
-      Debug.Log($"{healthSystem.MaxHealth}");
+      healthSystem.Heal(1);
+      Debug.Log($"{healthSystem.CurrentHealth}/{healthSystem.MaxHealth}");
     }
   }
 
   private void OnPlayerHealthChanged(int currentHealth, int maxHealth)
   {
-
+    if (currentHealth <= 0)
+    {
+      Destroy(gameObject);
+      Debug.Log("Player Died!");
+    }
   }
 }
 
