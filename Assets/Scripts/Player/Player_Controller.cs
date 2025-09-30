@@ -10,7 +10,14 @@ public class Player_Controller : MonoBehaviour
   private void Awake()
   {
     healthSystem = GetComponent<HealthSystem>();
+    healthSystem.OnHealthChanged += OnPlayerHealthChanged;
   }
+
+  private void:w OnDisable()
+  {
+    healthSystem.OnHealthChanged -= OnPlayerHealthChanged;
+  }
+
 
   private void Start()
   {
@@ -20,10 +27,17 @@ public class Player_Controller : MonoBehaviour
 
   private void Update()
   {
+      Debug.Log($"{healthSystem.MaxHealth}");
     if (Input.GetKeyDown(KeyCode.M))
     {
       healthSystem.MaxHealth++;
       Debug.Log($"{healthSystem.MaxHealth}");
     }
   }
+
+  private void OnPlayerHealthChanged(int currentHealth, int maxHealth)
+  {
+
+  }
 }
+
