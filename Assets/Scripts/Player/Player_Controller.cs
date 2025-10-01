@@ -16,6 +16,7 @@ public class Player_Controller : MonoBehaviour
     healthSystem = GetComponent<HealthSystem>();
     healthSystem.OnHealthChanged += OnPlayerHealthChanged;
     xP_System = GetComponent<XP_System>();
+    healthSystem.Initialize(Health);
   }
 
   private void OnDisable()
@@ -25,7 +26,6 @@ public class Player_Controller : MonoBehaviour
 
   private void Start()
   {
-    healthSystem.Initialize(Health);
     xP_System.Initialize(baseXpOn1stLVL);
   }
 

@@ -14,16 +14,19 @@ public class Player_InputHandler : MonoBehaviour
     [SerializeField] private string look = "Look";
     [SerializeField] private string jump = "Jump";
     [SerializeField] private string attack = "Attack";
+    [SerializeField] private string rangeAttack = "RangeAttack";
 
     private InputAction movementAction;
     private InputAction lookAction;
     private InputAction jumpAction;
     private InputAction attackAction;
+    private InputAction rangeAttackAction;
 
     public Vector2 MovementInput { get; private set; }
     public Vector2 LookInput { get; private set; }
     public bool JumpTriggered { get; private set; }
     public bool AttackTriggered { get; private set; }
+    public bool RangeAttackTriggered { get; private set; }
 
     private void Awake()
     {
@@ -33,6 +36,7 @@ public class Player_InputHandler : MonoBehaviour
         lookAction = mapReference.FindAction(look);
         jumpAction = mapReference.FindAction(jump);
         attackAction = mapReference.FindAction(attack);
+        rangeAttackAction = mapReference.FindAction(rangeAttack);
 
         MakeInputEvents();
     }
@@ -50,6 +54,9 @@ public class Player_InputHandler : MonoBehaviour
 
         attackAction.performed += inputInfo => AttackTriggered = true;
         attackAction.canceled += inputInfo => AttackTriggered = false; 
+
+        rangeAttackAction.performed += inputInfo => RangeAttackTriggered = true;
+        rangeAttackAction.canceled += inputInfo => RangeAttackTriggered = false; 
     }
 
     private void OnEnable()

@@ -1772,6 +1772,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _xpBar: {fileID: 1636660923}
   _levelText: {fileID: 587483511}
+  _hpBar: {fileID: 801855523}
 --- !u!1 &705234808
 GameObject:
   m_ObjectHideFlags: 0
@@ -1895,6 +1896,10 @@ PrefabInstance:
     - target: {fileID: 8163727369856622961, guid: f7314cad59d452987835ac1ddba33714, type: 3}
       propertyPath: followPlayerRange
       value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8163727369856622961, guid: f7314cad59d452987835ac1ddba33714, type: 3}
+      propertyPath: startTimeBtwAttack
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 9135078294359319425, guid: f7314cad59d452987835ac1ddba33714, type: 3}
       propertyPath: m_Name
@@ -2598,6 +2603,7 @@ MonoBehaviour:
   look: Look
   jump: Jump
   attack: Attack
+  rangeAttack: RangeAttack
 --- !u!60 &1225151855
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -2710,7 +2716,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc8766c9ed9be6b48ab8ab30bf4b470c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Health: 5
+  Health: 10
   baseXpOn1stLVL: 10
 --- !u!114 &1225151859
 MonoBehaviour:
@@ -11972,6 +11978,7 @@ MonoBehaviour:
   shotPoint: {fileID: 855462180}
   startTimeBetweenShots: 0.25
   Player_Movement: {fileID: 1225151853}
+  player_InputHandler: {fileID: 1225151854}
 --- !u!1 &1973805902
 GameObject:
   m_ObjectHideFlags: 0

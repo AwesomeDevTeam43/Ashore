@@ -8,12 +8,13 @@ public class Weapon : MonoBehaviour
     public float startTimeBetweenShots;
 
     [SerializeField] private Player_Movement Player_Movement;
+    [SerializeField] private Player_InputHandler player_InputHandler;
 
     private void Update()
     {
         if (timeBetweenShots <= 0)
         {
-            if (Input.GetKeyDown(KeyCode.K))
+            if (player_InputHandler.RangeAttackTriggered)
             {
                 GameObject newProjectile = Instantiate(projectile, shotPoint.position, shotPoint.rotation);
                 Projectile proj = newProjectile.GetComponent<Projectile>();
@@ -22,11 +23,12 @@ public class Weapon : MonoBehaviour
                     proj.SetDirection(Player_Movement.IsFacingRight ? Vector2.right : Vector2.left);
                 }
             }
+            timeBetweenShots = startTimeBetweenShots;
         }
         else
         {
             timeBetweenShots -= Time.deltaTime;
         }
     }
-    
+
 }

@@ -7,6 +7,7 @@ public class Manage_UI : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private Image _xpBar;
     [SerializeField] private TextMeshProUGUI _levelText;
+    [SerializeField] private Image _hpBar;
 
     private GameObject player;
     private XP_System xpSystem;
@@ -22,8 +23,12 @@ public class Manage_UI : MonoBehaviour
         xpSystem.OnCollectXP += UpdateXPBar;
         xpSystem.OnLevelUp += UpdateLevel;
 
+        healthSystem.OnHealthChanged += UpdateHPBar;
+
         UpdateXPBar(0);
         UpdateLevel(1);
+
+        UpdateHPBar(healthSystem.CurrentHealth, healthSystem.MaxHealth);
     }
 
     private void UpdateXPBar(int xpAmount)
@@ -45,6 +50,24 @@ public class Manage_UI : MonoBehaviour
     {
         _levelText.text = $"{newLevel}";
         UpdateXPBar(0);
+    }
 
+    private void UpdateHPBar(int health, int maxHealth)
+    {
+        float currentHP = (float)health;
+        float maxHP = (float)maxHealth;
+
+        if (maxHP > 0)
+        {
+            _hpBar.fillAmount = Mathf.Clamp01(currentHP / maxHP);
+            Debug.Log($"1");
+        }
+        else
+        {
+            _hpBar.fillAmount = 0f;
+            Debug.Log($"2");
+        }
+
+        Debug.Log($"HP Bar updated: {currentHP}/{maxHP} = {_hpBar.fillAmount}");
     }
 }
