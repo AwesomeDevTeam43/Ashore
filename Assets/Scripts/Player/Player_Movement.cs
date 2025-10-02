@@ -8,18 +8,19 @@ public class Player_Movement : MonoBehaviour
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask platformLayer;
 
     private float moveSpeed = 5f;
     private float jumpingPower = 15f;
     private bool isFacingRight = true;
-    private Vector3 vertAtk = new Vector3 (0.0f, 1.5f, 0.0f);
+    private Vector3 vertAtk = new Vector3(0.0f, 1.5f, 0.0f);
     private Vector3 startPos;
     public bool IsFacingRight => isFacingRight;
 
     void Start()
     {
-      attackZone = GameObject.FindGameObjectWithTag("AttackZone");
-      startPos = attackZone.transform.localPosition;
+        attackZone = GameObject.FindGameObjectWithTag("AttackZone");
+        startPos = attackZone.transform.localPosition;
     }
 
     void FixedUpdate()
@@ -27,11 +28,13 @@ public class Player_Movement : MonoBehaviour
         HandleMovement();
         HandleDirection();
         HandleJump();
+        
     }
 
     private bool IsGrounded()
     {
-        return Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
+        LayerMask layers = groundLayer | platformLayer;
+        return Physics2D.OverlapCircle(groundCheck.position, 0.2f, layers);
     }
 
     private void HandleMovement()
@@ -52,18 +55,16 @@ public class Player_Movement : MonoBehaviour
         }
         if (player_InputHandler.MovementInput.y < 0f && !IsGrounded())
         {
-          attackZone.transform.localPosition = -vertAtk;
+            attackZone.transform.localPosition = -vertAtk;
         }
         else if (player_InputHandler.MovementInput.y > 0f)
         {
-          attackZone.transform.localPosition = vertAtk; 
+            attackZone.transform.localPosition = vertAtk;
         }
         else
         {
-          attackZone.transform.localPosition = startPos;
+            attackZone.transform.localPosition = startPos;
         }
-      
-
     }
 
     private void HandleJump()
@@ -77,5 +78,21 @@ public class Player_Movement : MonoBehaviour
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
         }
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("MovingPlatform"))
+        {
+            this.transform.parent = collision.gameObject.transform;
+        }
+    }
+
+    void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("MovingPlatform"))
+        {
+            this.transform.parent = null;
+        }      
     }
 }
