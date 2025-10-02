@@ -136,7 +136,7 @@ public class BeeEnemy : MonoBehaviour
             
         }
     }
-        void OnDrawGizmosSelected()
+        void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, playerDetect);
