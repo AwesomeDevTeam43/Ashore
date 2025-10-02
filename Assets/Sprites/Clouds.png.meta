@@ -1,0 +1,845 @@
+fileFormatVersion: 2
+guid: 3c862b61132f6a54ea4185fbb9aef08c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5197684553695950923
+    second: Clounds_0
+  - first:
+      213: 8154366169535696962
+    second: Clounds_1
+  - first:
+      213: 3257162840529385095
+    second: Clounds_2
+  - first:
+      213: -8205248627718013995
+    second: Clounds_3
+  - first:
+      213: -2098507527773789378
+    second: Clounds_4
+  - first:
+      213: -1436615721059444145
+    second: Clounds_5
+  - first:
+      213: 6634229624427757477
+    second: Clounds_6
+  - first:
+      213: -3790053814399130423
+    second: Clounds_7
+  - first:
+      213: 5517761782688450512
+    second: Clounds_8
+  - first:
+      213: 4822413780484698901
+    second: Clounds_9
+  - first:
+      213: 6357883327287665770
+    second: Clounds_10
+  - first:
+      213: -5470702676605055963
+    second: Clounds_11
+  - first:
+      213: -1181895320829670286
+    second: Clounds_12
+  - first:
+      213: -1961138778510741875
+    second: Clounds_13
+  - first:
+      213: -3647713357655333442
+    second: Clounds_14
+  - first:
+      213: 6887199267336730873
+    second: Clounds_15
+  - first:
+      213: 5560359973612558915
+    second: Clounds_16
+  - first:
+      213: -7914143056498933092
+    second: Clounds_17
+  - first:
+      213: -4210392266867325876
+    second: Clounds_18
+  - first:
+      213: 2379388611208931490
+    second: Clounds_19
+  - first:
+      213: -5672300746821947605
+    second: Clounds_20
+  - first:
+      213: 2424084818523806530
+    second: Clounds_21
+  - first:
+      213: 8504609542601293616
+    second: Clounds_22
+  - first:
+      213: 609667438435823429
+    second: Clounds_23
+  - first:
+      213: 7932363885697058963
+    second: Clounds_24
+  - first:
+      213: -9007781229277444902
+    second: Clounds_25
+  - first:
+      213: -3823294540500312240
+    second: Clounds_26
+  - first:
+      213: -5023253418900508013
+    second: Clounds_27
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Clounds_0
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 102
+        width: 138
+        height: 173
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b70b6adf6d1ed7b0800000000000000
+      internalID: -5197684553695950923
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_1
+      rect:
+        serializedVersion: 2
+        x: 55
+        y: 160
+        width: 19
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24053a7d3d02a2170800000000000000
+      internalID: 8154366169535696962
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_2
+      rect:
+        serializedVersion: 2
+        x: 66
+        y: 170
+        width: 11
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7863b55a854c33d20800000000000000
+      internalID: 3257162840529385095
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_3
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 184
+        width: 25
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5db3b1ba8d9112e80800000000000000
+      internalID: -8205248627718013995
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_4
+      rect:
+        serializedVersion: 2
+        x: 161
+        y: 242
+        width: 39
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e336f88958a90e2e0800000000000000
+      internalID: -2098507527773789378
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_5
+      rect:
+        serializedVersion: 2
+        x: 166
+        y: 111
+        width: 210
+        height: 153
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f4a928bfc9d101ce0800000000000000
+      internalID: -1436615721059444145
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_6
+      rect:
+        serializedVersion: 2
+        x: 180
+        y: 208
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5afb36a91b4811c50800000000000000
+      internalID: 6634229624427757477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_7
+      rect:
+        serializedVersion: 2
+        x: 213
+        y: 261
+        width: 31
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c42029e226076bc0800000000000000
+      internalID: -3790053814399130423
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_8
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 255
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0d70f546b17039c40800000000000000
+      internalID: 5517761782688450512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_9
+      rect:
+        serializedVersion: 2
+        x: 344
+        y: 145
+        width: 127
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5133db978c7ace240800000000000000
+      internalID: 4822413780484698901
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_10
+      rect:
+        serializedVersion: 2
+        x: 388
+        y: 188
+        width: 45
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a642c5e533dbb3850800000000000000
+      internalID: 6357883327287665770
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_11
+      rect:
+        serializedVersion: 2
+        x: 399
+        y: 103
+        width: 242
+        height: 174
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52c4d2196e82414b0800000000000000
+      internalID: -5470702676605055963
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_12
+      rect:
+        serializedVersion: 2
+        x: 444
+        y: 191
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 27c4048b770199fe0800000000000000
+      internalID: -1181895320829670286
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_13
+      rect:
+        serializedVersion: 2
+        x: 647
+        y: 169
+        width: 51
+        height: 108
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8eaf97eba2a8c4e0800000000000000
+      internalID: -1961138778510741875
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_14
+      rect:
+        serializedVersion: 2
+        x: 700
+        y: 162
+        width: 93
+        height: 116
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eb5a1821708b06dc0800000000000000
+      internalID: -3647713357655333442
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_15
+      rect:
+        serializedVersion: 2
+        x: 732
+        y: 211
+        width: 25
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f8bfe26e3f349f50800000000000000
+      internalID: 6887199267336730873
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_16
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 179
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 34a1a7a9fed5a2d40800000000000000
+      internalID: 5560359973612558915
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_17
+      rect:
+        serializedVersion: 2
+        x: 791
+        y: 128
+        width: 117
+        height: 116
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c92c1cf22d05b2290800000000000000
+      internalID: -7914143056498933092
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_18
+      rect:
+        serializedVersion: 2
+        x: 898
+        y: 162
+        width: 62
+        height: 115
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c4442587a8ea195c0800000000000000
+      internalID: -4210392266867325876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_19
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 150
+        width: 22
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a8e7b9d559450120800000000000000
+      internalID: 2379388611208931490
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_20
+      rect:
+        serializedVersion: 2
+        x: 228
+        y: 154
+        width: 34
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2fae7e1680f741b0800000000000000
+      internalID: -5672300746821947605
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_21
+      rect:
+        serializedVersion: 2
+        x: 540
+        y: 142
+        width: 29
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24b57819c4414a120800000000000000
+      internalID: 2424084818523806530
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_22
+      rect:
+        serializedVersion: 2
+        x: 629
+        y: 151
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 03fb524d151760670800000000000000
+      internalID: 8504609542601293616
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_23
+      rect:
+        serializedVersion: 2
+        x: 655
+        y: 92
+        width: 78
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 54fe61b1e49f57800800000000000000
+      internalID: 609667438435823429
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_24
+      rect:
+        serializedVersion: 2
+        x: 751
+        y: 105
+        width: 28
+        height: 55
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3984c143dea651e60800000000000000
+      internalID: 7932363885697058963
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_25
+      rect:
+        serializedVersion: 2
+        x: 173
+        y: 122
+        width: 38
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ad48c7e72beedf280800000000000000
+      internalID: -9007781229277444902
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_26
+      rect:
+        serializedVersion: 2
+        x: 382
+        y: 111
+        width: 15
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05fd9c14fdde0fac0800000000000000
+      internalID: -3823294540500312240
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Clounds_27
+      rect:
+        serializedVersion: 2
+        x: 908
+        y: 109
+        width: 23
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3923bad31a1d94ab0800000000000000
+      internalID: -5023253418900508013
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Clounds_0: -5197684553695950923
+      Clounds_1: 8154366169535696962
+      Clounds_10: 6357883327287665770
+      Clounds_11: -5470702676605055963
+      Clounds_12: -1181895320829670286
+      Clounds_13: -1961138778510741875
+      Clounds_14: -3647713357655333442
+      Clounds_15: 6887199267336730873
+      Clounds_16: 5560359973612558915
+      Clounds_17: -7914143056498933092
+      Clounds_18: -4210392266867325876
+      Clounds_19: 2379388611208931490
+      Clounds_2: 3257162840529385095
+      Clounds_20: -5672300746821947605
+      Clounds_21: 2424084818523806530
+      Clounds_22: 8504609542601293616
+      Clounds_23: 609667438435823429
+      Clounds_24: 7932363885697058963
+      Clounds_25: -9007781229277444902
+      Clounds_26: -3823294540500312240
+      Clounds_27: -5023253418900508013
+      Clounds_3: -8205248627718013995
+      Clounds_4: -2098507527773789378
+      Clounds_5: -1436615721059444145
+      Clounds_6: 6634229624427757477
+      Clounds_7: -3790053814399130423
+      Clounds_8: 5517761782688450512
+      Clounds_9: 4822413780484698901
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
