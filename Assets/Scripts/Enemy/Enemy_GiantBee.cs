@@ -11,12 +11,14 @@ public class BeeEnemy : MonoBehaviour
   [SerializeField]  private float roamSpeed = 4f;
   [SerializeField]  private float lungingForce = 7f;
   [SerializeField] private float retreatSpeed = 6f;
+  private Vector2 roamTarget;
 
 
   [Header("Detection")]
   [SerializeField] private float playerDetect = 8f;
   [SerializeField] private float lungeRange = 4f;
   [SerializeField] private float retreatRange = 6f;
+  [SerializeField] private LayerMask playerLayer;
 
   [Header("Timers")]
   [SerializeField] private float roamTime = 3f;
@@ -27,6 +29,7 @@ public class BeeEnemy : MonoBehaviour
   private enum EnemyState {Roaming, Lunging, Retreating}
   private EnemyState enemyState;
   private Vector2 lungeStartPos;
+  private Vector3 retreatStartPosition;
   private Rigidbody2D rb;
 
   private void Awake()
@@ -43,20 +46,20 @@ public class BeeEnemy : MonoBehaviour
     enemyState = EnemyState.Roaming;
   }
 
-  private void StateMachine()
+  private void StateMachine(float playerDistance)
   {
     switch(enemyState)
     {
       case EnemyState.Roaming:
-        Debug.Log("Roaming State for debug");
+        RoamBehavior(playerDistance);
         break;
 
       case EnemyState.Lunging:
-        Debug.Log("Lunging State for Debug");
+        LungeBehavior(playerDistance);
         break;
 
       case EnemyState.Retreating:
-        Debug.Log("Retreating State for Debug");
+        RetreatBehavior();
         break;
     }
   }
@@ -67,14 +70,76 @@ public class BeeEnemy : MonoBehaviour
     if (player == null)
       return;
 
+    float playerDistance = Vector3.Distance(transform.position, player.transform.position);
 
-    Chase();
+
+    StateMachine(playerDistance);
+
   }
 
-  private void Chase()
-  {
-    transform.position=Vector2.MoveTowards(transform.position, player.transform.position, speed*Time.deltaTime);
-  }
+     void RoamBehavior(float playerDistance)
+    {
+        // For now, just wait for player to enter detection range
+        if (playerDistance <= playerDetect)
+        {
+            // Move towards player until in lunge range
+            Vector2 direction = (player.transform.position - transform.position).normalized;
+            rb.linearVelocity = direction * roamSpeed;
+            
+            if (playerDistance <= lungeRange)
+            {
+                // Player is close enough, initiate lunge
+                retreatStartPosition = transform.position;
+                enemyState = EnemyState.Lunging;
+            }
+        }
+        else
+        {
+            // Player is out of range, stay idle
+            rb.linearVelocity = Vector2.zero;
+        }
+    }
+
+    void LungeBehavior(float playerDistance)
+    {
+        // Lunge directly at the player
+        Vector2 lungeDirection = (player.transform.position - transform.position).normalized;
+        rb.linearVelocity = lungeDirection * lungingForce;
+        
+        // Simple retreat condition: you can add more conditions like collision detection
+        if (playerDistance < 0.5f) // Very close to player
+        {
+            enemyState = EnemyState.Retreating;
+        }
+    }
+
+    void RetreatBehavior()
+    {
+        // Move back to the starting position
+        Vector2 retreatDirection = (retreatStartPosition - transform.position).normalized;
+        rb.linearVelocity = retreatDirection * retreatSpeed;
+        
+        // Check if we've returned close to the start position
+        if (Vector2.Distance(transform.position, retreatStartPosition) < 0.1f)
+        {
+            rb.linearVelocity = Vector2.zero;
+            enemyState = EnemyState.Roaming;
+        }
+    }
+    
+    // Visualize the ranges in the Scene view for easy setup
+    void OnDrawGizmosSelected()
+    {
+        // Draw detection range (yellow)
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, playerDetect);
+        
+        // Draw lunge range (red)
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, lungeRange);
+    }
+
+
 
   void OnHealthChanged(int current, int max)
   {
