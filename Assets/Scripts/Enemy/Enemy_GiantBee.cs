@@ -87,7 +87,7 @@ public class BeeEnemy : MonoBehaviour
         {
             // Move towards player until in lunge range
             Vector2 direction = (player.transform.position - transform.position).normalized;
-            rb.velocity = direction * roamSpeed;
+            rb.linearVelocity = direction * roamSpeed;
             
             if (playerDistance <= lungeRange)
             {
@@ -99,7 +99,7 @@ public class BeeEnemy : MonoBehaviour
         else
         {
             // Player is out of range, stay idle
-            rb.velocity = Vector2.zero;
+            rb.linearVelocity = Vector2.zero;
         }
     }
 
@@ -107,7 +107,7 @@ public class BeeEnemy : MonoBehaviour
     {
         // Lunge directly at the player
         Vector2 lungeDirection = (player.transform.position - transform.position).normalized;
-        rb.velocity = lungeDirection * lungingForce;
+        rb.linearVelocity = lungeDirection * lungingForce;
         
     }
 
@@ -115,12 +115,12 @@ public class BeeEnemy : MonoBehaviour
     {
               // Move towards the retreat target
         Vector2 directionToTarget = (retreatTargetPosition - transform.position).normalized;
-        rb.velocity = directionToTarget * retreatSpeed;
+        rb.linearVelocity = directionToTarget * retreatSpeed;
 
         // Check if we've reached the retreat position
         if (Vector2.Distance(transform.position, retreatTargetPosition) < 0.1f)
         {
-            rb.velocity = Vector2.zero;
+            rb.linearVelocity = Vector2.zero;
             enemyState = EnemyState.Roaming;
         }
     }
