@@ -128,7 +128,7 @@ public class BeeEnemy : MonoBehaviour
     }
     
     // Visualize the ranges in the Scene view for easy setup
-    void OnDrawGizmosSelected()
+    void OnDrawGizmos()
     {
         // Draw detection range (yellow)
         Gizmos.color = Color.yellow;
