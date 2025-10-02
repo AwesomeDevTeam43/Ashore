@@ -2,33 +2,28 @@ using UnityEngine;
 
 public class Player_Controller : MonoBehaviour
 {
-  [Header("Starting Stats")]
-  [SerializeField] private int Health = 5;
-  //[SerializeField] private int startingAttackPower = 1;
-  //[SerializeField] private int maxLevel = 20;
-  [SerializeField] private int baseXpOn1stLVL = 10;
-
   private HealthSystem healthSystem;
   private XP_System xP_System;
+  private Player_Atributes player_Atributes;
 
   private void Awake()
   {
+    player_Atributes = GetComponent<Player_Atributes>();
+
     healthSystem = GetComponent<HealthSystem>();
     healthSystem.OnHealthChanged += OnPlayerHealthChanged;
+
+    healthSystem.Initialize(player_Atributes.Health);
+
     xP_System = GetComponent<XP_System>();
-    healthSystem.Initialize(Health);
+    xP_System.Initialize(player_Atributes.LVL1XpAmount, player_Atributes.LvlGap);
   }
 
   private void OnDisable()
   {
     healthSystem.OnHealthChanged -= OnPlayerHealthChanged;
   }
-
-  private void Start()
-  {
-    xP_System.Initialize(baseXpOn1stLVL);
-  }
-
+  
   private void Update()
   {
 

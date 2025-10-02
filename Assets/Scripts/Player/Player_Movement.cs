@@ -10,8 +10,10 @@ public class Player_Movement : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask platformLayer;
 
-    private float moveSpeed = 5f;
-    private float jumpingPower = 15f;
+    private Player_Atributes player_Atributes;
+
+    private float moveSpeed;
+    private float jumpingPower;
     private bool isFacingRight = true;
     private Vector3 vertAtk = new Vector3(0.0f, 1.5f, 0.0f);
     private Vector3 startPos;
@@ -21,6 +23,9 @@ public class Player_Movement : MonoBehaviour
     {
         attackZone = GameObject.FindGameObjectWithTag("AttackZone");
         startPos = attackZone.transform.localPosition;
+        player_Atributes = GetComponent<Player_Atributes>();
+        moveSpeed = player_Atributes.MoveSpeed;
+        jumpingPower = player_Atributes.JumpForce;
     }
 
     void FixedUpdate()
@@ -28,7 +33,6 @@ public class Player_Movement : MonoBehaviour
         HandleMovement();
         HandleDirection();
         HandleJump();
-        
     }
 
     private bool IsGrounded()
@@ -93,6 +97,6 @@ public class Player_Movement : MonoBehaviour
         if (collision.gameObject.CompareTag("MovingPlatform"))
         {
             this.transform.parent = null;
-        }      
+        }
     }
 }

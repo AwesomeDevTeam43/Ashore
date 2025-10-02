@@ -6,16 +6,17 @@ public class XP_System : MonoBehaviour
     private int _current_Xp;
     private int _Max_Xp_PerLevel;
     private int _Current_Level = 1;
-    private int _levelGap = 5;
+    private int _levelGap;
 
     public event Action<int> OnCollectXP;
     public event Action<int> OnLevelUp;
 
-    public void Initialize(int _max_Xp_1stLVL)
+    public void Initialize(int _max_Xp_1stLVL, int levelGap)
     {
         _Max_Xp_PerLevel = _max_Xp_1stLVL;
         _current_Xp = 0;
         _Current_Level = 1;
+        _levelGap = levelGap;
     }
 
     public void IncreaseXP(int xpAmount)
