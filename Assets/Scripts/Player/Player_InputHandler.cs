@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System;
 
 public class Player_InputHandler : MonoBehaviour
 {
@@ -28,6 +29,32 @@ public class Player_InputHandler : MonoBehaviour
     public bool AttackTriggered { get; private set; }
     public bool RangeAttackTriggered { get; private set; }
 
+    [Header("8-Direction Inputs")]
+    private Vector2[] directions8 = new Vector2[]
+    {
+        Vector2.right,
+        new Vector2(1,1).normalized,
+        Vector2.up,
+        new Vector2(-1,1).normalized,
+        Vector2.left,
+        new Vector2(-1,-1).normalized,
+        Vector2.down,
+        new Vector2(1,-1).normalized
+    };
+    public event Action<Vector2> On8DirectionChanged;
+    private int lastDirIndex = -1;
+
+
+    private void OnEnable()
+    {
+        playerControls.FindActionMap(actionMapName).Enable();
+    }
+
+    private void OnDisable()
+    {
+        playerControls.FindActionMap(actionMapName).Disable();
+    }
+
     private void Awake()
     {
         InputActionMap mapReference = playerControls.FindActionMap(actionMapName);
@@ -39,6 +66,11 @@ public class Player_InputHandler : MonoBehaviour
         rangeAttackAction = mapReference.FindAction(rangeAttack);
 
         MakeInputEvents();
+    }
+
+    public void Update()
+    {
+        Handle8Directions();
     }
 
     private void MakeInputEvents()
@@ -53,20 +85,34 @@ public class Player_InputHandler : MonoBehaviour
         jumpAction.canceled += inputInfo => JumpTriggered = false;
 
         attackAction.performed += inputInfo => AttackTriggered = true;
-        attackAction.canceled += inputInfo => AttackTriggered = false; 
+        attackAction.canceled += inputInfo => AttackTriggered = false;
 
         rangeAttackAction.performed += inputInfo => RangeAttackTriggered = true;
-        rangeAttackAction.canceled += inputInfo => RangeAttackTriggered = false; 
+        rangeAttackAction.canceled += inputInfo => RangeAttackTriggered = false;
     }
 
-    private void OnEnable()
+    private void Handle8Directions()
     {
-        playerControls.FindActionMap(actionMapName).Enable();
+        Vector2 dir8 = Get8Direction(MovementInput);
+        int dirIndex = Array.IndexOf(directions8, dir8);
+
+        if (dirIndex != lastDirIndex)
+        {
+            lastDirIndex = dirIndex;
+            On8DirectionChanged?.Invoke(dir8);
+        }
     }
 
-    private void OnDisable()
+    private Vector2 Get8Direction(Vector2 input)
     {
-        playerControls.FindActionMap(actionMapName).Disable();
+        if (input == Vector2.zero)
+            return Vector2.zero;
+
+        float angle = Mathf.Atan2(input.y, input.x) * Mathf.Rad2Deg;
+        if (angle < 0) angle += 360f;
+
+        int index = Mathf.RoundToInt(angle / 45f) % 8;
+        return directions8[index];
     }
 }
 
