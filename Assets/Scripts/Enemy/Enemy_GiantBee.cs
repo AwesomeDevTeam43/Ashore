@@ -31,6 +31,7 @@ public class BeeEnemy : MonoBehaviour
   private Vector2 lungeStartPos;
   private Vector3 retreatStartPosition;
   private Rigidbody2D rb;
+  private Collider2D playerCollider;
 
   private void Awake()
   {
@@ -42,6 +43,7 @@ public class BeeEnemy : MonoBehaviour
   {
     rb = GetComponent<Rigidbody2D>();
     player = GameObject.FindGameObjectWithTag("Player");
+    playerCollider = player.GetComponent<Collider2D>();
     healthSystem.Initialize(enemyHealth);
     enemyState = EnemyState.Roaming;
   }
@@ -106,11 +108,6 @@ public class BeeEnemy : MonoBehaviour
         Vector2 lungeDirection = (player.transform.position - transform.position).normalized;
         rb.linearVelocity = lungeDirection * lungingForce;
         
-        // Simple retreat condition: you can add more conditions like collision detection
-        if (playerDistance < 0.5f) // Very close to player
-        {
-            enemyState = EnemyState.Retreating;
-        }
     }
 
     void RetreatBehavior()
@@ -127,6 +124,18 @@ public class BeeEnemy : MonoBehaviour
         }
     }
     
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        // Check if the collision is with the player and we are in the Lunging state
+        if (enemyState == EnemyState.Lunging && collision.gameObject == player)
+        {
+            Debug.Log("Stung the player! Retreating.");
+            enemyState = EnemyState.Retreating;
+            
+        }
+    }
+
+
     // Visualize the ranges in the Scene view for easy setup
     void OnDrawGizmos()
     {
