@@ -29,8 +29,9 @@ public class BeeEnemy : MonoBehaviour
   private enum EnemyState {Roaming, Lunging, Retreating}
   private EnemyState enemyState;
   private Vector2 lungeStartPos;
-  private Vector3 retreatStartPosition;
   private Rigidbody2D rb;
+  private Vector3 retreatTargetPosition;
+  private Vector3 retreatDirection;
   private Collider2D playerCollider;
 
   private void Awake()
@@ -112,17 +113,18 @@ public class BeeEnemy : MonoBehaviour
 
     void RetreatBehavior()
     {
-        // Move back to the starting position
-        Vector2 retreatDirection = (retreatStartPosition - transform.position).normalized;
-        rb.linearVelocity = retreatDirection * retreatSpeed;
-        
-        // Check if we've returned close to the start position
-        if (Vector2.Distance(transform.position, retreatStartPosition) < 0.1f)
+              // Move towards the retreat target
+        Vector2 directionToTarget = (retreatTargetPosition - transform.position).normalized;
+        rb.velocity = directionToTarget * retreatSpeed;
+
+        // Check if we've reached the retreat position
+        if (Vector2.Distance(transform.position, retreatTargetPosition) < 0.1f)
         {
-            rb.linearVelocity = Vector2.zero;
+            rb.velocity = Vector2.zero;
             enemyState = EnemyState.Roaming;
         }
     }
+
     
     void OnCollisionEnter2D(Collision2D collision)
     {
@@ -134,18 +136,26 @@ public class BeeEnemy : MonoBehaviour
             
         }
     }
-
-
-    // Visualize the ranges in the Scene view for easy setup
-    void OnDrawGizmosSelected()
+        void OnDrawGizmosSelected()
     {
-        // Draw detection range (yellow)
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, playerDetect);
         
-        // Draw lunge range (red)
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, lungeRange);
+        
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, retreatRange);
+        
+        // Draw retreat direction when retreating
+        if (Application.isPlaying && enemyState == EnemyState.Retreating)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(transform.position, retreatTargetPosition);
+            Gizmos.DrawWireSphere(retreatTargetPosition, 0.2f);
+        }
+    } 
+
     }
 
 
