@@ -132,6 +132,13 @@ public class BeeEnemy : MonoBehaviour
         if (enemyState == EnemyState.Lunging && collision.gameObject == player)
         {
             Debug.Log("Stung the player! Retreating.");
+
+                        // Calculate retreat direction (away from player)
+            retreatDirection = (transform.position - player.transform.position).normalized;
+            
+            // Calculate retreat target position
+            retreatTargetPosition = transform.position + (retreatDirection * retreatRange);
+
             enemyState = EnemyState.Retreating;
             
         }
@@ -155,9 +162,6 @@ public class BeeEnemy : MonoBehaviour
             Gizmos.DrawWireSphere(retreatTargetPosition, 0.2f);
         }
     } 
-
-    }
-
 
 
   void OnHealthChanged(int current, int max)
