@@ -5,6 +5,8 @@ public class Player_Controller : MonoBehaviour
   private HealthSystem healthSystem;
   private XP_System xP_System;
   private Player_Atributes player_Atributes;
+  [SerializeField] private float fallDeathY = -10f;
+
 
   private void Awake()
   {
@@ -32,7 +34,21 @@ public class Player_Controller : MonoBehaviour
       healthSystem.Heal(1);
       Debug.Log($"{healthSystem.CurrentHealth}/{healthSystem.MaxHealth}");
     }
+            if (transform.position.y < fallDeathY)
+        {
+            ReturnToLastPoint();
+        }
   }
+      public void ReturnToLastPoint()
+    {
+        transform.position = ReturnPointManager.GetReturnPoint();
+        
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.velocity = Vector2.zero;
+        }
+    }
 
   private void OnPlayerHealthChanged(int currentHealth, int maxHealth)
   {
