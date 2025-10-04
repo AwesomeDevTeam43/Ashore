@@ -5,36 +5,80 @@ public class XP_Particle : MonoBehaviour
     [SerializeField] private int xpValue = 2;
     [SerializeField] private string playerTag = "Player";
 
-    private void OnTriggerEnter2D(Collider2D other)
+    [Header("Floating Settings")]
+    [SerializeField] private float floatSpeed = 1f;
+    [SerializeField] private float floatAmplitude = 0.3f;
+    [SerializeField] private float heightAboveGround = 0.5f;
+
+    private Vector3 startPosition;
+    private float timeOffset;
+    private bool hasLanded = false;
+    private Rigidbody2D rb;
+
+    private void Start()
     {
-        Debug.Log($"Something collided with XP particle: {other.name}");
+        timeOffset = Random.Range(0f, 2f * Mathf.PI);
+        rb = GetComponent<Rigidbody2D>();
         
-        if (other.CompareTag(playerTag))
+        if (rb != null)
         {
-            Debug.Log("Player tag detected!");
+            rb.gravityScale = 1f;
+            rb.bodyType = RigidbodyType2D.Dynamic;
+        }
+
+        CircleCollider2D existingCollider = GetComponent<CircleCollider2D>();
+        if (existingCollider != null)
+        {
+            existingCollider.isTrigger = false;
+        }
+
+        CircleCollider2D triggerCollider = gameObject.AddComponent<CircleCollider2D>();
+        triggerCollider.isTrigger = true;
+        triggerCollider.radius = 0.6f;
+
+    }
+
+    private void Update()
+    {
+        if (hasLanded)
+        {
+            float newY = startPosition.y + Mathf.Sin((Time.time + timeOffset) * floatSpeed) * floatAmplitude;
+            transform.position = new Vector3(transform.position.x, newY, transform.position.z);
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        string layerName = LayerMask.LayerToName(collision.gameObject.layer);
+        
+        if (layerName == "Ground" || layerName == "MovingPlatform")
+        {
+            hasLanded = true;
             
+            if (rb != null)
+            {
+                rb.gravityScale = 0f;
+                rb.linearVelocity = Vector2.zero;
+                rb.bodyType = RigidbodyType2D.Kinematic;
+            }
+            
+            startPosition = transform.position;
+            startPosition.y += heightAboveGround;
+            transform.position = startPosition;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    { 
+        if (other.CompareTag(playerTag))
+        {   
             XP_System playerXpSystem = other.GetComponent<XP_System>();
 
             if (playerXpSystem != null)
             {
-                Debug.Log($"XP System found! Adding {xpValue} XP");
                 playerXpSystem.IncreaseXP(xpValue);
-                PlayCollectionEffect();
                 Destroy(gameObject);
             }
-            else
-            {
-                Debug.LogError("XP_System component NOT found on player!");
-            }
         }
-        else
-        {
-            Debug.Log($"Wrong tag detected: {other.tag}, expected: {playerTag}");
-        }
-    }
-
-    private void PlayCollectionEffect()
-    {
-        Debug.Log($"Collected {xpValue} XP!");
     }
 }
