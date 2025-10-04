@@ -12,6 +12,8 @@ public class HealthSystem : MonoBehaviour
     {
         _maxHealth = maxHealth;
         _currentHealth = _maxHealth;
+
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
     }
 
     public void TakeDamage(int damage, GameObject damageSource = null)

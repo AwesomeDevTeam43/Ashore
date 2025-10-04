@@ -2,49 +2,46 @@ using UnityEngine;
 
 public class Player_Atributes : MonoBehaviour
 {
+    [SerializeField] private PlayerStats playerStats;
     private XP_System xpSystem;
 
-    //player status
-    private int health = 10;
-    private int health_UpgradePerLVL = 1;
+    private int currentHealth;
+    private int currentAttackPower;
+    private float currentMoveSpeed;
+    private float currentJumpForce;
 
-    private int attackPower = 1;
-    private int attackPower_UpgradePerLVL = 1;
-
-    private float moveSpeed = 5f;
-    private float moveSpeed_UpgradePerLVL = 0.5f;
-
-    private float jumpForce = 15f;
-    private readonly float jumpForce_UpgradePerLVL = 0.5f;
-
-    //xp
-    private readonly int lVL1XpAmount = 5;
-    private readonly int lvlGap = 5;
-
-    //inventory available spaces
-    
+    private void OnEnable()
+    {
+        if (playerStats != null)
+        {
+            UpdateStats(1);
+        }
+    }
 
     void Awake()
     {
         xpSystem = GetComponent<XP_System>();
 
-        if (xpSystem != null) { xpSystem.OnLevelUp += UpgradeStatus; }    
+        if (xpSystem != null)
+        {
+            xpSystem.OnLevelUp += UpdateStats;
+        }
     }
 
-    private void UpgradeStatus(int lvl)
+    private void UpdateStats(int level)
     {
-        health += health_UpgradePerLVL;
-        attackPower += attackPower_UpgradePerLVL;
-        moveSpeed += moveSpeed_UpgradePerLVL;
-        jumpForce += jumpForce_UpgradePerLVL;
+        currentHealth = playerStats.GetHealth(level);
+        currentAttackPower = playerStats.GetAttackPower(level);
+        currentMoveSpeed = playerStats.GetMoveSpeed(level);
+        currentJumpForce = playerStats.GetJumpForce(level);
 
-        Debug.Log($"Stats upgraded! Level {lvl}: HP={health}, ATK={attackPower}, Speed={moveSpeed}, Jump={jumpForce}");
+        Debug.Log($"Stats updated! Level {level}: HP={currentHealth}, ATK={currentAttackPower}, Speed={currentMoveSpeed}, Jump={currentJumpForce}");
     }
 
-    public int Health => health;
-    public int AttackPower => attackPower;
-    public float MoveSpeed => moveSpeed;
-    public float JumpForce => jumpForce;
-    public int LVL1XpAmount => lVL1XpAmount;
-    public int LvlGap => lvlGap;
+    public int Health => currentHealth;
+    public int AttackPower => currentAttackPower;
+    public float MoveSpeed => currentMoveSpeed;
+    public float JumpForce => currentJumpForce;
+    public int LVL1XpAmount => playerStats != null ? playerStats.Level1XpAmount : 0;
+    public int LvlGap => playerStats != null ? playerStats.LevelGap : 0;
 }

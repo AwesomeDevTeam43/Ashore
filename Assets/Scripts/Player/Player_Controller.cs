@@ -14,10 +14,15 @@ public class Player_Controller : MonoBehaviour
 
     healthSystem = GetComponent<HealthSystem>();
     healthSystem.OnHealthChanged += OnPlayerHealthChanged;
-
-    healthSystem.Initialize(player_Atributes.Health);
-
     xP_System = GetComponent<XP_System>();
+
+    
+  }
+
+  private void Start()
+  {
+    Debug.Log($"Initializing HealthSystem with {player_Atributes.Health} HP");
+    healthSystem.Initialize(player_Atributes.Health);    
     xP_System.Initialize(player_Atributes.LVL1XpAmount, player_Atributes.LvlGap);
   }
 
@@ -39,7 +44,7 @@ public class Player_Controller : MonoBehaviour
       ReturnToLastPoint();
     }
   }
-  
+
   public void ReturnToLastPoint()
   {
     transform.position = ReturnPointManager.GetReturnPoint();

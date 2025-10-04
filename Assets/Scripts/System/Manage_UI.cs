@@ -27,8 +27,6 @@ public class Manage_UI : MonoBehaviour
 
         UpdateXPBar(0);
         UpdateLevel(1);
-
-        UpdateHPBar(healthSystem.CurrentHealth, healthSystem.MaxHealth);
     }
 
     private void UpdateXPBar(int xpAmount)
@@ -60,12 +58,10 @@ public class Manage_UI : MonoBehaviour
         if (maxHP > 0)
         {
             _hpBar.fillAmount = Mathf.Clamp01(currentHP / maxHP);
-            Debug.Log($"1");
         }
         else
         {
             _hpBar.fillAmount = 0f;
-            Debug.Log($"2");
         }
 
         Debug.Log($"HP Bar updated: {currentHP}/{maxHP} = {_hpBar.fillAmount}");
