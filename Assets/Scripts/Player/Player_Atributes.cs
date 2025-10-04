@@ -5,16 +5,16 @@ public class Player_Atributes : MonoBehaviour
     private XP_System xpSystem;
 
     //player status
-    private int health;
+    private int health = 10;
     private int health_UpgradePerLVL = 1;
 
-    private int attackPower;
+    private int attackPower = 1;
     private int attackPower_UpgradePerLVL = 1;
 
-    private float moveSpeed;
+    private float moveSpeed = 5f;
     private float moveSpeed_UpgradePerLVL = 0.5f;
 
-    private float jumpForce;
+    private float jumpForce = 15f;
     private readonly float jumpForce_UpgradePerLVL = 0.5f;
 
     //xp
@@ -26,11 +26,6 @@ public class Player_Atributes : MonoBehaviour
 
     void Awake()
     {
-        health = 10;
-        attackPower = 1;
-        moveSpeed = 5f;
-        jumpForce = 15f;
-
         xpSystem = GetComponent<XP_System>();
 
         if (xpSystem != null) { xpSystem.OnLevelUp += UpgradeStatus; }    

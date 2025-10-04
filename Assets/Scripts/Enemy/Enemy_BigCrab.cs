@@ -14,6 +14,7 @@ public class Enemy : MonoBehaviour
   public Transform player;
 
   HealthSystem healthSystem;
+  XP_System xP_System;
 
   private Rigidbody2D rb;
 
@@ -22,7 +23,7 @@ public class Enemy : MonoBehaviour
     healthSystem = GetComponent<HealthSystem>();
     healthSystem.OnHealthChanged += OnHealthChanged;
   }
-  // Start is called once before the first execution of Update after the MonoBehaviour is created
+
   private void Start()
   {
     healthSystem.Initialize(health);
@@ -30,6 +31,10 @@ public class Enemy : MonoBehaviour
     if (rb == null)
     {
       rb = gameObject.AddComponent<Rigidbody2D>();
+    }
+    if (player != null)
+    {
+      xP_System = player.GetComponent<XP_System>();
     }
   }
 
@@ -100,6 +105,10 @@ public class Enemy : MonoBehaviour
     if (current <= 0)
     {
       Destroy(gameObject);
+      if (xP_System != null)
+      {
+        xP_System.DropXP(transform.position, 3);
+      }
     }
   }
   void OnDrawGizmos()

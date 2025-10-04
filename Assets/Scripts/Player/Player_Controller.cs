@@ -25,7 +25,7 @@ public class Player_Controller : MonoBehaviour
   {
     healthSystem.OnHealthChanged -= OnPlayerHealthChanged;
   }
-  
+
   private void Update()
   {
 
@@ -34,21 +34,22 @@ public class Player_Controller : MonoBehaviour
       healthSystem.Heal(1);
       Debug.Log($"{healthSystem.CurrentHealth}/{healthSystem.MaxHealth}");
     }
-            if (transform.position.y < fallDeathY)
-        {
-            ReturnToLastPoint();
-        }
-  }
-      public void ReturnToLastPoint()
+    if (transform.position.y < fallDeathY)
     {
-        transform.position = ReturnPointManager.GetReturnPoint();
-        
-        Rigidbody2D rb = GetComponent<Rigidbody2D>();
-        if (rb != null)
-        {
-            rb.linearVelocity = Vector2.zero;
-        }
+      ReturnToLastPoint();
     }
+  }
+  
+  public void ReturnToLastPoint()
+  {
+    transform.position = ReturnPointManager.GetReturnPoint();
+
+    Rigidbody2D rb = GetComponent<Rigidbody2D>();
+    if (rb != null)
+    {
+      rb.linearVelocity = Vector2.zero;
+    }
+  }
 
   private void OnPlayerHealthChanged(int currentHealth, int maxHealth)
   {

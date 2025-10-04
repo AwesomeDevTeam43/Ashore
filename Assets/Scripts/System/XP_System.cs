@@ -8,6 +8,8 @@ public class XP_System : MonoBehaviour
     private int _Current_Level = 1;
     private int _levelGap;
 
+    [SerializeField] private GameObject _xp_Particle;
+
     public event Action<int> OnCollectXP;
     public event Action<int> OnLevelUp;
 
@@ -44,6 +46,44 @@ public class XP_System : MonoBehaviour
             LevelUp();
         }
     }
+
+    public void DropXP(Vector3 position, int particlesAmount)
+    {
+        if (_xp_Particle == null)
+        {
+            Debug.LogWarning("XP Particle prefab is not assigned!");
+            return;
+        }
+
+        for (int i = 0; i < particlesAmount; i++)
+        {
+            // Cria um offset aleatório para espalhar as partículas (2D)
+            Vector3 randomOffset = new Vector3(
+                UnityEngine.Random.Range(-1f, 1f),
+                UnityEngine.Random.Range(-1f, 1f),
+                0f // Z sempre 0 para 2D
+            );
+
+            Vector3 spawnPosition = position + randomOffset;
+
+            // Instancia a partícula de XP
+            GameObject xpParticle = Instantiate(_xp_Particle, spawnPosition, Quaternion.identity);
+
+            // Opcional: Adiciona uma força inicial para criar um efeito de "explosão" (2D)
+            Rigidbody2D rb = xpParticle.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                Vector2 randomForce = new Vector2(
+                    UnityEngine.Random.Range(-3f, 3f),
+                    UnityEngine.Random.Range(2f, 5f)
+                );
+                rb.AddForce(randomForce, ForceMode2D.Impulse);
+            }
+        }
+
+        Debug.Log($"Dropped {particlesAmount} XP particles at {position}");
+    }
+
 
     public int CurrentXp => _current_Xp;
     public int CurrentLevel => _Current_Level;
