@@ -7,7 +7,7 @@ public class Enemy_SerpentVenom : MonoBehaviour
     public float speed;
     public float timer;
     private SpriteRenderer sprite;
-    HealthSystem healthSystem;
+    private HealthSystem healthSystem;
 
     void Start()
     {
