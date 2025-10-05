@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: f425af0b17cfdcd459b58694ae3d9c91
+guid: 4140c195ddb9f664fbf6b7319d8c5a0c
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -36,7 +36,7 @@ ScriptedImporter:
     spriteMeshType: 1
     alignment: 0
     spritePivot: {x: 0.5, y: 0.5}
-    spritePixelsToUnits: 100
+    spritePixelsToUnits: 32
     spriteBorder: {x: 0, y: 0, z: 0, w: 0}
     spriteGenerateFallbackPhysicsShape: 0
     generateCubemap: 6
@@ -98,7 +98,7 @@ ScriptedImporter:
     addSortingGroup: 1
     addShadowCasters: 0
   importFileNodeState: 1
-  platformSettingsDirtyTick: 638952654957323019
+  platformSettingsDirtyTick: 638952653914106536
   textureAssetName: 
   singleSpriteImportData:
   - name: 
@@ -123,19 +123,19 @@ ScriptedImporter:
     tessellationDetail: 0
     uvTransform: {x: 0, y: 0}
   animatedSpriteImportData:
-  - name: SlingShot_Art
+  - name: Serpent
     originalName: 
-    pivot: {x: 0.45454547, y: -0.3}
-    alignment: 9
+    pivot: {x: 0.5, y: 0.5}
+    alignment: 0
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
     rect:
       serializedVersion: 2
       x: 4
       y: 4
-      width: 11
-      height: 20
-    spriteID: 8f42aa33d6e6d574b8db4418fa9e7340
+      width: 29
+      height: 32
+    spriteID: 882eb71fa099a424a8035600a9c3edd1
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -148,25 +148,25 @@ ScriptedImporter:
   asepriteLayers:
   - layerIndex: 0
     uuid:
-      value0: 1464133887
+      value0: 1671717323
       value1: 0
       value2: 0
       value3: 0
     guid: 0
-    name: SlingShot_Art
+    name: Serpent
     layerFlags: 0
     layerType: 0
     blendMode: 0
     cells:
-    - name: SlingShot_Art
+    - name: Serpent
       frameIndex: 0
       additiveSortOrder: 0
       cellRect:
-        x: 11
-        y: 6
-        width: 11
-        height: 20
-      spriteId: 8f42aa33d6e6d574b8db4418fa9e7340
+        x: 0
+        y: 0
+        width: 29
+        height: 32
+      spriteId: 882eb71fa099a424a8035600a9c3edd1
     linkedCells: []
     parentIndex: -1
   platformSettings:
@@ -210,4 +210,4 @@ ScriptedImporter:
   secondarySpriteTextures: []
   spritePackingTag: 
   canvasSize: {x: 32, y: 32}
-  previousTextureSize: {x: 32, y: 32}
+  previousTextureSize: {x: 64, y: 64}
