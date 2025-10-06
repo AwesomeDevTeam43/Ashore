@@ -34,6 +34,7 @@ public class BeeEnemy : MonoBehaviour
   private Vector3 retreatTargetPosition;
   private Vector3 retreatDirection;
   private Collider2D playerCollider;
+  private Vector3 playerAttackPoint;
 
   private void Awake()
   {
@@ -88,42 +89,36 @@ public class BeeEnemy : MonoBehaviour
 
   void RoamBehavior(float playerDistance)
   {
-    // For now, just wait for player to enter detection range
     if (playerDistance <= playerDetect)
     {
-      // Move towards player until in lunge range
       Vector2 direction = (player.transform.position - transform.position).normalized;
       rb.linearVelocity = direction * roamSpeed;
 
       if (playerDistance <= lungeRange)
       {
-        // Player is close enough, initiate lunge
         retreatTargetPosition = transform.position;
+        playerAttackPoint = player.transform.position;
         enemyState = EnemyState.Lunging;
       }
     }
     else
     {
-      // Player is out of range, stay idle
       rb.linearVelocity = Vector2.zero;
     }
   }
 
   void LungeBehavior(float playerDistance)
   {
-    // Lunge directly at the player
-    Vector2 lungeDirection = (player.transform.position - transform.position).normalized;
+    Vector2 lungeDirection = (playerAttackPoint - transform.position).normalized;
     rb.linearVelocity = lungeDirection * lungingForce;
 
   }
 
   void RetreatBehavior()
   {
-    // Move towards the retreat target
     Vector2 directionToTarget = (retreatTargetPosition - transform.position).normalized;
     rb.linearVelocity = directionToTarget * retreatSpeed;
 
-    // Check if we've reached the retreat position
     if (Vector2.Distance(transform.position, retreatTargetPosition) < 0.1f)
     {
       rb.linearVelocity = Vector2.zero;
@@ -134,15 +129,12 @@ public class BeeEnemy : MonoBehaviour
 
   void OnCollisionEnter2D(Collision2D collision)
   {
-    // Check if the collision is with the player and we are in the Lunging state
     if (enemyState == EnemyState.Lunging && collision.gameObject == player)
     {
       Debug.Log("Stung the player! Retreating.");
 
-      // Calculate retreat direction (away from player)
       retreatDirection = (transform.position - player.transform.position).normalized;
 
-      // Calculate retreat target position
       retreatTargetPosition = transform.position + (retreatDirection * retreatRange);
 
       enemyState = EnemyState.Retreating;
@@ -160,7 +152,6 @@ public class BeeEnemy : MonoBehaviour
     Gizmos.color = Color.blue;
     Gizmos.DrawWireSphere(transform.position, retreatRange);
 
-    // Draw retreat direction when retreating
     if (Application.isPlaying && enemyState == EnemyState.Retreating)
     {
       Gizmos.color = Color.green;
