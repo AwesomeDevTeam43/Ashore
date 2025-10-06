@@ -11,6 +11,11 @@ public class Player_Controller : MonoBehaviour
   [Header("Settings")]
   [SerializeField] private float fallDeathY = -10f;
 
+  [Header("Equipment")]
+  [SerializeField] private SpearEquipment spearEquipment;
+  private bool hasSpearInInventory = true;
+  private bool isSpearEquipped = false;
+
   private int currentHealth;
   private int currentAttackPower;
   private float currentMoveSpeed;
@@ -48,6 +53,11 @@ public class Player_Controller : MonoBehaviour
     Debug.Log($"Initializing HealthSystem with {currentHealth} HP");
     healthSystem.Initialize(currentHealth);
     xP_System.Initialize(LVL1XpAmount, LvlGap);
+    
+    if (spearEquipment != null)
+    {
+      spearEquipment.gameObject.SetActive(false);
+    }
   }
 
   private void OnDisable()
@@ -62,21 +72,56 @@ public class Player_Controller : MonoBehaviour
 
   private void Update()
   {
-
     if (Input.GetKeyDown(KeyCode.M))
     {
       healthSystem.Heal(1);
       Debug.Log($"{healthSystem.CurrentHealth}/{healthSystem.MaxHealth}");
     }
+    
+    if (Input.GetKeyDown(KeyCode.F))
+    {
+      HandleEquipUnequip();
+    }
+    
+    if (Input.GetKeyDown(KeyCode.L) && isSpearEquipped)
+    {
+      UseSpear();
+    }
+    
     if (transform.position.y < fallDeathY)
     {
       ReturnToLastPoint();
     }
   }
 
+  private void HandleEquipUnequip()
+  {
+    if (!hasSpearInInventory)
+      return;
+    
+    if (isSpearEquipped)
+    {
+      spearEquipment.OnUnequip();
+      isSpearEquipped = false;
+    }
+    else
+    {
+      spearEquipment.OnEquip();
+      isSpearEquipped = true;
+    }
+  }
+
+  private void UseSpear()
+  {
+    spearEquipment.OnUse();
+    hasSpearInInventory = false;
+    isSpearEquipped = false;
+  }
+
   private void UpdateStats(int level)
   {
     int previousMaxHealth = currentHealth;
+    int currentHealthPoints = healthSystem != null ? healthSystem.CurrentHealth : 0;
 
     currentHealth = playerStats.GetHealth(level);
     currentAttackPower = playerStats.GetAttackPower(level);
@@ -86,6 +131,8 @@ public class Player_Controller : MonoBehaviour
     if (healthSystem != null)
     {
       int healthDifference = currentHealth - previousMaxHealth;
+      
+      int newCurrentHealth = currentHealthPoints + healthDifference;
       
       healthSystem.Initialize(currentHealth);
       
@@ -111,11 +158,6 @@ public class Player_Controller : MonoBehaviour
 
   private void OnPlayerHealthChanged(int currentHealth, int maxHealth)
   {
-    if (currentHealth <= 0)
-    {
-      Destroy(gameObject);
-      Debug.Log("Player Died!");
-    }
+    
   }
 }
-

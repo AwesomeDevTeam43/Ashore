@@ -12,29 +12,27 @@ public class BeeEnemy : MonoBehaviour
   [SerializeField] private float roamSpeed = 4f;
   [SerializeField] private float lungingForce = 7f;
   [SerializeField] private float retreatSpeed = 6f;
-  private Vector2 roamTarget;
-
 
   [Header("Detection")]
   [SerializeField] private float playerDetect = 8f;
   [SerializeField] private float lungeRange = 4f;
-  [SerializeField] private float retreatRange = 6f;
+  [SerializeField] private float retreatRange = 5f;
   [SerializeField] private LayerMask playerLayer;
 
   [Header("Timers")]
-  [SerializeField] private float roamTime = 3f;
   [SerializeField] private float lungeCooldown = 2f;
-  [SerializeField] private float currentTime;
   [SerializeField] private float currentCooldown;
+  [SerializeField] private float lungeDuration = 1f;
+  private float lungeTimer;
 
   private enum EnemyState { Roaming, Lunging, Retreating }
   private EnemyState enemyState;
-  private Vector2 lungeStartPos;
   private Rigidbody2D rb;
   private Vector3 retreatTargetPosition;
-  private Vector3 retreatDirection;
-  private Collider2D playerCollider;
   private Vector3 playerAttackPoint;
+  private Vector3 lungeStartPosition;
+  private Collider2D playerCollider; // NEW: Reference to player's 
+  private HealthSystem playerHealth;
 
   private void Awake()
   {
@@ -46,14 +44,18 @@ public class BeeEnemy : MonoBehaviour
   {
     rb = GetComponent<Rigidbody2D>();
     player = GameObject.FindGameObjectWithTag("Player");
-    playerCollider = player.GetComponent<Collider2D>();
-    healthSystem.Initialize(enemyHealth);
-    enemyState = EnemyState.Roaming;
-
+    playerHealth = player.GetComponent<HealthSystem>();
+    
+    // NEW: Get player's collider for feet targeting
     if (player != null)
     {
+      playerCollider = player.GetComponent<Collider2D>();
       xP_System = player.GetComponent<XP_System>();
     }
+    
+    healthSystem.Initialize(enemyHealth);
+    enemyState = EnemyState.Roaming;
+    currentCooldown = 0f;
   }
 
   private void StateMachine(float playerDistance)
@@ -69,36 +71,39 @@ public class BeeEnemy : MonoBehaviour
         break;
 
       case EnemyState.Retreating:
-        RetreatBehavior();
+        RetreatBehavior(playerDistance);
         break;
     }
   }
-
 
   private void Update()
   {
     if (player == null)
       return;
 
+    if (currentCooldown > 0)
+      currentCooldown -= Time.deltaTime;
+
     float playerDistance = Vector3.Distance(transform.position, player.transform.position);
-
-
     StateMachine(playerDistance);
-
   }
 
   void RoamBehavior(float playerDistance)
   {
     if (playerDistance <= playerDetect)
     {
-      Vector2 direction = (player.transform.position - transform.position).normalized;
-      rb.linearVelocity = direction * roamSpeed;
-
-      if (playerDistance <= lungeRange)
+      if (currentCooldown <= 0 && playerDistance <= lungeRange)
       {
-        retreatTargetPosition = transform.position;
-        playerAttackPoint = player.transform.position;
-        enemyState = EnemyState.Lunging;
+        StartLunge();
+      }
+      else if (currentCooldown <= 0 && playerDistance > lungeRange)
+      {
+        Vector2 directionToPlayer = (player.transform.position - transform.position).normalized;
+        rb.linearVelocity = directionToPlayer * roamSpeed;
+      }
+      else if (currentCooldown > 0)
+      {
+        rb.linearVelocity = Vector2.zero;
       }
     }
     else
@@ -107,45 +112,80 @@ public class BeeEnemy : MonoBehaviour
     }
   }
 
+  void StartLunge()
+  {
+    lungeStartPosition = transform.position;
+    
+    // NEW: Calculate attack point at player's feet
+    playerAttackPoint = GetPlayerFeetPosition();
+    
+    lungeTimer = 0f;
+    enemyState = EnemyState.Lunging;
+    Debug.Log("Starting lunge towards player's feet!");
+  }
+
+  // NEW: Method to get player's feet position
+  Vector3 GetPlayerFeetPosition()
+  {
+    if (playerCollider != null)
+    {
+      // Get the bottom of the player's collider
+      Bounds bounds = playerCollider.bounds;
+      return new Vector3(bounds.center.x, bounds.min.y, bounds.center.z);
+    }
+    else
+    {
+      // Fallback: position slightly below player's transform
+      return player.transform.position + Vector3.down * 0.5f;
+    }
+  }
+
   void LungeBehavior(float playerDistance)
   {
+    lungeTimer += Time.deltaTime;
+    
     Vector2 lungeDirection = (playerAttackPoint - transform.position).normalized;
     rb.linearVelocity = lungeDirection * lungingForce;
 
-    if (playerDistance <= lungeRange + 1)
+    if (lungeTimer >= lungeDuration || Vector2.Distance(transform.position, playerAttackPoint) < 0.3f)
     {
-      enemyState = EnemyState.Roaming;
+      EndLunge();
     }
-
   }
 
-  void RetreatBehavior()
+  void EndLunge()
+  {
+    Vector2 retreatDirection = (lungeStartPosition - transform.position).normalized;
+    retreatTargetPosition = transform.position + (Vector3)retreatDirection * retreatRange;
+    
+    currentCooldown = lungeCooldown;
+    enemyState = EnemyState.Retreating;
+    Debug.Log("Lunge ended, retreating!");
+  }
+
+  void RetreatBehavior(float playerDistance)
   {
     Vector2 directionToTarget = (retreatTargetPosition - transform.position).normalized;
     rb.linearVelocity = directionToTarget * retreatSpeed;
 
-    if (Vector2.Distance(transform.position, retreatTargetPosition) < 0.1f)
+    if (Vector2.Distance(transform.position, retreatTargetPosition) < 0.5f)
     {
       rb.linearVelocity = Vector2.zero;
       enemyState = EnemyState.Roaming;
+      Debug.Log("Retreat complete, back to roaming!");
     }
   }
-
 
   void OnCollisionEnter2D(Collision2D collision)
   {
     if (enemyState == EnemyState.Lunging && collision.gameObject == player)
     {
       Debug.Log("Stung the player! Retreating.");
-
-      retreatDirection = (transform.position - playerAttackPoint).normalized;
-
-      retreatTargetPosition = transform.position + (retreatDirection * retreatRange);
-
-      enemyState = EnemyState.Retreating;
-
+      playerHealth.TakeDamage(2);
+      EndLunge();
     }
   }
+
   void OnDrawGizmos()
   {
     Gizmos.color = Color.yellow;
@@ -157,14 +197,28 @@ public class BeeEnemy : MonoBehaviour
     Gizmos.color = Color.blue;
     Gizmos.DrawWireSphere(transform.position, retreatRange);
 
-    if (Application.isPlaying && enemyState == EnemyState.Retreating)
+    // Show player's feet attack point
+    if (Application.isPlaying && player != null)
     {
-      Gizmos.color = Color.green;
-      Gizmos.DrawLine(transform.position, retreatTargetPosition);
-      Gizmos.DrawWireSphere(retreatTargetPosition, 0.2f);
+      Vector3 feetPos = GetPlayerFeetPosition();
+      Gizmos.color = Color.magenta;
+      Gizmos.DrawWireSphere(feetPos, 0.2f);
+      Gizmos.DrawLine(transform.position, feetPos);
+    }
+
+    if (Application.isPlaying)
+    {
+      Gizmos.color = Color.white;
+      Gizmos.DrawWireSphere(lungeStartPosition, 0.3f);
+      
+      if (enemyState == EnemyState.Retreating)
+      {
+        Gizmos.color = Color.green;
+        Gizmos.DrawLine(transform.position, retreatTargetPosition);
+        Gizmos.DrawWireSphere(retreatTargetPosition, 0.2f);
+      }
     }
   }
-
 
   void OnHealthChanged(int current, int max)
   {
@@ -177,12 +231,5 @@ public class BeeEnemy : MonoBehaviour
         xP_System.DropXP(transform.position, 3);
       }
     }
-  }
-
-
-  bool PlayeInRange(float range)
-  {
-
-    return false;
   }
 }
