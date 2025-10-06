@@ -1012,6 +1012,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95e62ce075d021a24abd39845ecc4840, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startDazedTime: 0
 --- !u!1 &302915032
 GameObject:
   m_ObjectHideFlags: 0
@@ -2028,11 +2029,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4294930200414580726, guid: f7314cad59d452987835ac1ddba33714, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -4.7247
+      value: -12.93
       objectReference: {fileID: 0}
     - target: {fileID: 4294930200414580726, guid: f7314cad59d452987835ac1ddba33714, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.29
+      value: -4.3
       objectReference: {fileID: 0}
     - target: {fileID: 4294930200414580726, guid: f7314cad59d452987835ac1ddba33714, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2079,6 +2080,14 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8163727369856622961, guid: f7314cad59d452987835ac1ddba33714, type: 3}
+      propertyPath: speed
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8163727369856622961, guid: f7314cad59d452987835ac1ddba33714, type: 3}
+      propertyPath: health
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 8163727369856622961, guid: f7314cad59d452987835ac1ddba33714, type: 3}
       propertyPath: player
       value: 
       objectReference: {fileID: 1225151848}
@@ -2091,8 +2100,12 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8163727369856622961, guid: f7314cad59d452987835ac1ddba33714, type: 3}
+      propertyPath: startDazedTime
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 8163727369856622961, guid: f7314cad59d452987835ac1ddba33714, type: 3}
       propertyPath: followPlayerRange
-      value: 4
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 8163727369856622961, guid: f7314cad59d452987835ac1ddba33714, type: 3}
       propertyPath: startTimeBtwAttack
@@ -2100,7 +2113,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9135078294359319425, guid: f7314cad59d452987835ac1ddba33714, type: 3}
       propertyPath: m_Name
-      value: Enemy
+      value: Crab
       objectReference: {fileID: 0}
     - target: {fileID: 9135078294359319425, guid: f7314cad59d452987835ac1ddba33714, type: 3}
       propertyPath: m_TagString
@@ -2848,13 +2861,16 @@ MonoBehaviour:
   player_InputHandler: {fileID: 1225151854}
   player_Camera: {fileID: 1225151856}
   attackOrigin: {fileID: 19052141}
-  attackRadius: 1.14
+  attackRadius: 1
   damage: 1
   enemyLayer:
     serializedVersion: 2
     m_Bits: 128
   cooldownTime: 0.5
-  knockbackForce: 6
+  knockbackForce: 20
+  knockbackDuration: 0.3
+  meleeEffectPrefab: {fileID: 1388199414278010597, guid: 0d4c2f106a06ce544b9681fb658011f5, type: 3}
+  effectDuration: 0.3
 --- !u!114 &1225151853
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3022,6 +3038,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95e62ce075d021a24abd39845ecc4840, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startDazedTime: 0
 --- !u!114 &1225151860
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3077,11 +3094,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: 4140c195ddb9f664fbf6b7319d8c5a0c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -13.04
+      value: 29.7
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: 4140c195ddb9f664fbf6b7319d8c5a0c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -3.85
+      value: 0.24
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: 4140c195ddb9f664fbf6b7319d8c5a0c, type: 3}
       propertyPath: m_LocalPosition.z
@@ -16461,6 +16478,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3004671544734020060, guid: 315f744dc06ac5ba3ac9439a2721b19b, type: 3}
+      propertyPath: speed
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004671544734020060, guid: 315f744dc06ac5ba3ac9439a2721b19b, type: 3}
+      propertyPath: startDazedTime
+      value: 0.25
+      objectReference: {fileID: 0}
     - target: {fileID: 3210235178425042887, guid: 315f744dc06ac5ba3ac9439a2721b19b, type: 3}
       propertyPath: m_LocalScale.x
       value: 2

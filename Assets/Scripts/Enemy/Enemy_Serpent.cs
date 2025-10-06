@@ -11,6 +11,7 @@ public class VenomShooting : MonoBehaviour
     private HealthSystem healthSystem;
     private XP_System xP_System;
     public int enemyHealth;
+    private Rigidbody2D rb;
 
 
     void Awake()
@@ -22,6 +23,7 @@ public class VenomShooting : MonoBehaviour
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
+        rb = GetComponent<Rigidbody2D>();
         healthSystem.Initialize(enemyHealth);
         if (player != null)
         {
@@ -64,7 +66,7 @@ public class VenomShooting : MonoBehaviour
         }
     }
 
-    void OnDrawGizmosSelected()
+    void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, distanceToPlayer);

@@ -4,6 +4,8 @@ public class HealthSystem : MonoBehaviour
 {
     private int _maxHealth;
     private int _currentHealth;
+    private float dazedTime;
+    public float startDazedTime;
 
     public event Action<int, int> OnHealthChanged;
     public event Action<GameObject> OnDamageTaken;
@@ -18,6 +20,7 @@ public class HealthSystem : MonoBehaviour
 
     public void TakeDamage(int damage, GameObject damageSource = null)
     {
+        dazedTime = startDazedTime;
         _currentHealth = Mathf.Max(0, _currentHealth - damage);
 
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
