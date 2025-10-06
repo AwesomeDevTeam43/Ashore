@@ -27,11 +27,12 @@ public class SpearEquipment : Equipment
         if (spearPrefab != null && throwPoint != null)
         {
             GameObject spear = Instantiate(spearPrefab, throwPoint.position, throwPoint.rotation);
-            Rigidbody rb = spear.GetComponent<Rigidbody>();
+            Rigidbody2D rb = spear.GetComponent<Rigidbody2D>();
             
             if (rb != null)
             {
-                rb.AddForce(throwPoint.forward * throwForce, ForceMode.Impulse);
+                Vector2 throwDirection = transform.parent.localScale.x > 0 ? Vector2.right : Vector2.left;
+                rb.AddForce(throwDirection * throwForce, ForceMode2D.Impulse);
             }
         }
     }
