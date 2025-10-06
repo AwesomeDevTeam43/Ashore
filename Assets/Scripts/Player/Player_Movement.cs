@@ -17,6 +17,10 @@ public class Player_Movement : MonoBehaviour
     private bool isFacingRight = true;
     private Vector3 vertAtk = new Vector3(0.0f, 1.5f, 0.0f);
     private Vector3 startPos;
+
+    private Map_PlatformMoves currentPlatform;
+    private Vector2 lastPlatformPosition;
+
     public bool IsFacingRight => isFacingRight;
 
     void Start()
@@ -43,7 +47,18 @@ public class Player_Movement : MonoBehaviour
 
     private void HandleMovement()
     {
-        rb.linearVelocity = new Vector2(player_InputHandler.MovementInput.x * moveSpeed, rb.linearVelocity.y);
+        // Calculate platform movement
+        Vector2 platformMovement = Vector2.zero;
+        if (currentPlatform != null && IsGrounded())
+        {
+            Vector2 currentPlatformPos = currentPlatform.transform.position;
+            platformMovement = currentPlatformPos - lastPlatformPosition;
+            lastPlatformPosition = currentPlatformPos;
+        }
+
+        // Apply player input movement + platform movement
+        float targetX = player_InputHandler.MovementInput.x * moveSpeed + platformMovement.x / Time.fixedDeltaTime;
+        rb.linearVelocity = new Vector2(targetX, rb.linearVelocity.y);
     }
 
     private void HandleDirection()
@@ -84,11 +99,15 @@ public class Player_Movement : MonoBehaviour
         }
     }
 
-    void OnCollisionEnter2D(Collision2D collision)
+     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("MovingPlatform"))
         {
-            this.transform.parent = collision.gameObject.transform;
+            currentPlatform = collision.gameObject.GetComponent<Map_PlatformMoves>();
+            if (currentPlatform != null)
+            {
+                lastPlatformPosition = currentPlatform.transform.position;
+            }
         }
     }
 
@@ -96,7 +115,7 @@ public class Player_Movement : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("MovingPlatform"))
         {
-            this.transform.parent = null;
+            currentPlatform = null;
         }
     }
 }
