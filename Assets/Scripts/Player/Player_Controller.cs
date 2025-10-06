@@ -53,7 +53,7 @@ public class Player_Controller : MonoBehaviour
     Debug.Log($"Initializing HealthSystem with {currentHealth} HP");
     healthSystem.Initialize(currentHealth);
     xP_System.Initialize(LVL1XpAmount, LvlGap);
-    
+
     if (spearEquipment != null)
     {
       spearEquipment.gameObject.SetActive(false);
@@ -77,17 +77,17 @@ public class Player_Controller : MonoBehaviour
       healthSystem.Heal(1);
       Debug.Log($"{healthSystem.CurrentHealth}/{healthSystem.MaxHealth}");
     }
-    
+
     if (Input.GetKeyDown(KeyCode.F))
     {
       HandleEquipUnequip();
     }
-    
+
     if (Input.GetKeyDown(KeyCode.L) && isSpearEquipped)
     {
       UseSpear();
     }
-    
+
     if (transform.position.y < fallDeathY)
     {
       ReturnToLastPoint();
@@ -98,7 +98,7 @@ public class Player_Controller : MonoBehaviour
   {
     if (!hasSpearInInventory)
       return;
-    
+
     if (isSpearEquipped)
     {
       spearEquipment.OnUnequip();
@@ -131,11 +131,11 @@ public class Player_Controller : MonoBehaviour
     if (healthSystem != null)
     {
       int healthDifference = currentHealth - previousMaxHealth;
-      
+
       int newCurrentHealth = currentHealthPoints + healthDifference;
-      
+
       healthSystem.Initialize(currentHealth);
-      
+
       if (healthDifference > 0)
       {
         healthSystem.Heal(healthDifference);
@@ -158,6 +158,10 @@ public class Player_Controller : MonoBehaviour
 
   private void OnPlayerHealthChanged(int currentHealth, int maxHealth)
   {
-    
+    if (currentHealth <= 0)
+    {
+      Destroy(gameObject);
+      Debug.Log("Player Died!");
+    }
   }
 }
