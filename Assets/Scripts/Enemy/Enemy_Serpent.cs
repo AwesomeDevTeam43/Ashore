@@ -44,6 +44,7 @@ public class VenomShooting : MonoBehaviour
                 timer = 0;
                 shoot();
             }
+            //Bite();
         }
     }
 
@@ -59,7 +60,7 @@ public class VenomShooting : MonoBehaviour
             HealthSystem playerHealth = player.GetComponent<HealthSystem>();
             if (playerHealth != null)
             {
-                playerHealth.TakeDamage(10);
+                playerHealth.TakeDamage(5);
                 Debug.Log("Player Hit!");
                 Debug.Log(playerHealth.CurrentHealth);
             }
