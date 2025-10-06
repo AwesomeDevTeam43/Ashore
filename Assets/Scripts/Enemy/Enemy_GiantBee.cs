@@ -112,6 +112,11 @@ public class BeeEnemy : MonoBehaviour
     Vector2 lungeDirection = (playerAttackPoint - transform.position).normalized;
     rb.linearVelocity = lungeDirection * lungingForce;
 
+    if (playerDistance <= lungeRange + 1)
+    {
+      enemyState = EnemyState.Roaming;
+    }
+
   }
 
   void RetreatBehavior()
@@ -133,7 +138,7 @@ public class BeeEnemy : MonoBehaviour
     {
       Debug.Log("Stung the player! Retreating.");
 
-      retreatDirection = (transform.position - player.transform.position).normalized;
+      retreatDirection = (transform.position - playerAttackPoint.position).normalized;
 
       retreatTargetPosition = transform.position + (retreatDirection * retreatRange);
 
