@@ -138,7 +138,7 @@ public class BeeEnemy : MonoBehaviour
     {
       Debug.Log("Stung the player! Retreating.");
 
-      retreatDirection = (transform.position - playerAttackPoint.position).normalized;
+      retreatDirection = (transform.position - playerAttackPoint).normalized;
 
       retreatTargetPosition = transform.position + (retreatDirection * retreatRange);
 
