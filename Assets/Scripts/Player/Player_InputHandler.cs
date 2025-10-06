@@ -16,18 +16,21 @@ public class Player_InputHandler : MonoBehaviour
     [SerializeField] private string jump = "Jump";
     [SerializeField] private string attack = "Attack";
     [SerializeField] private string rangeAttack = "RangeAttack";
+    [SerializeField] private string interact = "Interact";
 
     private InputAction movementAction;
     private InputAction lookAction;
     private InputAction jumpAction;
     private InputAction attackAction;
     private InputAction rangeAttackAction;
+    private InputAction interactAction;
 
     public Vector2 MovementInput { get; private set; }
     public Vector2 LookInput { get; private set; }
     public bool JumpTriggered { get; private set; }
     public bool AttackTriggered { get; private set; }
     public bool RangeAttackTriggered { get; private set; }
+    public bool InteractActionTriggered { get; private set; }
 
     [Header("8-Direction Inputs")]
     private Vector2[] directions8 = new Vector2[]
@@ -64,6 +67,7 @@ public class Player_InputHandler : MonoBehaviour
         jumpAction = mapReference.FindAction(jump);
         attackAction = mapReference.FindAction(attack);
         rangeAttackAction = mapReference.FindAction(rangeAttack);
+        interactAction = mapReference.FindAction(interact);
 
         MakeInputEvents();
     }
@@ -89,6 +93,9 @@ public class Player_InputHandler : MonoBehaviour
 
         rangeAttackAction.performed += inputInfo => RangeAttackTriggered = true;
         rangeAttackAction.canceled += inputInfo => RangeAttackTriggered = false;
+
+        interactAction.performed += inputInfo => InteractActionTriggered = true;
+        interactAction.canceled += inputInfo => InteractActionTriggered = false;
     }
 
     private void Handle8Directions()

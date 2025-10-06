@@ -10,7 +10,7 @@ public class Player_Movement : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask platformLayer;
 
-    private Player_Atributes player_Atributes;
+    private Player_Controller player_Controller;
 
     private float moveSpeed;
     private float jumpingPower;
@@ -23,9 +23,9 @@ public class Player_Movement : MonoBehaviour
     {
         attackZone = GameObject.FindGameObjectWithTag("AttackZone");
         startPos = attackZone.transform.localPosition;
-        player_Atributes = GetComponent<Player_Atributes>();
-        moveSpeed = player_Atributes.MoveSpeed;
-        jumpingPower = player_Atributes.JumpForce;
+        player_Controller = GetComponent<Player_Controller>();
+        moveSpeed = player_Controller.MoveSpeed;
+        jumpingPower = player_Controller.JumpForce;
     }
 
     void FixedUpdate()
