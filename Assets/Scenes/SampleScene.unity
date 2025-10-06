@@ -3077,11 +3077,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: 4140c195ddb9f664fbf6b7319d8c5a0c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -13.04
+      value: 29.85
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: 4140c195ddb9f664fbf6b7319d8c5a0c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -3.85
+      value: 0.18
       objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: 4140c195ddb9f664fbf6b7319d8c5a0c, type: 3}
       propertyPath: m_LocalPosition.z
@@ -16461,6 +16461,42 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3004671544734020060, guid: 315f744dc06ac5ba3ac9439a2721b19b, type: 3}
+      propertyPath: roamSpeed
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004671544734020060, guid: 315f744dc06ac5ba3ac9439a2721b19b, type: 3}
+      propertyPath: lungeRange
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004671544734020060, guid: 315f744dc06ac5ba3ac9439a2721b19b, type: 3}
+      propertyPath: lungingForce
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004671544734020060, guid: 315f744dc06ac5ba3ac9439a2721b19b, type: 3}
+      propertyPath: playerDetect
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004671544734020060, guid: 315f744dc06ac5ba3ac9439a2721b19b, type: 3}
+      propertyPath: retreatRange
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004671544734020060, guid: 315f744dc06ac5ba3ac9439a2721b19b, type: 3}
+      propertyPath: retreatSpeed
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004671544734020060, guid: 315f744dc06ac5ba3ac9439a2721b19b, type: 3}
+      propertyPath: lungeCooldown
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004671544734020060, guid: 315f744dc06ac5ba3ac9439a2721b19b, type: 3}
+      propertyPath: currentCooldown
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3004671544734020060, guid: 315f744dc06ac5ba3ac9439a2721b19b, type: 3}
+      propertyPath: playerLayer.m_Bits
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 3210235178425042887, guid: 315f744dc06ac5ba3ac9439a2721b19b, type: 3}
       propertyPath: m_LocalScale.x
       value: 2

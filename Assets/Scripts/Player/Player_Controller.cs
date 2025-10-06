@@ -6,6 +6,11 @@ public class Player_Controller : MonoBehaviour
   private XP_System xP_System;
   private Player_Atributes player_Atributes;
   [SerializeField] private float fallDeathY = -10f;
+  
+  [Header("Equipment")]
+  [SerializeField] private SpearEquipment spearEquipment;
+  private bool hasSpearInInventory = true;
+  private bool isSpearEquipped = false;
 
 
   private void Awake()
@@ -16,7 +21,7 @@ public class Player_Controller : MonoBehaviour
     healthSystem.OnHealthChanged += OnPlayerHealthChanged;
     xP_System = GetComponent<XP_System>();
 
-    
+
   }
 
   private void Start()
