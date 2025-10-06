@@ -77,7 +77,6 @@ public class Player_Controller : MonoBehaviour
   private void UpdateStats(int level)
   {
     int previousMaxHealth = currentHealth;
-    int currentHealthPoints = healthSystem != null ? healthSystem.CurrentHealth : 0;
 
     currentHealth = playerStats.GetHealth(level);
     currentAttackPower = playerStats.GetAttackPower(level);
@@ -88,13 +87,8 @@ public class Player_Controller : MonoBehaviour
     {
       int healthDifference = currentHealth - previousMaxHealth;
       
-      // Calcula a nova vida atual (vida atual + diferença de vida máxima)
-      int newCurrentHealth = currentHealthPoints + healthDifference;
-      
-      // Re-inicializa o HealthSystem com a nova vida máxima
       healthSystem.Initialize(currentHealth);
       
-      // Define a vida atual para o valor calculado (vida anterior + bônus do level up)
       if (healthDifference > 0)
       {
         healthSystem.Heal(healthDifference);
