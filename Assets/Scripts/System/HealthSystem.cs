@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+
 public class HealthSystem : MonoBehaviour
 {
     private int _maxHealth;
@@ -13,6 +14,12 @@ public class HealthSystem : MonoBehaviour
         _maxHealth = maxHealth;
         _currentHealth = _maxHealth;
 
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+    }
+
+    public void SetHealth(int health)
+    {
+        _currentHealth = Mathf.Clamp(health, 0, _maxHealth);
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
     }
 

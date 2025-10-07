@@ -2,30 +2,34 @@ using UnityEngine;
 
 public class ParallaxEffect : MonoBehaviour
 {
-    public Camera cam;
-    public Transform followTarget;
+    [Header("Camara")]
+    [SerializeField] private Transform cam;
 
-    Vector2 startingPoint;
-    float startingZ;
+    [Header("Layers")]
+    [SerializeField] private Transform backgroundLayer;
+    [SerializeField] private Transform midgroundLayer;
 
-    float zDistanceFromTarget => transform.position.z - followTarget.transform.position.z;
+    [Header("Velocidades de Parallax")]
+    [SerializeField, Range(0f, 1f)] private float backgroundSpeed = 0.3f;
+    [SerializeField, Range(0f, 1f)] private float midgroundSpeed = 0.6f;
 
-    float clippingPlane => (cam.transform.position.z + (zDistanceFromTarget > 0 ? cam.farClipPlane : cam.nearClipPlane));
+    private Vector3 lastCamPos;
 
-    Vector2 camMoveSinceStart => (Vector2)cam.transform.position - startingPoint;
-
-    float parallaxFactor => Mathf.Abs(zDistanceFromTarget) / clippingPlane;
-
-    void Start()
+    private void Start()
     {
-        startingPoint = transform.position;
-        startingZ = transform.position.z;
+        if (cam == null)
+            cam = Camera.main.transform;
+
+        lastCamPos = cam.position;
     }
 
-    void Update()
+    private void LateUpdate()
     {
-        Vector2 newPosition = startingPoint + camMoveSinceStart * parallaxFactor;
+        Vector3 deltaMovement = cam.position - lastCamPos;
 
-        transform.position = new Vector3(newPosition.x, newPosition.y, startingZ);
+        backgroundLayer.position += new Vector3(deltaMovement.x * backgroundSpeed, deltaMovement.y * backgroundSpeed, 0);
+        midgroundLayer.position += new Vector3(deltaMovement.x * midgroundSpeed, deltaMovement.y * midgroundSpeed, 0);
+
+        lastCamPos = cam.position;
     }
 }
