@@ -45,7 +45,9 @@ public class Enemy : MonoBehaviour
 
     CheckPlayerDistance();
   }
-  private void FixedUpdate()
+
+
+    private void FixedUpdate()
   {
     if (player == null)
     {

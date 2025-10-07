@@ -11,11 +11,8 @@ public class Player_Controller : MonoBehaviour
   [Header("Settings")]
   [SerializeField] private float fallDeathY = -10f;
 
-  [Header("Equipment")]
-  [SerializeField] private SpearEquipment spearEquipment;
-  private bool hasSpearInInventory = true;
-  private bool isSpearEquipped = false;
-
+  [Header("Temporary Inventory")]
+  [SerializeField] private Equipment currentEquipment;
   private int currentHealth;
   private int currentAttackPower;
   private float currentMoveSpeed;
@@ -53,12 +50,9 @@ public class Player_Controller : MonoBehaviour
     Debug.Log($"Initializing HealthSystem with {currentHealth} HP");
     healthSystem.Initialize(currentHealth);
     xP_System.Initialize(LVL1XpAmount, LvlGap);
-    
-    if (spearEquipment != null)
-    {
-      spearEquipment.gameObject.SetActive(false);
-    }
+
   }
+
 
   private void OnDisable()
   {
@@ -72,51 +66,41 @@ public class Player_Controller : MonoBehaviour
 
   private void Update()
   {
+    useEquipment();
     if (Input.GetKeyDown(KeyCode.M))
     {
       healthSystem.Heal(1);
       Debug.Log($"{healthSystem.CurrentHealth}/{healthSystem.MaxHealth}");
     }
-    
-    if (Input.GetKeyDown(KeyCode.F))
-    {
-      HandleEquipUnequip();
-    }
-    
-    if (Input.GetKeyDown(KeyCode.L) && isSpearEquipped)
-    {
-      UseSpear();
-    }
-    
+
     if (transform.position.y < fallDeathY)
     {
       ReturnToLastPoint();
     }
   }
 
-  private void HandleEquipUnequip()
+  void useEquipment()
   {
-    if (!hasSpearInInventory)
-      return;
-    
-    if (isSpearEquipped)
+    if (currentEquipment != null)
     {
-      spearEquipment.OnUnequip();
-      isSpearEquipped = false;
-    }
-    else
-    {
-      spearEquipment.OnEquip();
-      isSpearEquipped = true;
+      if (Input.GetKeyDown(KeyCode.F) && currentEquipment.isEquipped)
+      {
+        currentEquipment.Unequip();
+      }
+      else if (Input.GetKeyDown(KeyCode.F) && !currentEquipment.isEquipped)
+      {
+        currentEquipment.Equip();
+      }
+
+      if (Input.GetKeyDown(KeyCode.N) && currentEquipment.isEquipped)
+      {
+        currentEquipment.Use();
+        Debug.Log("Used Equipment");
+        currentEquipment = null;
+      }
     }
   }
 
-  private void UseSpear()
-  {
-    spearEquipment.OnUse();
-    hasSpearInInventory = false;
-    isSpearEquipped = false;
-  }
 
   private void UpdateStats(int level)
   {
@@ -131,11 +115,11 @@ public class Player_Controller : MonoBehaviour
     if (healthSystem != null)
     {
       int healthDifference = currentHealth - previousMaxHealth;
-      
+
       int newCurrentHealth = currentHealthPoints + healthDifference;
-      
+
       healthSystem.Initialize(currentHealth);
-      
+
       if (healthDifference > 0)
       {
         healthSystem.Heal(healthDifference);
@@ -156,8 +140,17 @@ public class Player_Controller : MonoBehaviour
     }
   }
 
+  private void OnTriggerEnter2D(Collider2D collision)
+  {
+    if (collision.gameObject.layer == LayerMask.NameToLayer("Equipment"))
+    {
+      currentEquipment = collision.gameObject.GetComponent<Equipment>();
+      Debug.Log($"Picked up {currentEquipment.equipmentName} - {currentEquipment.description}");
+    }
+  }
+
   private void OnPlayerHealthChanged(int currentHealth, int maxHealth)
   {
-    
+
   }
 }
