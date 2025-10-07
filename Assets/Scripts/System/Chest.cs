@@ -26,7 +26,7 @@ public class Chest : MonoBehaviour
     private void Update()
     {
         float distance = Vector3.Distance(transform.position, player.transform.position);
-        playerNearby = distance <= 5f;
+        playerNearby = distance <= 1f;
 
         if (playerNearby && player_InputHandler.InteractActionTriggered)
         {
