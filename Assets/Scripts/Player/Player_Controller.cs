@@ -7,6 +7,7 @@ public class Player_Controller : MonoBehaviour
 
   [Header("Player Stats")]
   [SerializeField] private PlayerStats playerStats;
+  public bool IsAlive = true;
 
   [Header("Settings")]
   [SerializeField] private float fallDeathY = -10f;
@@ -189,6 +190,7 @@ private void OnTriggerEnter2D(Collider2D collision)
     if (currentHealth <= 0)
     {
       Destroy(gameObject);
+      IsAlive = false;
       Debug.Log("Player Died!");
     }
   }

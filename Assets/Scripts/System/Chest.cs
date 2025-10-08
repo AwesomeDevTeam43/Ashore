@@ -4,6 +4,7 @@ public class Chest : MonoBehaviour
 {
     [SerializeField] private GameObject player;
     private Player_InputHandler player_InputHandler;
+    private Player_Controller player_Controller;
 
     [Header("Chest Sprites")]
     [SerializeField] private Sprite openSprite;
@@ -21,16 +22,20 @@ public class Chest : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         xP_System = player.GetComponent<XP_System>();
         player_InputHandler = player.GetComponent<Player_InputHandler>();
+        player_Controller = player.GetComponent<Player_Controller>();
     }
 
     private void Update()
     {
-        float distance = Vector3.Distance(transform.position, player.transform.position);
-        playerNearby = distance <= 1f;
-
-        if (playerNearby && player_InputHandler.InteractActionTriggered)
+        if (player_Controller.IsAlive)
         {
-            OpenChest();
+            float distance = Vector3.Distance(transform.position, player.transform.position);
+            playerNearby = distance <= 1f;
+
+            if (playerNearby && player_InputHandler.InteractActionTriggered)
+            {
+                OpenChest();
+            }
         }
     }
 
