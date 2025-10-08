@@ -236,11 +236,11 @@ public class BeeEnemy : MonoBehaviour
   {
     if (player.transform.position.x <= 0.01f)
     {
-      transform.localScale = new Vector3(-1, 1, 1);
+      transform.localScale = new Vector3(-2, 2, 1);
     }
     else if (player.transform.position.x >= -0.01f)
     {
-      transform.localScale = new Vector3(1, 1, 1);
+      transform.localScale = new Vector3(2, 2, 1);
     }
   }
 }
