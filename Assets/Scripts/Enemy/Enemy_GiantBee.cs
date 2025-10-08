@@ -45,14 +45,14 @@ public class BeeEnemy : MonoBehaviour
     rb = GetComponent<Rigidbody2D>();
     player = GameObject.FindGameObjectWithTag("Player");
     playerHealth = player.GetComponent<HealthSystem>();
-    
+
     // NEW: Get player's collider for feet targeting
     if (player != null)
     {
       playerCollider = player.GetComponent<Collider2D>();
       xP_System = player.GetComponent<XP_System>();
     }
-    
+
     healthSystem.Initialize(enemyHealth);
     enemyState = EnemyState.Roaming;
     currentCooldown = 0f;
@@ -83,7 +83,7 @@ public class BeeEnemy : MonoBehaviour
 
     if (currentCooldown > 0)
       currentCooldown -= Time.deltaTime;
-
+    FlipSprite();
     float playerDistance = Vector3.Distance(transform.position, player.transform.position);
     StateMachine(playerDistance);
   }
@@ -115,10 +115,10 @@ public class BeeEnemy : MonoBehaviour
   void StartLunge()
   {
     lungeStartPosition = transform.position;
-    
+
     // NEW: Calculate attack point at player's feet
     playerAttackPoint = GetPlayerFeetPosition();
-    
+
     lungeTimer = 0f;
     enemyState = EnemyState.Lunging;
     Debug.Log("Starting lunge towards player's feet!");
@@ -143,7 +143,7 @@ public class BeeEnemy : MonoBehaviour
   void LungeBehavior(float playerDistance)
   {
     lungeTimer += Time.deltaTime;
-    
+
     Vector2 lungeDirection = (playerAttackPoint - transform.position).normalized;
     rb.linearVelocity = lungeDirection * lungingForce;
 
@@ -157,7 +157,7 @@ public class BeeEnemy : MonoBehaviour
   {
     Vector2 retreatDirection = (lungeStartPosition - transform.position).normalized;
     retreatTargetPosition = transform.position + (Vector3)retreatDirection * retreatRange;
-    
+
     currentCooldown = lungeCooldown;
     enemyState = EnemyState.Retreating;
     Debug.Log("Lunge ended, retreating!");
@@ -210,7 +210,7 @@ public class BeeEnemy : MonoBehaviour
     {
       Gizmos.color = Color.white;
       Gizmos.DrawWireSphere(lungeStartPosition, 0.3f);
-      
+
       if (enemyState == EnemyState.Retreating)
       {
         Gizmos.color = Color.green;
@@ -230,6 +230,17 @@ public class BeeEnemy : MonoBehaviour
       {
         xP_System.DropXP(transform.position, 3);
       }
+    }
+  }
+  void FlipSprite()
+  {
+    if (player.transform.position.x <= 0.01f)
+    {
+      transform.localScale = new Vector3(-1, 1, 1);
+    }
+    else if (player.transform.position.x >= -0.01f)
+    {
+      transform.localScale = new Vector3(1, 1, 1);
     }
   }
 }

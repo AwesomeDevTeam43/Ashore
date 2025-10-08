@@ -46,6 +46,7 @@ public class VenomShooting : MonoBehaviour
             }
             //Bite();
         }
+        FlipSprite();
     }
 
     void shoot()
@@ -85,6 +86,18 @@ public class VenomShooting : MonoBehaviour
             {
                 xP_System.DropXP(transform.position, 5);
             }
+        }
+    }
+
+    void FlipSprite()
+    {
+        if (player.transform.position.x <= 0.01f)
+        {
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
+        else if (player.transform.position.x >= -0.01f)
+        {
+            transform.localScale = new Vector3(1, 1, 1);
         }
     }
 }

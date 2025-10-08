@@ -43,11 +43,12 @@ public class Enemy : MonoBehaviour
     if (player == null)
       return;
 
+    FlipSprite();
     CheckPlayerDistance();
   }
 
 
-    private void FixedUpdate()
+  private void FixedUpdate()
   {
     if (player == null)
     {
@@ -119,5 +120,16 @@ public class Enemy : MonoBehaviour
     Gizmos.DrawWireSphere(transform.position, followPlayerRange);
     Gizmos.color = Color.blue;
     Gizmos.DrawWireSphere(transform.position, attackRange);
+  }
+  void FlipSprite()
+  {
+    if (player.transform.position.x <= 0.01f)
+    {
+      transform.localScale = new Vector3(-1, 1, 1);
+    }
+    else if (player.transform.position.x >= -0.01f)
+    {
+      transform.localScale = new Vector3(1, 1, 1);
+    }
   }
 }
