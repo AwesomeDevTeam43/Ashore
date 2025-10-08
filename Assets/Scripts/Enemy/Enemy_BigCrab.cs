@@ -125,11 +125,11 @@ public class Enemy : MonoBehaviour
   {
     if (player.transform.position.x <= 0.01f)
     {
-      transform.localScale = new Vector3(-2, 2, 1);
+      transform.localScale = new Vector3(-3.34f, 3.34f, 1);
     }
     else if (player.transform.position.x >= -0.01f)
     {
-      transform.localScale = new Vector3(2, 2, 1);
+      transform.localScale = new Vector3(3.34f, 3.34f, 1);
     }
   }
 }
