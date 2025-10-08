@@ -1603,6 +1603,67 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1001 &442435127
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1463316567475179387, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
+      propertyPath: isEquipped
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468351527201308388, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 30.256828
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468351527201308388, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.07985878
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468351527201308388, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468351527201308388, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468351527201308388, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468351527201308388, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468351527201308388, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468351527201308388, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468351527201308388, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1468351527201308388, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1841228293332522625, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
+      propertyPath: m_Name
+      value: Tool
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -1691,7 +1752,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 78.18, y: -0.92, z: -10}
+  m_LocalPosition: {x: -13.9, y: -3.2, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3130,7 +3191,7 @@ Transform:
   m_GameObject: {fileID: 1225151845}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 78.18, y: -0.92, z: 0}
+  m_LocalPosition: {x: -13.9, y: -3.2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3157,7 +3218,7 @@ MonoBehaviour:
   player_Camera: {fileID: 1225151856}
   attackOrigin: {fileID: 19052141}
   attackRadius: 1.14
-  damage: 1
+  damage: 2
   enemyLayer:
     serializedVersion: 2
     m_Bits: 128
@@ -3188,6 +3249,7 @@ MonoBehaviour:
   platformLayer:
     serializedVersion: 2
     m_Bits: 512
+  downwardAttackBounce: 10
 --- !u!114 &1225151854
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3323,7 +3385,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerStats: {fileID: 11400000, guid: bd35a466862b3c849af092f1d041e9c1, type: 2}
   fallDeathY: -10
-  currentEquipment: {fileID: 1463316567475179387, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
+  currentEquipment: {fileID: 0}
   spearPrefab: {fileID: 1841228293332522625, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
 --- !u!114 &1225151859
 MonoBehaviour:
@@ -23682,3 +23744,4 @@ SceneRoots:
   - {fileID: 3318592922458799091}
   - {fileID: 6259495043920048304}
   - {fileID: 299078085}
+  - {fileID: 442435127}
