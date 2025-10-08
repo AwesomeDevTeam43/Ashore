@@ -96,10 +96,12 @@ public class Melee : MonoBehaviour
 
     private IEnumerator SlowDownEnemy(Rigidbody2D enemyRigidbody)
     {
+        if (enemyRigidbody == null) yield break;
         float timer = 0f;
+        if (enemyRigidbody == null) yield break;
         Vector2 startVelocity = enemyRigidbody.linearVelocity;
 
-        while (timer < knockbackDuration)
+        while (timer < knockbackDuration && enemyRigidbody != null)
         {
             // Interpola a velocidade até parar
             enemyRigidbody.linearVelocity = Vector2.Lerp(startVelocity, Vector2.zero, timer / knockbackDuration);
@@ -108,6 +110,7 @@ public class Melee : MonoBehaviour
         }
 
         // Garante que parou completamente
+        if (enemyRigidbody != null)
         enemyRigidbody.linearVelocity = Vector2.zero;
     }
 }
