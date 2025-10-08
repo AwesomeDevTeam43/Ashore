@@ -4,6 +4,7 @@ public class Heal_Plant : MonoBehaviour
 {
     [SerializeField] private GameObject player;
     private Player_InputHandler player_InputHandler;
+    private Player_Controller player_Controller;
 
     [SerializeField] private Sprite plant_dead;
     private SpriteRenderer spriteRenderer;
@@ -17,16 +18,20 @@ public class Heal_Plant : MonoBehaviour
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         player_InputHandler = player.GetComponent<Player_InputHandler>();
+        player_Controller = player.GetComponent<Player_Controller>();
     }
 
     private void Update()
     {
-        float distance = Vector3.Distance(transform.position, player.transform.position);
-        playerNearby = distance <= 1f;
-
-        if (playerNearby && player_InputHandler.InteractActionTriggered)
+        if (player_Controller.IsAlive)
         {
-            DropHeal();
+            float distance = Vector3.Distance(transform.position, player.transform.position);
+            playerNearby = distance <= 1f;
+
+            if (playerNearby && player_InputHandler.InteractActionTriggered)
+            {
+                DropHeal();
+            }
         }
     }
 
