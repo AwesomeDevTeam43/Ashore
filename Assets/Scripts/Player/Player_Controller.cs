@@ -13,6 +13,7 @@ public class Player_Controller : MonoBehaviour
 
   [Header("Temporary Inventory")]
   [SerializeField] private Equipment currentEquipment;
+  [SerializeField] private GameObject spearPrefab;
   private int currentHealth;
   private int currentAttackPower;
   private float currentMoveSpeed;
@@ -95,6 +96,7 @@ public class Player_Controller : MonoBehaviour
       {
         currentEquipment.Use();
         Debug.Log("Used Equipment");
+        currentEquipment.isEquipped = false;
         currentEquipment = null;
       }
     }
@@ -135,14 +137,51 @@ public class Player_Controller : MonoBehaviour
     }
   }
 
-  private void OnTriggerEnter2D(Collider2D collision)
-  {
-    if (collision.gameObject.layer == LayerMask.NameToLayer("Equipment"))
+private void OnTriggerEnter2D(Collider2D collision)
+{
+    Equipment equipment = collision.GetComponent<Equipment>();
+    if (equipment != null && !equipment.isEquipped)
     {
-      currentEquipment = collision.gameObject.GetComponent<Equipment>();
-      Debug.Log($"Picked up {currentEquipment.equipmentName} - {currentEquipment.description}");
+        // Check if it's a spear and if it can be picked up
+        Spear spear = equipment as Spear;
+        if (spear != null)
+        {
+            if (spear.CanBePickedUp())
+            {
+                Debug.Log("Picked up " + equipment.name);
+                
+                // If we don't have a spear prefab reference, store it
+                if (spearPrefab == null)
+                {
+                    spearPrefab = equipment.gameObject;
+                }
+                
+                // Create a new instance for inventory (inactive, just data holder)
+                GameObject inventorySpear = Instantiate(spearPrefab);
+                inventorySpear.SetActive(false);
+                inventorySpear.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+                
+                currentEquipment = inventorySpear.GetComponent<Equipment>();
+                currentEquipment.isEquipped = true;
+                
+                // Destroy the world spear
+                Destroy(collision.gameObject);
+            }
+            else
+            {
+                Debug.Log("Spear not ready to be picked up yet");
+            }
+        }
+        else if (equipment.hasLanded) // Other equipment
+        {
+            Debug.Log("Picked up " + equipment.name);
+            currentEquipment = equipment;
+            equipment.gameObject.SetActive(false);
+            Destroy(collision.gameObject, 0.1f);
+        }
     }
-  }
+}
+
 
 
   private void OnPlayerHealthChanged(int currentHealth, int maxHealth)

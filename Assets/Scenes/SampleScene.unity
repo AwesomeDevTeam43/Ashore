@@ -2643,7 +2643,7 @@ GameObject:
   - component: {fileID: 855462180}
   m_Layer: 0
   m_Name: ShotPoint
-  m_TagString: Untagged
+  m_TagString: Shootpoint
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3164,7 +3164,7 @@ MonoBehaviour:
   cooldownTime: 0.5
   knockbackForce: 6
   knockbackDuration: 0.3
-  meleeEffectPrefab: {fileID: 0}
+  meleeEffectPrefab: {fileID: 1388199414278010597, guid: 0d4c2f106a06ce544b9681fb658011f5, type: 3}
   effectDuration: 0.3
 --- !u!114 &1225151853
 MonoBehaviour:
@@ -3323,7 +3323,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerStats: {fileID: 11400000, guid: bd35a466862b3c849af092f1d041e9c1, type: 2}
   fallDeathY: -10
-  currentEquipment: {fileID: 0}
+  currentEquipment: {fileID: 1463316567475179387, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
+  spearPrefab: {fileID: 1841228293332522625, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
 --- !u!114 &1225151859
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23020,6 +23021,7 @@ MonoBehaviour:
   projectile: {fileID: 3107644326291823944, guid: c95c8f78b9a182f468f976c09a9c860b, type: 3}
   shotPoint: {fileID: 855462180}
   startTimeBetweenShots: 0.25
+  weaponDirection: 0
   Player_Movement: {fileID: 1225151853}
   player_InputHandler: {fileID: 1225151854}
 --- !u!1 &1973805902

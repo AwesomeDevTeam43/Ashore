@@ -6,6 +6,8 @@ public abstract class Equipment : MonoBehaviour
     public string description;
     public bool isEquipped;
 
+    public bool hasLanded = false;
+
     public abstract void Equip();
     public abstract void Unequip();
 

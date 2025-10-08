@@ -7,12 +7,11 @@ public class Weapon : MonoBehaviour
     public Transform shotPoint;
     private float timeBetweenShots;
     public float startTimeBetweenShots;
-    private enum WeaponDirection { Right, Left, Up, Down }
-    private WeaponDirection weaponDirection;
+    public enum WeaponDirection { Right, Left, Up, Down }
+    public WeaponDirection weaponDirection;
     [SerializeField] private Player_Movement Player_Movement;
     [SerializeField] private Player_InputHandler player_InputHandler;
-
-    private Vector2 GetShootDirection()
+    public Vector2 GetShootDirection()
     {
         switch (weaponDirection)
         {
