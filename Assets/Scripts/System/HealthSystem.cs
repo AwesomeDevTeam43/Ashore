@@ -6,6 +6,8 @@ public class HealthSystem : MonoBehaviour
     private int _maxHealth;
     private int _currentHealth;
 
+    private Player_Camera player_Camera;
+
     public event Action<int, int> OnHealthChanged;
     public event Action<GameObject> OnDamageTaken;
 
@@ -14,6 +16,8 @@ public class HealthSystem : MonoBehaviour
         _maxHealth = maxHealth;
         _currentHealth = _maxHealth;
 
+        player_Camera = GetComponent<Player_Camera>();
+        
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
     }
 
@@ -29,6 +33,8 @@ public class HealthSystem : MonoBehaviour
 
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
         OnDamageTaken?.Invoke(damageSource);
+
+        player_Camera.StartCameraShake();
 
         Debug.Log($"Damage taken: {damage} by {gameObject.name}. Current health: {_currentHealth}/{_maxHealth}");
     }

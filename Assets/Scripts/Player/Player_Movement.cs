@@ -9,6 +9,7 @@ public class Player_Movement : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask platformLayer;
+    [SerializeField] private float downwardAttackBounce = 10f;
 
     private Player_Controller player_Controller;
 
@@ -20,6 +21,7 @@ public class Player_Movement : MonoBehaviour
 
     private Map_PlatformMoves currentPlatform;
     private Vector2 lastPlatformPosition;
+    private bool isDownwardAttacking = false;
 
     public bool IsFacingRight => isFacingRight;
 
@@ -69,20 +71,21 @@ public class Player_Movement : MonoBehaviour
             Vector3 localScale = transform.localScale;
             localScale.x *= -1f;
             transform.localScale = localScale;
-
-
         }
         if (player_InputHandler.MovementInput.y < 0f && !IsGrounded())
         {
             attackZone.transform.localPosition = -vertAtk;
+            isDownwardAttacking = true;
         }
         else if (player_InputHandler.MovementInput.y > 0f)
         {
             attackZone.transform.localPosition = vertAtk;
+            isDownwardAttacking = false;
         }
         else
         {
             attackZone.transform.localPosition = startPos;
+            isDownwardAttacking = false ;
         }
     }
 
@@ -99,7 +102,7 @@ public class Player_Movement : MonoBehaviour
         }
     }
 
-     void OnCollisionEnter2D(Collision2D collision)
+    void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("MovingPlatform"))
         {
