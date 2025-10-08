@@ -3191,7 +3191,7 @@ Transform:
   m_GameObject: {fileID: 1225151845}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 78.18, y: -0.92, z: 0}
+  m_LocalPosition: {x: -15.57, y: -3.4, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3249,6 +3249,7 @@ MonoBehaviour:
   platformLayer:
     serializedVersion: 2
     m_Bits: 512
+  downwardAttackBounce: 10
   downwardAttackBounce: 10
 --- !u!114 &1225151854
 MonoBehaviour:
