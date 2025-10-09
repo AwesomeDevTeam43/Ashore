@@ -93,7 +93,7 @@ public class Spear : Equipment
         spearInstance.SetActive(true);
 
         // Rotate and flip the spear based on throw direction
-        SpriteRenderer spearSprite = spearInstance.GetComponent<SpriteRenderer>();
+        SpriteRenderer spearSprite = spearInstance.GetComponentInChildren<SpriteRenderer>();
         if (spearSprite != null)
         {
             if (throwDirection == Vector2.right)
@@ -106,6 +106,7 @@ public class Spear : Equipment
             {
                 spearInstance.transform.rotation = Quaternion.Euler(0, 0, 0);
                 spearSprite.flipX = true;
+                spearSprite.flipY = true;
                 Debug.Log("Spear set to LEFT");
             }
             else if (throwDirection == Vector2.up)

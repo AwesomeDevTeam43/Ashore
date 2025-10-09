@@ -9,9 +9,6 @@ public class Player_Controller : MonoBehaviour
   [SerializeField] private PlayerStats playerStats;
   public bool IsAlive = true;
 
-  [Header("Settings")]
-  [SerializeField] private float fallDeathY = -10f;
-
   [Header("Temporary Inventory")]
   [SerializeField] private Equipment currentEquipment;
   [SerializeField] private GameObject spearPrefab;
