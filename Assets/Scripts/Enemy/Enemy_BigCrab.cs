@@ -113,6 +113,19 @@ public class Enemy : MonoBehaviour
       }
     }
   }
+
+  void OnTriggerEnter2D(Collider2D collision)
+  {
+    if (collision.gameObject.layer == LayerMask.NameToLayer("FallLevel"))
+    {
+      healthSystem.TakeDamage(healthSystem.CurrentHealth);
+      if (xP_System != null)
+      {
+        xP_System.DropXP(transform.position, 3);
+      }
+    }
+  }
+
   void OnDrawGizmos()
   {
     Gizmos.color = Color.red;
