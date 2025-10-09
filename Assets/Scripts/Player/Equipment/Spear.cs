@@ -56,14 +56,14 @@ public class Spear : Equipment
         GameObject player = GameObject.FindGameObjectWithTag("Player");
 
         Vector2 throwDirection = Vector2.right; // Default
-        
+
         // Get the input handler to read current input direction
         Player_InputHandler inputHandler = player.GetComponent<Player_InputHandler>();
         if (inputHandler != null)
         {
             Vector2 inputDir = inputHandler.MovementInput;
             Debug.Log($"Current movement input: {inputDir}");
-            
+
             if (inputDir != Vector2.zero)
             {
                 // Prioritize vertical input for up/down throws
@@ -86,12 +86,12 @@ public class Spear : Equipment
                 }
             }
         }
-        
+
         Debug.Log($"FINAL throw direction: {throwDirection}");
 
         GameObject spearInstance = Instantiate(gameObject, throwpoint.position, Quaternion.identity);
         spearInstance.SetActive(true);
-        
+
         // Rotate and flip the spear based on throw direction
         SpriteRenderer spearSprite = spearInstance.GetComponent<SpriteRenderer>();
         if (spearSprite != null)
@@ -121,7 +121,7 @@ public class Spear : Equipment
                 Debug.Log("Spear set to DOWN");
             }
         }
-        
+
         Spear spearScript = spearInstance.GetComponent<Spear>();
         if (spearScript != null)
         {
@@ -129,7 +129,7 @@ public class Spear : Equipment
             spearScript.hasLanded = false;
             spearScript.canBePickedUp = false;
             spearScript.throwpoint = null;
-            
+
             if (spearScript.physicsCollider != null && player != null)
             {
                 Collider2D playerCollider = player.GetComponent<Collider2D>();
@@ -138,7 +138,7 @@ public class Spear : Equipment
                     Physics2D.IgnoreCollision(spearScript.physicsCollider, playerCollider, true);
                 }
             }
-            
+
             if (spearScript.triggerCollider != null)
             {
                 spearScript.triggerCollider.enabled = true;
@@ -151,6 +151,8 @@ public class Spear : Equipment
             rb.bodyType = RigidbodyType2D.Dynamic;
             rb.AddForce(throwDirection * throwForce, ForceMode2D.Impulse);
         }
+        
+        
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -182,13 +184,41 @@ public class Spear : Equipment
         {
             Physics2D.IgnoreCollision(physicsCollider, collision.collider);
         }
+
+  
+    }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.layer == LayerMask.NameToLayer("FallLevel"))
+        {
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                transform.position = player.transform.position;
+                Rigidbody2D rb = GetComponent<Rigidbody2D>();
+                if (rb != null)
+                {
+                    rb.linearVelocity = Vector2.zero;
+                    rb.angularVelocity = 0f;
+                    rb.bodyType = RigidbodyType2D.Kinematic;
+                }
+                hasLanded = true;
+                canBePickedUp = true;
+                if (triggerCollider != null)
+                {
+                    triggerCollider.enabled = true;
+                }
+                Debug.Log("Spear teleported back to player after falling.");
+            }
+        }
     }
 
     public void ResetForInventory()
     {
         hasLanded = false;
         canBePickedUp = false;
-        
+
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
         if (rb != null)
         {
@@ -196,13 +226,21 @@ public class Spear : Equipment
             rb.angularVelocity = 0f;
             rb.bodyType = RigidbodyType2D.Kinematic;
         }
-        
+
         if (triggerCollider != null)
         {
             triggerCollider.enabled = true;
         }
-        
+
         Debug.Log("Spear reset for inventory");
+    }
+
+    private IEnumerator EnableHasLandedAfterDelay()
+    {
+        yield return new WaitForSeconds(5);
+        canBePickedUp = true;
+        hasLanded = true;
+        Debug.Log("Spear has landed");
     }
 
     private IEnumerator EnablePickupAfterDelay()

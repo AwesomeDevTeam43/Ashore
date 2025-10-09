@@ -119,9 +119,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   equipmentName: Tool
   description: yay
-  isEquipped: 1
+  isEquipped: 0
+  hasLanded: 0
   throwpoint: {fileID: 0}
   throwForce: 20
+  pickupDelay: 0.3
 --- !u!61 &-600326815369543428
 BoxCollider2D:
   m_ObjectHideFlags: 0
