@@ -23,6 +23,7 @@ public class Player_Controller : MonoBehaviour
   public float JumpForce => currentJumpForce;
   public int LVL1XpAmount => playerStats != null ? playerStats.Level1XpAmount : 0;
   public int LvlGap => playerStats != null ? playerStats.LevelGap : 0;
+  public Equipment CurrentEquipment => currentEquipment;
 
   private void OnEnable()
   {
