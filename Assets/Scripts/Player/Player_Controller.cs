@@ -178,7 +178,7 @@ private void OnTriggerEnter2D(Collider2D collision)
             Debug.Log("Picked up " + equipment.name);
             currentEquipment = equipment;
             equipment.gameObject.SetActive(false);
-            Destroy(collision.gameObject, 0.1f);
+            Destroy(collision.gameObject);
         }
     }
 }
