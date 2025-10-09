@@ -8,14 +8,19 @@ public class Manage_UI : MonoBehaviour
     [SerializeField] private Image _xpBar;
     [SerializeField] private TextMeshProUGUI _levelText;
     [SerializeField] private Image _hpBar;
+    [SerializeField] private Image equipment_1;
 
     private GameObject player;
     private XP_System xpSystem;
     private HealthSystem healthSystem;
 
+    private Player_Controller player_Controller;
+
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
+
+        player_Controller = player.GetComponent<Player_Controller>();
 
         xpSystem = player.GetComponent<XP_System>();
         healthSystem = player.GetComponent<HealthSystem>();
@@ -27,6 +32,18 @@ public class Manage_UI : MonoBehaviour
 
         UpdateXPBar(0);
         UpdateLevel(1);
+    }
+
+    private void Update()
+    {
+        if (player_Controller.CurrentEquipment != null)
+        {
+            equipment_1.enabled = true;
+        }
+        else
+        {
+            equipment_1.enabled = false;
+        }
     }
 
     private void UpdateXPBar(int xpAmount)
