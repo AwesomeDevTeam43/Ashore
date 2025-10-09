@@ -2,15 +2,26 @@ using UnityEngine;
 
 public class Enemy_Fly : MonoBehaviour
 {
+    [Header("Patrol Points")]
     public GameObject pointA;
     public GameObject pointB;
     private Rigidbody2D rb;
     private Transform currentPoint;
     public float speed;
-    
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    [Header("Enemy Settings")]
+    public float health;
+    private HealthSystem healthSystem;
+    private XP_System xP_System;
+
+    private void Awake()
+    {
+        healthSystem = GetComponent<HealthSystem>();
+        healthSystem.OnHealthChanged += OnHealthChanged;
+    }
     void Start()
     {
+        healthSystem.Initialize((int)health);
         rb = GetComponent<Rigidbody2D>();
         currentPoint = pointB.transform;
     }
@@ -49,8 +60,20 @@ public class Enemy_Fly : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        Gizmos.DrawWireSphere(pointA.transform.position, 0.5f);
-        Gizmos.DrawWireSphere(pointB.transform.position, 0.5f);
+        Gizmos.DrawWireSphere(pointA.transform.position, 1f);
+        Gizmos.DrawWireSphere(pointB.transform.position, 1f);
         Gizmos.DrawLine(pointA.transform.position, pointB.transform.position);
     }
+    void OnHealthChanged(int current, int max)
+  {
+    Debug.Log($"Enemy Health changed {current} {max}");
+    if (current <= 0)
+    {
+      Destroy(gameObject);
+      if (xP_System != null)
+      {
+        xP_System.DropXP(transform.position, 1);
+      }
+    }
+  }
 }

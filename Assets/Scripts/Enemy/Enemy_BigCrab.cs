@@ -15,7 +15,6 @@ public class Enemy : MonoBehaviour
 
   HealthSystem healthSystem;
   XP_System xP_System;
-
   private Rigidbody2D rb;
 
   private void Awake()
