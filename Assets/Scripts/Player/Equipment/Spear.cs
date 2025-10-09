@@ -55,9 +55,8 @@ public class Spear : Equipment
         throwpoint = GameObject.FindWithTag("Shootpoint").transform;
         GameObject player = GameObject.FindGameObjectWithTag("Player");
 
-        Vector2 throwDirection = Vector2.right; // Default
+        Vector2 throwDirection = Vector2.right;
 
-        // Get the input handler to read current input direction
         Player_InputHandler inputHandler = player.GetComponent<Player_InputHandler>();
         if (inputHandler != null)
         {
@@ -92,7 +91,6 @@ public class Spear : Equipment
         GameObject spearInstance = Instantiate(gameObject, throwpoint.position, Quaternion.identity);
         spearInstance.SetActive(true);
 
-        // Rotate and flip the spear based on throw direction
         SpriteRenderer spearSprite = spearInstance.GetComponentInChildren<SpriteRenderer>();
         if (spearSprite != null)
         {
@@ -100,26 +98,22 @@ public class Spear : Equipment
             {
                 spearInstance.transform.rotation = Quaternion.Euler(0, 0, 0);
                 spearSprite.flipX = false;
-                Debug.Log("Spear set to RIGHT");
             }
             else if (throwDirection == Vector2.left)
             {
                 spearInstance.transform.rotation = Quaternion.Euler(0, 0, 0);
                 spearSprite.flipX = true;
                 spearSprite.flipY = true;
-                Debug.Log("Spear set to LEFT");
             }
             else if (throwDirection == Vector2.up)
             {
                 spearInstance.transform.rotation = Quaternion.Euler(0, 0, 90);
                 spearSprite.flipX = false;
-                Debug.Log("Spear set to UP");
             }
             else if (throwDirection == Vector2.down)
             {
                 spearInstance.transform.rotation = Quaternion.Euler(0, 0, -90);
                 spearSprite.flipX = false;
-                Debug.Log("Spear set to DOWN");
             }
         }
 

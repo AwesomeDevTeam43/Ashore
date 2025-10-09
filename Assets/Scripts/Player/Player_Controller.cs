@@ -150,15 +150,9 @@ public class Player_Controller : MonoBehaviour
             spearPrefab = equipment.gameObject;
           }
 
-          // Create a new instance for inventory (inactive, just data holder)
-          GameObject inventorySpear = Instantiate(spearPrefab);
-          inventorySpear.SetActive(false);
-          inventorySpear.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
-
-          currentEquipment = inventorySpear.GetComponent<Equipment>();
+          currentEquipment = spearPrefab.GetComponent<Equipment>();
           currentEquipment.isEquipped = true;
 
-          // Destroy the world spear
           Destroy(collision.gameObject);
         }
         else
@@ -170,7 +164,6 @@ public class Player_Controller : MonoBehaviour
       {
         Debug.Log("Picked up " + equipment.name);
         currentEquipment = equipment;
-        equipment.gameObject.SetActive(false);
         Destroy(collision.gameObject);
       }
     }
