@@ -11,6 +11,10 @@ public class VenomShooting : MonoBehaviour
     private HealthSystem healthSystem;
     private XP_System xP_System;
     public int enemyHealth;
+    public int biteDamage;
+    public float startTimeBtwAttack;
+    private float timeBtwAttack;
+    private bool inRange;
     private Rigidbody2D rb;
 
 
@@ -34,20 +38,32 @@ public class VenomShooting : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float distance = Vector2.Distance(player.transform.position, transform.position);
-        if (distance < distanceToPlayer)
+        if (player == null)
         {
-            timer += Time.deltaTime;
-
-            if (timer > 2)
-            {
-                timer = 0;
-                shoot();
-            }
-            //Bite();
+            return;
         }
-        FlipSprite();
+        float distance = Vector2.Distance(player.transform.position, transform.position);
+        if (distance < meleeRange)
+        {
+            inRange = true;
+            Bite();
+        }
+        else
+        {
+            inRange = false;
+            if (distance < distanceToPlayer)
+            {
+                timer += Time.deltaTime;
+
+                if (timer > 2)
+                {
+                    timer = 0;
+                    shoot();
+                }
+            }
+        }
     }
+
 
     void shoot()
     {
@@ -56,18 +72,19 @@ public class VenomShooting : MonoBehaviour
 
     void Bite()
     {
-        if (player != null)
+        if (player != null && inRange)
         {
-            HealthSystem playerHealth = player.GetComponent<HealthSystem>();
-            if (playerHealth != null)
+            if (timeBtwAttack <= 0)
             {
-                playerHealth.TakeDamage(5);
-                Debug.Log("Player Hit!");
-                Debug.Log(playerHealth.CurrentHealth);
+                player.GetComponent<HealthSystem>().TakeDamage(biteDamage);
+                timeBtwAttack = startTimeBtwAttack;
+            }
+            else
+            {
+                timeBtwAttack -= Time.deltaTime;
             }
         }
     }
-
     void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
@@ -86,18 +103,6 @@ public class VenomShooting : MonoBehaviour
             {
                 xP_System.DropXP(transform.position, 5);
             }
-        }
-    }
-
-    void FlipSprite()
-    {
-        if (player.transform.position.x <= 0.01f)
-        {
-            transform.localScale = new Vector3(-2, 2, 1);
-        }
-        else if (player.transform.position.x >= -0.01f)
-        {
-            transform.localScale = new Vector3(2, 2, 1);
         }
     }
 }

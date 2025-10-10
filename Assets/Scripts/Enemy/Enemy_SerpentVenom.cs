@@ -29,7 +29,6 @@ public class Enemy_SerpentVenom : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        //FlipSprite();
     }
 
     void OnTriggerEnter2D(Collider2D collision)
@@ -44,21 +43,4 @@ public class Enemy_SerpentVenom : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
-    /*void FlipSprite()
-    {
-        if (player == null || sprite == null)
-        {
-            return;
-        }
-        if (player.transform.position.x < transform.position.x)
-        {
-            sprite.flipX = true;
-        }
-        else
-        {
-            sprite.flipX = false;
-        }
-    }*/
-
 }
