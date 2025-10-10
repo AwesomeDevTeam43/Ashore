@@ -19,6 +19,7 @@ public class Chest : MonoBehaviour
 
     private void Awake()
     {
+        player = GameObject.FindGameObjectWithTag("Player");
         spriteRenderer = GetComponent<SpriteRenderer>();
         xP_System = player.GetComponent<XP_System>();
         player_InputHandler = player.GetComponent<Player_InputHandler>();

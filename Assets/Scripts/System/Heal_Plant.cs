@@ -16,6 +16,7 @@ public class Heal_Plant : MonoBehaviour
 
     void Start()
     {
+        player = GameObject.FindGameObjectWithTag("Player");
         spriteRenderer = GetComponent<SpriteRenderer>();
         player_InputHandler = player.GetComponent<Player_InputHandler>();
         player_Controller = player.GetComponent<Player_Controller>();
