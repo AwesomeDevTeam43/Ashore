@@ -17,6 +17,7 @@ public class Player_InputHandler : MonoBehaviour
     [SerializeField] private string attack = "Attack";
     [SerializeField] private string rangeAttack = "RangeAttack";
     [SerializeField] private string interact = "Interact";
+    [SerializeField] private string inventory = "Inventory";
 
     private InputAction movementAction;
     private InputAction lookAction;
@@ -24,6 +25,7 @@ public class Player_InputHandler : MonoBehaviour
     private InputAction attackAction;
     private InputAction rangeAttackAction;
     private InputAction interactAction;
+    private InputAction inventoryAction;
 
     public Vector2 MovementInput { get; private set; }
     public Vector2 LookInput { get; private set; }
@@ -31,6 +33,7 @@ public class Player_InputHandler : MonoBehaviour
     public bool AttackTriggered { get; private set; }
     public bool RangeAttackTriggered { get; private set; }
     public bool InteractActionTriggered { get; private set; }
+    public bool InventoryActionTriggered { get; private set; }
 
     [Header("8-Direction Inputs")]
     private Vector2[] directions8 = new Vector2[]
@@ -68,6 +71,7 @@ public class Player_InputHandler : MonoBehaviour
         attackAction = mapReference.FindAction(attack);
         rangeAttackAction = mapReference.FindAction(rangeAttack);
         interactAction = mapReference.FindAction(interact);
+        inventoryAction = mapReference.FindAction(inventory);
 
         MakeInputEvents();
     }
@@ -75,6 +79,14 @@ public class Player_InputHandler : MonoBehaviour
     public void Update()
     {
         Handle8Directions();
+        if (InventoryActionTriggered)
+        {
+            InventoryActionTriggered = false;
+        }
+        if (InteractActionTriggered)
+        {
+            InteractActionTriggered = false;
+        }
     }
 
     private void MakeInputEvents()
@@ -96,6 +108,9 @@ public class Player_InputHandler : MonoBehaviour
 
         interactAction.performed += inputInfo => InteractActionTriggered = true;
         interactAction.canceled += inputInfo => InteractActionTriggered = false;
+
+        inventoryAction.performed += inputInfo => InventoryActionTriggered = true;
+        inventoryAction.canceled += inputInfo => InventoryActionTriggered = false;
     }
 
     private void Handle8Directions()

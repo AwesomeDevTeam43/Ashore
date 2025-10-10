@@ -99,7 +99,7 @@ public class Player_Controller : MonoBehaviour
 
 
   private void UpdateStats(int level)
-{
+  {
     int previousMaxHealth = currentHealth;
     int currentHealthPoints = healthSystem != null ? healthSystem.CurrentHealth : 0;
 
@@ -110,16 +110,16 @@ public class Player_Controller : MonoBehaviour
 
     if (healthSystem != null)
     {
-        int healthDifference = currentHealth - previousMaxHealth;
-        int newCurrentHealth = currentHealthPoints + healthDifference;
-        
-        // Update max health and set current health
-        healthSystem.MaxHealth = currentHealth;
-        healthSystem.SetHealth(newCurrentHealth);
+      int healthDifference = currentHealth - previousMaxHealth;
+      int newCurrentHealth = currentHealthPoints + healthDifference;
+
+      // Update max health and set current health
+      healthSystem.MaxHealth = currentHealth;
+      healthSystem.SetHealth(newCurrentHealth);
     }
 
     Debug.Log($"Stats updated! Level {level}: HP={healthSystem.CurrentHealth}/{currentHealth}, ATK={currentAttackPower}, Speed={currentMoveSpeed}, Jump={currentJumpForce}");
-}
+  }
 
   public void ReturnToLastPoint()
   {
@@ -174,7 +174,7 @@ public class Player_Controller : MonoBehaviour
       ReturnToLastPoint();
       healthSystem.TakeDamage(1);
     }
-}
+  }
 
 
 
