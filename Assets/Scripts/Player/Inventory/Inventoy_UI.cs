@@ -7,6 +7,7 @@ public class Inventoy_UI : MonoBehaviour
     private bool isOpen;
 
     [SerializeField] private GameObject canvasInventory;
+    [SerializeField] private GameObject playerUI;
 
     void Awake()
     {
@@ -28,5 +29,6 @@ public class Inventoy_UI : MonoBehaviour
     {
         isOpen = !isOpen;
         canvasInventory.SetActive(isOpen);
+        playerUI.SetActive(!isOpen);
     }
 }
