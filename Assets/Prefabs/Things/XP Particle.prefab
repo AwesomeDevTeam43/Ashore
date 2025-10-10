@@ -78,7 +78,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 300
   m_Sprite: {fileID: -2413806693520163455, guid: ebe73ca9363db456bacf42c025bb4847, type: 3}
   m_Color: {r: 1, g: 0.7406687, b: 0, a: 1}
   m_FlipX: 0
@@ -106,15 +106,7 @@ MonoBehaviour:
   playerTag: Player
   floatSpeed: 1
   floatAmplitude: 0.3
-  groundCheckDistance: 10
   heightAboveGround: 0.5
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  platformLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  fallSpeed: 5
 --- !u!58 &8352217487831030165
 CircleCollider2D:
   m_ObjectHideFlags: 0
