@@ -3,8 +3,8 @@ using UnityEngine;
 public class Enemy_Fly : MonoBehaviour
 {
     [Header("Patrol Points")]
-    public GameObject pointA;
-    public GameObject pointB;
+    public GameObject pointFinal;
+    public GameObject pointInitial;
     private Rigidbody2D rb;
     private Transform currentPoint;
     public float speed;
@@ -19,36 +19,32 @@ public class Enemy_Fly : MonoBehaviour
         healthSystem = GetComponent<HealthSystem>();
         healthSystem.OnHealthChanged += OnHealthChanged;
     }
+
     void Start()
     {
         healthSystem.Initialize((int)health);
         rb = GetComponent<Rigidbody2D>();
-        
-        currentPoint = pointB.transform;
+        rb.gravityScale = 0; // garantir que não desce
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation; // não rodar
+
+        currentPoint = pointInitial.transform;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        Vector2 point = currentPoint.position - transform.position;
-        if (currentPoint == pointB.transform)
-        {
-            rb.linearVelocity = new Vector2(speed, 0);
-        }
-        else
-        {
-            rb.linearVelocity = new Vector2(-speed, 0);
-        }
+        // Direção entre a posição atual e o ponto de destino
+        Vector2 direction = (currentPoint.position - transform.position).normalized;
 
-        if (Vector2.Distance(transform.position, currentPoint.position) < 0.5f && currentPoint == pointB.transform)
+        // Movimento na direção certa
+        rb.linearVelocity = direction * speed;
+
+        // Verifica se chegou perto do ponto
+        if (Vector2.Distance(transform.position, currentPoint.position) < 0.5f)
         {
             FlipSprite();
-            currentPoint = pointA.transform;
-        }
-        if (Vector2.Distance(transform.position, currentPoint.position) < 0.5f && currentPoint == pointA.transform)
-        {
-            FlipSprite();
-            currentPoint = pointB.transform;
+
+            // Troca de ponto
+            currentPoint = (currentPoint == pointInitial.transform) ? pointFinal.transform : pointInitial.transform;
         }
     }
 
@@ -61,20 +57,25 @@ public class Enemy_Fly : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        Gizmos.DrawWireSphere(pointA.transform.position, 1f);
-        Gizmos.DrawWireSphere(pointB.transform.position, 1f);
-        Gizmos.DrawLine(pointA.transform.position, pointB.transform.position);
+        if (pointFinal != null && pointInitial != null)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(pointFinal.transform.position, 1f);
+            Gizmos.DrawWireSphere(pointInitial.transform.position, 1f);
+            Gizmos.DrawLine(pointFinal.transform.position, pointInitial.transform.position);
+        }
     }
+
     void OnHealthChanged(int current, int max)
-  {
-    Debug.Log($"Enemy Health changed {current} {max}");
-    if (current <= 0)
     {
-      Destroy(gameObject);
-      if (xP_System != null)
-      {
-        xP_System.DropXP(transform.position, 1);
-      }
+        Debug.Log($"Enemy Health changed {current} {max}");
+        if (current <= 0)
+        {
+            Destroy(gameObject);
+            if (xP_System != null)
+            {
+                xP_System.DropXP(transform.position, 1);
+            }
+        }
     }
-  }
 }
