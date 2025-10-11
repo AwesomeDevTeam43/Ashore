@@ -182,9 +182,8 @@ public class Player_Controller : MonoBehaviour
   {
     if (currentHealth <= 0)
     {
-      Destroy(gameObject);
-      IsAlive = false;
-      Debug.Log("Player Died!");
+    IsAlive = false;
+    UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
     }
   }
 }
