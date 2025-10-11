@@ -23,6 +23,7 @@ public class Enemy_Fly : MonoBehaviour
     {
         healthSystem.Initialize((int)health);
         rb = GetComponent<Rigidbody2D>();
+        
         currentPoint = pointB.transform;
     }
 

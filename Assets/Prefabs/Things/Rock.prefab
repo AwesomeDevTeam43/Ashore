@@ -16,6 +16,10 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Enemy
       objectReference: {fileID: 0}
+    - target: {fileID: 3626916397498700004, guid: c53ef946744d4c24099905f6d1833b7e, type: 3}
+      propertyPath: m_SortingOrder
+      value: 22
+      objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: c53ef946744d4c24099905f6d1833b7e, type: 3}
       propertyPath: m_LocalScale.x
       value: 3
