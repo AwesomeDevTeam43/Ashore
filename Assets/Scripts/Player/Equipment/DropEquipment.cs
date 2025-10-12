@@ -45,6 +45,7 @@ public class DropEquipment : MonoBehaviour
     {
         if (equipmentPrefab != null)
         {
+            equipmentPrefab.GetComponent<Equipment>().isEquipped = false;
             Instantiate(equipmentPrefab, transform.position, Quaternion.identity);
         }
     }

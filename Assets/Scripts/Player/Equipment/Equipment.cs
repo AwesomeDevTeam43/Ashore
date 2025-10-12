@@ -4,7 +4,7 @@ public abstract class Equipment : MonoBehaviour
 {
     public string equipmentName;
     public string description;
-    public bool isEquipped;
+    public bool isEquipped = false;
 
     public bool hasLanded = false;
 

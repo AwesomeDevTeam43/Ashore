@@ -19,7 +19,7 @@ public class Inventoy_UI : MonoBehaviour
 
     void Update()
     {
-        if (player_InputHandler.InventoryActionTriggered)
+        if (Input.GetKeyDown(KeyCode.I))
         {
             ToggleInventory();
         }
