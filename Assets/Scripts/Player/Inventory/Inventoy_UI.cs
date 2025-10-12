@@ -18,7 +18,7 @@ public class Inventoy_UI : MonoBehaviour
     [SerializeField] private Transform itemsParent; // Drag the parent of your slots here
     private Inventory inventory;
     private InventorySlot[] slots;
-    
+
     [Header("Description UI (assign) ")]
     [SerializeField] private Image descriptionImage;
     [SerializeField] private TextMeshProUGUI descriptionText;
@@ -56,7 +56,7 @@ public class Inventoy_UI : MonoBehaviour
 
         if (descriptionImage == null || descriptionText == null || descriptionButton == null)
         {
-            Debug.LogWarning("Inventoy_UI: Description UI fields are not fully assigned (Image/Text/Button). Clicks will still populate, but the description panel may be incomplete."); 
+            Debug.LogWarning("Inventoy_UI: Description UI fields are not fully assigned (Image/Text/Button). Clicks will still populate, but the description panel may be incomplete.");
         }
 
         // EventSystem is required for UI Button clicks to work. Warn if missing.
@@ -109,7 +109,7 @@ public class Inventoy_UI : MonoBehaviour
                 {
                     // Add a transparent Image to the slot root so the Button has a targetGraphic
                     rootImg = slots[i].gameObject.AddComponent<Image>();
-                    rootImg.color = new Color(1,1,1,0);
+                    rootImg.color = new Color(1, 1, 1, 0);
                     rootImg.raycastTarget = true;
                 }
 
@@ -125,7 +125,8 @@ public class Inventoy_UI : MonoBehaviour
             slotBtn.onClick.AddListener(() => { Debug.Log($"Inventoy_UI: slot button clicked index={index} slot='{slots[index].name}'"); ShowDetails(index); });
 
             // Also wire the slot's select callback (useful if the icon intercepts clicks)
-            slots[i].onSelected = (s) => {
+            slots[i].onSelected = (s) =>
+            {
                 ShowDetails(index);
             };
 
@@ -154,7 +155,7 @@ public class Inventoy_UI : MonoBehaviour
             }
             string iconName = childIcon != null && childIcon.sprite != null ? childIcon.sprite.name : "(none)";
             CanvasGroup cg = s.GetComponentInParent<CanvasGroup>();
-            Debug.Log($"Inventoy_UI DIAG: Slot[{i}]='{s.name}' hasButton={hasButton} rootImg={(rootImg!=null?rootImg.name:"null")} rootImgRaycast={rootImgRaycast} childIcon={iconName} childIconRaycast={(childIcon!=null?childIcon.raycastTarget.ToString():"n/a")} CanvasGroup={(cg!=null?cg.name+" alpha="+cg.alpha+" interactable="+cg.interactable:"none")} ");
+            Debug.Log($"Inventoy_UI DIAG: Slot[{i}]='{s.name}' hasButton={hasButton} rootImg={(rootImg != null ? rootImg.name : "null")} rootImgRaycast={rootImgRaycast} childIcon={iconName} childIconRaycast={(childIcon != null ? childIcon.raycastTarget.ToString() : "n/a")} CanvasGroup={(cg != null ? cg.name + " alpha=" + cg.alpha + " interactable=" + cg.interactable : "none")} ");
         }
 
         // We'll wire description buttons dynamically in ShowDetails
@@ -221,25 +222,27 @@ public class Inventoy_UI : MonoBehaviour
     void UpdateUI()
     {
         if (slots == null) return;
+
         // Debug: print inventory contents for diagnosis
         if (Inventory.instance != null)
         {
             string list = "Inventory contents: ";
-            for (int i = 0; i < Inventory.instance.items.Count; i++)
+            for (int i = 0; i < Inventory.instance.inventoryItems.Count; i++)
             {
-                var it = Inventory.instance.items[i];
-                list += $"[{i}: {it?.itemName} (icon={(it?.icon!=null)})] ";
+                var it = Inventory.instance.inventoryItems[i];
+                list += $"[{i}: {it?.itemData?.itemName} x{it?.quantity}] ";
             }
             Debug.Log(list);
         }
+
         // Loop through all of our slots
         for (int i = 0; i < slots.Length; i++)
         {
             // If there is an item for this slot
-            if (i < inventory.items.Count)
+            if (i < inventory.inventoryItems.Count)
             {
-                // Add the item to the slot
-                slots[i].AddItem(inventory.items[i]);
+                var inventoryItem = inventory.inventoryItems[i];
+                slots[i].AddItem(inventoryItem.itemData, inventoryItem.quantity);
             }
             else
             {
@@ -253,16 +256,23 @@ public class Inventoy_UI : MonoBehaviour
     private void ShowDetails(int slotIndex)
     {
         selectedSlotIndex = slotIndex;
-        if (slotIndex < 0 || slotIndex >= slots.Length) return;
+
+        if (slotIndex < 0 || slotIndex >= slots.Length)
+        {
+            ClearSelection();
+            return;
+        }
+
         ItemData it = slots[slotIndex].GetItem();
-        Debug.Log($"Inventoy_UI.ShowDetails called for slot {slotIndex} ('{slots[slotIndex].name}'), item={(it!=null?it.itemName:"null")}");
+        int qty = slots[slotIndex].GetQuantity();
+
         if (it == null)
         {
-            if (descriptionImage != null) descriptionImage.enabled = false;
+            if (descriptionImage != null) descriptionImage.sprite = null;
             if (descriptionText != null) descriptionText.text = "";
             if (descriptionButton != null)
             {
-                descriptionButton.interactable = false;
+                descriptionButton.gameObject.SetActive(false);
             }
             return;
         }
@@ -270,81 +280,60 @@ public class Inventoy_UI : MonoBehaviour
         if (descriptionImage != null)
         {
             descriptionImage.sprite = it.icon;
-            descriptionImage.enabled = (it.icon != null);
         }
 
         if (descriptionText != null)
         {
-            descriptionText.text = it.itemName + "\n" + it.description;
+            string description = it.description;
+
+            // Add quantity to description
+            if (qty > 1)
+            {
+                description = $"Quantity: {qty}\n\n{description}";
+            }
+
+            descriptionText.text = description;
         }
 
-        // Make sure the description use button is enabled when an item is selected
         if (descriptionButton != null)
         {
-            descriptionButton.interactable = true;
-            // Clear previous listeners
-            descriptionButton.onClick.RemoveAllListeners();
-            if (descriptionSecondaryButton != null) descriptionSecondaryButton.onClick.RemoveAllListeners();
+            if (descriptionSecondaryButton != null) descriptionSecondaryButton.gameObject.SetActive(false);
 
-            // Determine if it's equipment
             EquipmentData ed = it as EquipmentData;
             if (ed != null)
             {
-                // Show Equip/Unequip depending on player's current equipment (best-effort)
-                descriptionButton.GetComponentInChildren<TextMeshProUGUI>()?.SetText("Equip");
-                descriptionButton.onClick.AddListener(() => {
-                    if (EquipmentManager.instance != null)
-                    {
-                        EquipmentManager.instance.EquipFromInventory(ed);
-                        // Update UI immediately after equipping
-                        UpdateUI();
-                        ClearSelection();
-                    }
-                });
-                Debug.Log($"Inventoy_UI: wired Equip action for '{it.itemName}'");
+                descriptionButton.gameObject.SetActive(true);
+                descriptionButton.GetComponentInChildren<TextMeshProUGUI>().text = "Equip";
             }
             else
             {
-                ItemData id = it as ItemData;
-                if (id.isUsable)
+                if (it.isUsable)
                 {
-                    descriptionButton.GetComponentInChildren<TextMeshProUGUI>()?.SetText("Use");
-                    descriptionButton.onClick.AddListener(() => {
-                        Debug.Log($"Use action for item '{id.itemName}' not implemented (placeholder)");
-                        // Implement consumable behavior here or send message to InventoryManager
-                    });
+                    descriptionButton.gameObject.SetActive(true);
+                    descriptionButton.GetComponentInChildren<TextMeshProUGUI>().text = "Use";
                 }
-                else if (id.isCraftable)
+                else if (it.isCraftable)
                 {
-                    descriptionButton.GetComponentInChildren<TextMeshProUGUI>()?.SetText("Craft");
-                    descriptionButton.onClick.AddListener(() => {
-                        Debug.Log($"Open craft UI for '{id.itemName}' (not implemented)");
-                        // Open craft UI
-                    });
+                    descriptionButton.gameObject.SetActive(true);
+                    descriptionButton.GetComponentInChildren<TextMeshProUGUI>().text = "Craft";
                 }
                 else
                 {
-                    descriptionButton.GetComponentInChildren<TextMeshProUGUI>()?.SetText("Use");
-                    descriptionButton.onClick.AddListener(() => { Debug.Log($"No action defined for item '{id.itemName}'"); });
+                    descriptionButton.gameObject.SetActive(false);
                 }
 
-                // Secondary action for craftable items
-                if (id.isCraftable && descriptionSecondaryButton != null)
+                if (it.isCraftable && descriptionSecondaryButton != null)
                 {
                     descriptionSecondaryButton.gameObject.SetActive(true);
-                    descriptionSecondaryButton.GetComponentInChildren<TextMeshProUGUI>()?.SetText("Craft Options");
-                    descriptionSecondaryButton.onClick.AddListener(() => { Debug.Log($"Craft options for '{id.itemName}' (placeholder)"); });
+                    descriptionSecondaryButton.GetComponentInChildren<TextMeshProUGUI>().text = "Craft";
                 }
                 else if (descriptionSecondaryButton != null)
                 {
                     descriptionSecondaryButton.gameObject.SetActive(false);
                 }
             }
-
-            Debug.Log($"Inventoy_UI: descriptionButton assigned and set interactable for item '{it.itemName}'");
         }
 
-        // (selection highlight removed)
     }
 
     private void ClearSelection()
