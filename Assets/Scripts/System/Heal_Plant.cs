@@ -54,9 +54,9 @@ public class Heal_Plant : MonoBehaviour
 
             Vector3 spawnPosition = transform.position + randomOffset;
 
-            GameObject xpParticle = Instantiate(heal_particle, spawnPosition, Quaternion.identity);
+            GameObject healParticle = Instantiate(heal_particle, spawnPosition, Quaternion.identity);
 
-            Rigidbody2D rb = xpParticle.GetComponent<Rigidbody2D>();
+            Rigidbody2D rb = healParticle.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
                 Vector2 randomForce = new Vector2(
