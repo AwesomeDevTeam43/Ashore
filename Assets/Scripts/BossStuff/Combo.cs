@@ -18,6 +18,23 @@ public class Combo : StateMachineBehaviour
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         animator.ResetTrigger("yes");
+
+        // When a Combo finishes, re-enable the boss's ability to use the Laser
+        Boss boss = animator.GetComponent<Boss>();
+        if (boss != null)
+        {
+            boss.canUseLaser = true;
+
+            // Also reset any Laser components under the boss so they can damage again
+            Laser[] lasers = boss.GetComponentsInChildren<Laser>(true);
+            foreach (var l in lasers)
+            {
+                if (l != null)
+                {
+                    l.ResetDamageFlag();
+                }
+            }
+        }
     }
 
 
