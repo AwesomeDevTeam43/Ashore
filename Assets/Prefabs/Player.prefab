@@ -110,7 +110,6 @@ GameObject:
   - component: {fileID: 6494822104957315991}
   - component: {fileID: 7609287017837383225}
   - component: {fileID: 6317419510644124579}
-  - component: {fileID: 4674051923702341329}
   - component: {fileID: -8307651892915196505}
   m_Layer: 3
   m_Name: Player
@@ -154,7 +153,7 @@ Rigidbody2D:
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 3
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: f8d8bcecf6124224aa8bd5184b74f000, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -226,6 +225,7 @@ MonoBehaviour:
   attack: Attack
   rangeAttack: RangeAttack
   interact: Interact
+  inventory: Inventory
 --- !u!114 &6494822104957315991
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -293,52 +293,6 @@ MonoBehaviour:
   knockbackDuration: 0.3
   meleeEffectPrefab: {fileID: 1388199414278010597, guid: 0d4c2f106a06ce544b9681fb658011f5, type: 3}
   effectDuration: 0.3
---- !u!61 &4674051923702341329
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4299354313336116005}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.25, y: 1.6875}
-    newSize: {x: 0.2, y: 0.27}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 1, y: 2}
-  m_EdgeRadius: 0
 --- !u!212 &-8307651892915196505
 SpriteRenderer:
   m_ObjectHideFlags: 0

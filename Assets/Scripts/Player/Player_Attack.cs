@@ -43,14 +43,67 @@ public class Melee : MonoBehaviour
         // Efeito visual
         if (meleeEffectPrefab != null)
         {
+            // This is needed for the ground check.
+            Player_Movement player_Movement = GetComponent<Player_Movement>();
+
+
+            // 1. Determine attack direction
+            Vector2 attackDirection = Vector2.right;
+            Vector2 inputDir = player_InputHandler.MovementInput;
+
+            if (inputDir != Vector2.zero)
+            {
+                if (Mathf.Abs(inputDir.y) >= Mathf.Abs(inputDir.x))
+                {
+                    attackDirection = inputDir.y > 0 ? Vector2.up : Vector2.down;
+                }
+                else
+                {
+                    attackDirection = inputDir.x > 0 ? Vector2.right : Vector2.left;
+                }
+            }
+            else
+            {
+                attackDirection = transform.localScale.x > 0 ? Vector2.right : Vector2.left;
+            }
+
+            // 2. Prevent attacking down while grounded
+            if (attackDirection == Vector2.down && player_Movement != null && player_Movement.IsGrounded())
+            {
+                attackDirection = transform.localScale.x > 0 ? Vector2.right : Vector2.left;
+            }
+
+
+            // 3. Instantiate and parent as before
             GameObject effect = Instantiate(meleeEffectPrefab, attackOrigin.position, Quaternion.identity);
             effect.transform.SetParent(attackOrigin);
+            SpriteRenderer effectSprite = effect.GetComponent<SpriteRenderer>();
 
-            if (transform.localScale.x < 0)
+
+            // 4. Set rotation and flip based on direction
+            if (attackDirection == Vector2.right)
             {
-                Vector3 scale = effect.transform.localScale;
-                scale.x *= -1;
-                effect.transform.localScale = scale;
+                // Default state, no changes needed.
+            }
+            else if (attackDirection == Vector2.left)
+            {
+                // To mirror symmetrically, we flip the sprite's rendering on the X-axis.
+                if (effectSprite != null)
+                {
+                    effectSprite.flipX = true;
+                }
+            }
+            else if (attackDirection == Vector2.up)
+            {
+                // THE FIX: Compensate for parent's flip when facing left.
+                float angle = (transform.localScale.x > 0) ? 90 : -90;
+                effect.transform.localRotation = Quaternion.Euler(0, 0, angle);
+            }
+            else if (attackDirection == Vector2.down)
+            {
+                // THE FIX: Compensate for parent's flip when facing left.
+                float angle = (transform.localScale.x > 0) ? -90 : 90;
+                effect.transform.localRotation = Quaternion.Euler(0, 0, angle);
             }
 
             Destroy(effect, effectDuration);

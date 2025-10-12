@@ -248,6 +248,6 @@ public class Spear : Equipment
 
     public bool CanBePickedUp()
     {
-        return hasLanded && canBePickedUp && !isEquipped;
+        return hasLanded && canBePickedUp;
     }
 }

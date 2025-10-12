@@ -41,7 +41,7 @@ public class Player_Movement : MonoBehaviour
         HandleJump();
     }
 
-    private bool IsGrounded()
+    public bool IsGrounded()
     {
         LayerMask layers = groundLayer | platformLayer;
         return Physics2D.OverlapCircle(groundCheck.position, 0.2f, layers);
