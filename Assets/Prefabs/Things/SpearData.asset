@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e58a1ea7b8f8cf478ae50ed3935c761, type: 3}
+  m_Name: SpearData
+  m_EditorClassIdentifier: 
+  itemName: Spear
+  icon: {fileID: 6108012597462862368, guid: 03b306a780301cc4fb237fd83d7ccced, type: 3}
+  description: A spear that is throwable
+  equipmentPrefab: {fileID: 1841228293332522625, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}

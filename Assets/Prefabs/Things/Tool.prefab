@@ -221,6 +221,7 @@ MonoBehaviour:
   description: yay
   isEquipped: 0
   hasLanded: 0
+  equipmentData: {fileID: 11400000, guid: 0f0cc81a21dda424da1e192a9d3b13ef, type: 2}
   throwpoint: {fileID: 0}
   throwForce: 20
   pickupDelay: 0.3

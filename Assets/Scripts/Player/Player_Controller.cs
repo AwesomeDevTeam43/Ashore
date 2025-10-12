@@ -25,6 +25,16 @@ public class Player_Controller : MonoBehaviour
   public int LvlGap => playerStats != null ? playerStats.LevelGap : 0;
   public Equipment CurrentEquipment => currentEquipment;
 
+  // Called by EquipmentManager (or other systems) to set the player's current equipment
+  public void SetCurrentEquipment(Equipment eq)
+  {
+    currentEquipment = eq;
+    if (currentEquipment != null)
+    {
+      currentEquipment.isEquipped = true;
+    }
+  }
+
   private void OnEnable()
   {
     if (playerStats != null)
@@ -137,6 +147,28 @@ public class Player_Controller : MonoBehaviour
     Equipment equipment = collision.GetComponent<Equipment>();
     if (equipment != null && !equipment.isEquipped)
     {
+      // If this is a thrown spear that's not ready, ignore the trigger (prevents instant re-pickup after throw)
+      Spear thrownSpearCheck = equipment as Spear;
+      if (thrownSpearCheck != null && !thrownSpearCheck.CanBePickedUp())
+      {
+        Debug.Log("Spear not ready to be picked up yet (early exit)");
+        return;
+      }
+      // If this world equipment has inventory data, try to add it to the inventory first
+      if (equipment.equipmentData != null)
+      {
+        bool added = Inventory.instance.Add(equipment.equipmentData);
+        if (added)
+        {
+          Debug.Log("Picked up item: " + equipment.equipmentData.itemName);
+          Destroy(collision.gameObject);
+          return;
+        }
+        else
+        {
+          Debug.Log("Inventory full, cannot pick up: " + equipment.equipmentData.itemName);
+        }
+      }
       // Check if it's a spear and if it can be picked up
       Spear spear = equipment as Spear;
       if (spear != null)
