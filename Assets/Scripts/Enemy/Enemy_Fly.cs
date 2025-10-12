@@ -10,22 +10,26 @@ public class Enemy_Fly : MonoBehaviour
     public float speed;
 
     [Header("Enemy Settings")]
-    public float health;
+    public int health;
     private HealthSystem healthSystem;
     private XP_System xP_System;
+    public GameObject player;
 
     private void Awake()
     {
         healthSystem = GetComponent<HealthSystem>();
+        healthSystem.Initialize(health);
         healthSystem.OnHealthChanged += OnHealthChanged;
     }
 
     void Start()
     {
-        healthSystem.Initialize((int)health);
+        
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = 0; // garantir que não desce
         rb.constraints = RigidbodyConstraints2D.FreezeRotation; // não rodar
+        player = GameObject.FindGameObjectWithTag("Player");
+        xP_System = player.GetComponent<XP_System>();
 
         currentPoint = pointInitial.transform;
     }

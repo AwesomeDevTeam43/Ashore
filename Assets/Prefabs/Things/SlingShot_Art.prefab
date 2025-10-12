@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SlingShot_Art
       objectReference: {fileID: 0}
+    - target: {fileID: 3626916397498700004, guid: f425af0b17cfdcd459b58694ae3d9c91, type: 3}
+      propertyPath: m_SortingOrder
+      value: 32767
+      objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: f425af0b17cfdcd459b58694ae3d9c91, type: 3}
       propertyPath: m_LocalScale.x
       value: 5
