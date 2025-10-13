@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player_Controller : MonoBehaviour
 {
@@ -215,7 +216,7 @@ public class Player_Controller : MonoBehaviour
     if (currentHealth <= 0)
     {
     IsAlive = false;
-    UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+    SceneManager.LoadScene("MainMenu");
     }
   }
 }

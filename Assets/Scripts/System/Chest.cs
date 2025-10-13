@@ -17,6 +17,8 @@ public class Chest : MonoBehaviour
     private bool isOpen = false;
     private bool playerNearby = false;
 
+    private Drop_Materials drop_Materials;
+
     private void Awake()
     {
         player = GameObject.FindGameObjectWithTag("Player");
@@ -24,16 +26,20 @@ public class Chest : MonoBehaviour
         xP_System = player.GetComponent<XP_System>();
         player_InputHandler = player.GetComponent<Player_InputHandler>();
         player_Controller = player.GetComponent<Player_Controller>();
+        drop_Materials = GetComponent<Drop_Materials>();
     }
 
     private void Update()
     {
-        if (player_Controller.IsAlive)
-        {
-            float distance = Vector3.Distance(transform.position, player.transform.position);
-            playerNearby = distance <= 1f;
 
-            if (playerNearby && player_InputHandler.InteractActionTriggered)
+    }
+
+    void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Player"))
+        {
+            Debug.Log("colidde");
+            if (Input.GetKeyDown(KeyCode.E))
             {
                 OpenChest();
             }
@@ -47,6 +53,7 @@ public class Chest : MonoBehaviour
             isOpen = true;
             spriteRenderer.sprite = openSprite;
             xP_System.DropXP(transform.position, xpReward);
+            drop_Materials.DropMaterial(1, 2, 3);
         }
     }
 

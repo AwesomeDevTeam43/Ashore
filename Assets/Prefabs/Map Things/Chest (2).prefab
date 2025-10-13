@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &529411751994010414
+--- !u!1 &1754115231248754664
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,39 +8,39 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6805210733261809109}
-  - component: {fileID: 8714142457020957197}
-  - component: {fileID: 4286927151320119484}
-  - component: {fileID: 4041911731043399830}
+  - component: {fileID: 822545206608224700}
+  - component: {fileID: 5012524537559707583}
+  - component: {fileID: 3511647002900033405}
+  - component: {fileID: -4843128180931224427}
   m_Layer: 0
-  m_Name: Heal Plant
+  m_Name: Chest (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6805210733261809109
+--- !u!4 &822545206608224700
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 529411751994010414}
+  m_GameObject: {fileID: 1754115231248754664}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 180.54337, y: 10.468972, z: -0.0460505}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 176.7497, y: 10.705291, z: 0.08009532}
+  m_LocalScale: {x: 5, y: 5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &8714142457020957197
+--- !u!212 &5012524537559707583
 SpriteRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 529411751994010414}
+  m_GameObject: {fileID: 1754115231248754664}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -77,40 +77,39 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_Sprite: {fileID: -7025864106946108032, guid: 38e003483079bf04abad7f298a064e26, type: 3}
+  m_SortingOrder: 20
+  m_Sprite: {fileID: 7952422664872360696, guid: 5e3f5c1854a4b45468301325129d9a4d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.34, y: 0.3}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &4286927151320119484
+--- !u!114 &3511647002900033405
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 529411751994010414}
+  m_GameObject: {fileID: 1754115231248754664}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d54858c9ae155234ca969877970703fb, type: 3}
+  m_Script: {fileID: 11500000, guid: eeb084511f531b7488d35fdb33617ade, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  plant_dead: {fileID: 8116476127508738298, guid: 7b1765bed85561e48afc16909fb94c04, type: 3}
-  heal_particle: {fileID: 6643727125893635682, guid: eb62d858bd93346489f3820509685166, type: 3}
-  isDead: 0
---- !u!61 &4041911731043399830
+  openSprite: {fileID: 2067646171788204918, guid: c04739fef83ed4346ab06dd314b824e1, type: 3}
+  xpReward: 5
+--- !u!61 &-4843128180931224427
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 529411751994010414}
+  m_GameObject: {fileID: 1754115231248754664}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -138,15 +137,15 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0.008083463, y: 0.04722105}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
+    oldSize: {x: 0.34, y: 0.3}
+    newSize: {x: 0.34, y: 0.3}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.4174286, y: 0.3944421}
   m_EdgeRadius: 0

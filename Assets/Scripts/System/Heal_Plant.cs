@@ -69,25 +69,27 @@ public class Heal_Plant : MonoBehaviour
         if (player == null || player_Controller == null || player_InputHandler == null)
             return;
 
-        if (player_Controller.IsAlive)
+    }
+
+    void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Player"))
         {
-            float distance = Vector3.Distance(transform.position, player.transform.position);
-            playerNearby = distance <= 1f;
-            
-            if (playerNearby && player_InputHandler.InteractActionTriggered && !isDead)
+            Debug.Log("colidde");
+            if (Input.GetKeyDown(KeyCode.E))
             {
-                Debug.Log($"Player interacting with heal plant: {gameObject.name}");
                 DropHeal();
             }
         }
     }
+
 
     private void DropHeal()
     {
         if (!isDead)
         {
             Debug.Log($"DropHeal called on {gameObject.name}");
-            
+
             if (heal_particle == null)
             {
                 Debug.LogWarning($"Heal_Plant on {gameObject.name}: Heal Particle prefab is not assigned!");
@@ -119,7 +121,7 @@ public class Heal_Plant : MonoBehaviour
             {
                 spriteRenderer.sprite = plant_dead;
             }
-            
+
             Debug.Log($"Heal plant {gameObject.name} is now dead");
         }
     }

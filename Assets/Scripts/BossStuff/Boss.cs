@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using UnityEngine.SceneManagement;
 
 public class Boss : MonoBehaviour
 {
@@ -179,6 +180,7 @@ public class Boss : MonoBehaviour
         if (currentHealth <= 0)
         {
             Debug.Log("Boss defeated");
+            SceneManager.LoadScene("MainMenu");
             Destroy(gameObject);
         }
     }
