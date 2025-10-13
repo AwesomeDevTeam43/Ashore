@@ -11876,6 +11876,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1468674986171170441, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
+      propertyPath: m_SortingOrder
+      value: 21
+      objectReference: {fileID: 0}
     - target: {fileID: 5083669464025086213, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
       propertyPath: m_Name
       value: Serpent (3)
@@ -15353,6 +15357,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1468674986171170441, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
+      propertyPath: m_SortingOrder
+      value: 21
+      objectReference: {fileID: 0}
     - target: {fileID: 5083669464025086213, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
       propertyPath: m_Name
       value: Serpent (6)
@@ -20038,6 +20046,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2704447177518886563, guid: 8fc457a6a36d05945a1bfa6446a5a9b7, type: 3}
+      propertyPath: m_SortingOrder
+      value: 21
+      objectReference: {fileID: 0}
     - target: {fileID: 5503759780063087387, guid: 8fc457a6a36d05945a1bfa6446a5a9b7, type: 3}
       propertyPath: m_LocalPosition.x
       value: 453.67
@@ -20916,6 +20928,10 @@ PrefabInstance:
       propertyPath: m_FlipX
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3626916397498700004, guid: 4443a681c5281b94b9ce6fa8cac0af50, type: 3}
+      propertyPath: m_SortingOrder
+      value: 21
+      objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: 4443a681c5281b94b9ce6fa8cac0af50, type: 3}
       propertyPath: m_LocalPosition.x
       value: 366.84
@@ -21535,6 +21551,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1468674986171170441, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
+      propertyPath: m_SortingOrder
+      value: 21
+      objectReference: {fileID: 0}
     - target: {fileID: 5083669464025086213, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
       propertyPath: m_Name
       value: Serpent (1)
@@ -27124,6 +27144,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2704447177518886563, guid: 8fc457a6a36d05945a1bfa6446a5a9b7, type: 3}
+      propertyPath: m_SortingOrder
+      value: 21
+      objectReference: {fileID: 0}
     - target: {fileID: 5503759780063087387, guid: 8fc457a6a36d05945a1bfa6446a5a9b7, type: 3}
       propertyPath: m_LocalPosition.x
       value: 381.03
@@ -47775,6 +47799,10 @@ PrefabInstance:
       propertyPath: m_FlipX
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3626916397498700004, guid: 4443a681c5281b94b9ce6fa8cac0af50, type: 3}
+      propertyPath: m_SortingOrder
+      value: 21
+      objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: 4443a681c5281b94b9ce6fa8cac0af50, type: 3}
       propertyPath: m_LocalPosition.x
       value: 382.06
@@ -48625,6 +48653,10 @@ PrefabInstance:
     - target: {fileID: 4765420972248475635, guid: 69d55de689756b9448543dd2c0224a20, type: 3}
       propertyPath: m_FlipY
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4765420972248475635, guid: 69d55de689756b9448543dd2c0224a20, type: 3}
+      propertyPath: m_SortingOrder
+      value: 21
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -119539,6 +119571,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1468674986171170441, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
+      propertyPath: m_SortingOrder
+      value: 21
+      objectReference: {fileID: 0}
     - target: {fileID: 5083669464025086213, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
       propertyPath: m_Name
       value: Serpent (5)
