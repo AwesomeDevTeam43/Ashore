@@ -88,51 +88,56 @@ public class Inventoy_UI : MonoBehaviour
 
         // (no debug overlays)
 
-        // Wire slot buttons to show details automatically
+        // Wire slot buttons to show details automatically: make the slot root itself a clickable Button.
         for (int i = 0; i < slots.Length; i++)
         {
             int index = i; // capture
-            // Prefer an existing Button on the slot. If none exists, try to find one on a child named "Button"
+
+            // Make sure any child icon doesn't block raycasts
+            var childImages = slots[i].GetComponentsInChildren<Image>(true);
+            foreach (var im in childImages)
+            {
+                if (im.gameObject != slots[i].gameObject && im.name == "Icon")
+                {
+                    im.raycastTarget = false;
+                }
+            }
+
+            // Ensure the slot root has an Image to act as button targetGraphic
+            Image rootImg = slots[i].GetComponent<Image>();
+            if (rootImg == null)
+            {
+                rootImg = slots[i].gameObject.AddComponent<Image>();
+                rootImg.color = new Color(1f, 1f, 1f, 0f);
+                rootImg.raycastTarget = true;
+            }
+
+            // Ensure the slot root has a Button
             Button slotBtn = slots[i].GetComponent<Button>();
             if (slotBtn == null)
             {
-                // try a child Button (common prefab pattern)
-                Transform btnChild = slots[i].transform.Find("Button");
-                if (btnChild != null) slotBtn = btnChild.GetComponent<Button>();
-            }
-
-            if (slotBtn == null)
-            {
-                // Ensure the slot root has an Image to act as the targetGraphic for a Button.
-                Image rootImg = slots[i].GetComponent<Image>();
-                if (rootImg == null)
-                {
-                    // Add a transparent Image to the slot root so the Button has a targetGraphic
-                    rootImg = slots[i].gameObject.AddComponent<Image>();
-                    rootImg.color = new Color(1, 1, 1, 0);
-                    rootImg.raycastTarget = true;
-                }
-
-                // Add a Button component to the slot root so clicks naturally hit the slot even if the icon overlays it
                 slotBtn = slots[i].gameObject.AddComponent<Button>();
                 slotBtn.targetGraphic = rootImg;
                 slotBtn.interactable = true;
-
-                Debug.LogWarning($"Inventoy_UI: Slot '{slots[i].name}' had no Button; added Button on root for reliable clicks.");
             }
 
-            // Wire the Button click to show details and log the click for diagnostics
+            // Wire click
+            slotBtn.onClick.RemoveAllListeners();
             slotBtn.onClick.AddListener(() => { Debug.Log($"Inventoy_UI: slot button clicked index={index} slot='{slots[index].name}'"); ShowDetails(index); });
 
-            // Also wire the slot's select callback (useful if the icon intercepts clicks)
-            slots[i].onSelected = (s) =>
+            // Also wire the slot's select callback
+            slots[i].onSelected = (s) => { ShowDetails(index); };
+
+            // Add a low-level SlotClickCatcher to forward pointer clicks directly to the UI (fallback for edge cases)
+            var catcher = slots[i].GetComponent<SlotClickCatcher>();
+            if (catcher == null)
             {
-                ShowDetails(index);
-            };
+                catcher = slots[i].gameObject.AddComponent<SlotClickCatcher>();
+            }
+            catcher.ui = this;
+            catcher.slotIndex = index;
 
-            // no debug overlay/selection highlight
-
-            // Run quick diagnostics for blocking UI: check for CanvasGroup on any parent that might block interactions
+            // Diagnostics for blocking UI: check for CanvasGroup on any parent that might block interactions
             CanvasGroup cg = slots[i].GetComponentInParent<CanvasGroup>();
             if (cg != null && (cg.alpha == 0f || !cg.interactable))
             {
@@ -292,6 +297,18 @@ public class Inventoy_UI : MonoBehaviour
                 description = $"Quantity: {qty}\n\n{description}";
             }
 
+            // If the item is craftable, append the required materials and current player counts
+            if (it.isCraftable && it.craftIngredients != null && it.craftIngredients.Count > 0)
+            {
+                description += "\n\nRequired:\n";
+                foreach (var ing in it.craftIngredients)
+                {
+                    if (ing == null || ing.material == null) continue;
+                    int have = Inventory.instance != null ? Inventory.instance.GetItemQuantity(ing.material) : 0;
+                    description += $" - {ing.material.itemName} x{ing.amount} (You have: {have})\n";
+                }
+            }
+
             descriptionText.text = description;
         }
 
@@ -299,41 +316,107 @@ public class Inventoy_UI : MonoBehaviour
         {
             if (descriptionSecondaryButton != null) descriptionSecondaryButton.gameObject.SetActive(false);
 
-            EquipmentData ed = it as EquipmentData;
-            if (ed != null)
+            // Clear previous listeners always
+            descriptionButton.onClick.RemoveAllListeners();
+
+            // Prefer Craft when isCraftable (even for equipment types)
+            if (it.isCraftable)
             {
                 descriptionButton.gameObject.SetActive(true);
-                descriptionButton.GetComponentInChildren<TextMeshProUGUI>().text = "Equip";
+                descriptionButton.GetComponentInChildren<TextMeshProUGUI>().text = "Craft";
+
+                // Determine if player has required materials
+                bool canCraft = false;
+                if (Inventory.instance != null)
+                {
+                    canCraft = it.CanCraft((ItemData m) => Inventory.instance.GetItemQuantity(m));
+                }
+
+                descriptionButton.interactable = canCraft;
+                if (canCraft)
+                {
+                    descriptionButton.onClick.AddListener(() => TryCraftSelectedItem());
+                }
+
+                if (descriptionSecondaryButton != null)
+                {
+                    descriptionSecondaryButton.gameObject.SetActive(true);
+                    descriptionSecondaryButton.GetComponentInChildren<TextMeshProUGUI>().text = "Craft";
+                    descriptionSecondaryButton.onClick.RemoveAllListeners();
+                    if (canCraft) descriptionSecondaryButton.onClick.AddListener(() => TryCraftSelectedItem());
+                }
             }
             else
             {
-                if (it.isUsable)
+                // Not craftable: check for equipment first, then usable
+                EquipmentData ed = it as EquipmentData;
+                if (ed != null)
+                {
+                    descriptionButton.gameObject.SetActive(true);
+                    descriptionButton.GetComponentInChildren<TextMeshProUGUI>().text = "Equip";
+                    descriptionButton.interactable = true;
+                    int capturedIndex = selectedSlotIndex;
+                    descriptionButton.onClick.AddListener(() =>
+                    {
+                        if (capturedIndex >= 0 && capturedIndex < slots.Length)
+                        {
+                            slots[capturedIndex].OnUseItem();
+                        }
+                    });
+                }
+                else if (it.isUsable)
                 {
                     descriptionButton.gameObject.SetActive(true);
                     descriptionButton.GetComponentInChildren<TextMeshProUGUI>().text = "Use";
-                }
-                else if (it.isCraftable)
-                {
-                    descriptionButton.gameObject.SetActive(true);
-                    descriptionButton.GetComponentInChildren<TextMeshProUGUI>().text = "Craft";
+                    descriptionButton.interactable = true;
+                    // If you have a use handler, wire it here. For now keep it enabled but without action.
                 }
                 else
                 {
                     descriptionButton.gameObject.SetActive(false);
                 }
-
-                if (it.isCraftable && descriptionSecondaryButton != null)
-                {
-                    descriptionSecondaryButton.gameObject.SetActive(true);
-                    descriptionSecondaryButton.GetComponentInChildren<TextMeshProUGUI>().text = "Craft";
-                }
-                else if (descriptionSecondaryButton != null)
-                {
-                    descriptionSecondaryButton.gameObject.SetActive(false);
-                }
             }
         }
 
+    }
+
+    // Public entry used by SlotClickCatcher to forward pointer clicks reliably.
+    public void OnSlotClicked(int slotIndex)
+    {
+        Debug.Log($"Inventoy_UI: OnSlotClicked({slotIndex}) called");
+        ShowDetails(slotIndex);
+    }
+
+    // Diagnostic helper: given a screen position, log which slot RectTransforms contain that point
+    public void LogSlotHitInfo(Vector2 screenPos)
+    {
+        if (slots == null || slots.Length == 0)
+        {
+            Debug.Log("Inventoy_UI: no slots to test");
+            return;
+        }
+
+        Debug.Log($"Inventoy_UI DIAG: checking slots for screenPos={screenPos}");
+        for (int i = 0; i < slots.Length; i++)
+        {
+            var s = slots[i];
+            RectTransform rt = s.GetComponent<RectTransform>();
+            bool contains = false;
+            Camera cam = null;
+            var c = s.GetComponentInParent<Canvas>();
+            if (c != null && c.renderMode != RenderMode.ScreenSpaceOverlay) cam = c.worldCamera;
+            if (rt != null)
+            {
+                contains = RectTransformUtility.RectangleContainsScreenPoint(rt, screenPos, cam);
+            }
+
+            Image rootImg = s.GetComponent<Image>();
+            bool rootRaycast = rootImg != null ? rootImg.raycastTarget : false;
+            CanvasGroup cg = s.GetComponentInParent<CanvasGroup>();
+            Mask mask = s.GetComponentInParent<Mask>();
+
+            Debug.Log($"  Slot[{i}]='{s.name}' contains={contains} rootImgRaycast={rootRaycast} Canvas={(c!=null?c.name:"none")} CanvasGroup={(cg!=null?cg.name+" alpha="+cg.alpha+" interactable="+cg.interactable:"none")} Mask={(mask!=null?mask.name:"none")}");
+        }
     }
 
     private void ClearSelection()
@@ -353,5 +436,118 @@ public class Inventoy_UI : MonoBehaviour
         }
 
         // (selection highlight removed)
+    }
+
+    // Attempt to craft the currently selected item (uses ItemData.craftIngredients and Inventory methods)
+    private void TryCraftSelectedItem()
+    {
+        if (selectedSlotIndex < 0 || selectedSlotIndex >= slots.Length) return;
+
+        ItemData it = slots[selectedSlotIndex].GetItem();
+        if (it == null) return;
+
+        if (!it.isCraftable)
+        {
+            Debug.Log("Inventoy_UI: item is not craftable.");
+            return;
+        }
+
+        // Check inventory for required materials using Inventory.GetItemQuantity
+        if (it.craftIngredients != null)
+        {
+            foreach (var ing in it.craftIngredients)
+            {
+                if (ing == null || ing.material == null)
+                {
+                    Debug.LogWarning("Inventoy_UI: invalid craft ingredient.");
+                    return;
+                }
+
+                int have = Inventory.instance != null ? Inventory.instance.GetItemQuantity(ing.material) : 0;
+                if (have < ing.amount)
+                {
+                    Debug.Log("Inventoy_UI: Cannot craft - missing materials.");
+                    return;
+                }
+            }
+        }
+
+        // All checks passed. Now perform the transaction: remove materials and remove one recipe item (the craftable entry)
+        // We'll rollback everything if adding the crafted product fails.
+
+        // Remove materials
+        foreach (var ing in it.craftIngredients)
+        {
+            Inventory.instance.Remove(ing.material, ing.amount);
+        }
+
+        // Remove one unit of the recipe item from inventory (the recipe is consumed)
+        Inventory.instance.Remove(it, 1);
+
+        // Determine resulting ItemData to add. Prefer a configured craftResult ScriptableObject.
+        ItemData result = null;
+        bool createdRuntimeClone = false;
+
+        ItemData proto = it.craftResult != null ? it.craftResult : it; // source prototype to clone
+
+        // Create a runtime instance of the same concrete ScriptableObject type as the prototype
+        var runtimeInstance = ScriptableObject.CreateInstance(proto.GetType()) as ItemData;
+        if (runtimeInstance == null)
+        {
+            Debug.LogWarning("Inventoy_UI: failed to create runtime instance for crafted item. Aborting craft.");
+            // rollback materials & recipe
+            Inventory.instance.Add(it, 1);
+            foreach (var ing in it.craftIngredients)
+            {
+                Inventory.instance.Add(ing.material, ing.amount);
+            }
+            return;
+        }
+
+        // Copy base ItemData fields
+        runtimeInstance.itemName = proto.itemName;
+        runtimeInstance.icon = proto.icon;
+        runtimeInstance.description = proto.description;
+        runtimeInstance.isUsable = proto.isUsable;
+        runtimeInstance.isCraftable = false; // crafted product shouldn't be a recipe
+        runtimeInstance.isStackable = proto.isStackable;
+        runtimeInstance.maxStackSize = proto.maxStackSize;
+
+        // If the prototype is an EquipmentData, copy equipment-specific fields as well
+        var protoEquip = proto as EquipmentData;
+        var runtimeEquip = runtimeInstance as EquipmentData;
+        if (protoEquip != null && runtimeEquip != null)
+        {
+            runtimeEquip.equipmentPrefab = protoEquip.equipmentPrefab;
+        }
+
+        result = runtimeInstance;
+        createdRuntimeClone = true;
+
+        bool added = Inventory.instance.Add(result, 1);
+        if (added)
+        {
+            Debug.Log($"Inventoy_UI: Crafted {result.itemName} and added to inventory.");
+            UpdateUI();
+            ClearSelection();
+        }
+        else
+        {
+            // Add failed: rollback recipe and materials
+            Debug.LogWarning("Inventoy_UI: Crafted item could not be added to inventory (maybe full). Rolling back recipe and materials.");
+            // restore recipe
+            Inventory.instance.Add(it, 1);
+            // restore materials
+            foreach (var ing in it.craftIngredients)
+            {
+                Inventory.instance.Add(ing.material, ing.amount);
+            }
+
+            // destroy runtime clone if we created one since it's unused
+            if (createdRuntimeClone && result != null)
+            {
+                Destroy(result);
+            }
+        }
     }
 }

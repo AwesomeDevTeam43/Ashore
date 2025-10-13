@@ -10,21 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0e58a1ea7b8f8cf478ae50ed3935c761, type: 3}
-  m_Name: SpearData
+  m_Name: SpearData 1
   m_EditorClassIdentifier: 
   itemName: Spear
   icon: {fileID: 6108012597462862368, guid: 03b306a780301cc4fb237fd83d7ccced, type: 3}
   description: A spear that is throwable
   isUsable: 0
-  isCraftable: 1
-  craftIngredients:
-  - material: {fileID: 11400000, guid: 32410df1c793ac94eaf344c30dad367a, type: 2}
-    amount: 1
-  - material: {fileID: 11400000, guid: c794599bb4cdcca4a8001e4ff1cba7fb, type: 2}
-    amount: 1
-  - material: {fileID: 11400000, guid: 321063f8e7c67734da1616587ab2def1, type: 2}
-    amount: 1
-  craftResult: {fileID: 11400000, guid: 3be2e48de3e99184e9c6b3d716c9b7f3, type: 2}
+  isCraftable: 0
+  craftIngredients: []
+  craftResult: {fileID: 0}
   maxStackSize: 50
   isStackable: 0
-  equipmentPrefab: {fileID: 1841228293332522625, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
+  equipmentPrefab: {fileID: 1841228293332522625, guid: 73c895ff291af2a4faf0d0f3e4b00d63, type: 3}
