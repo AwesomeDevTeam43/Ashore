@@ -15,6 +15,9 @@ public class Enemy_Fly : MonoBehaviour
     private XP_System xP_System;
     public GameObject player;
 
+    private Drop_Materials drop_Materials;
+
+
     private void Awake()
     {
         healthSystem = GetComponent<HealthSystem>();
@@ -24,12 +27,13 @@ public class Enemy_Fly : MonoBehaviour
 
     void Start()
     {
-        
+
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = 0; // garantir que não desce
         rb.constraints = RigidbodyConstraints2D.FreezeRotation; // não rodar
         player = GameObject.FindGameObjectWithTag("Player");
         xP_System = player.GetComponent<XP_System>();
+        drop_Materials = GetComponent<Drop_Materials>();
 
         currentPoint = pointInitial.transform;
     }
@@ -79,6 +83,10 @@ public class Enemy_Fly : MonoBehaviour
             if (xP_System != null)
             {
                 xP_System.DropXP(transform.position, 1);
+            }
+            if (drop_Materials != null)
+            {
+                drop_Materials.DropMaterial(1, 2, 3);
             }
         }
     }

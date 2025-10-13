@@ -17,3 +17,5 @@ MonoBehaviour:
   description: Pieces of Wood, nice for crafting.
   isUsable: 0
   isCraftable: 0
+  maxStackSize: 50
+  isStackable: 1

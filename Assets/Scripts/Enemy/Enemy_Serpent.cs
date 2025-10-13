@@ -16,6 +16,7 @@ public class VenomShooting : MonoBehaviour
     private float timeBtwAttack;
     private bool inRange;
     private Rigidbody2D rb;
+    private Drop_Materials drop_Materials;
 
 
     void Awake()
@@ -29,6 +30,7 @@ public class VenomShooting : MonoBehaviour
         player = GameObject.FindGameObjectWithTag("Player");
         rb = GetComponent<Rigidbody2D>();
         healthSystem.Initialize(enemyHealth);
+        drop_Materials = GetComponent<Drop_Materials>();
         if (player != null)
         {
             xP_System = player.GetComponent<XP_System>();
@@ -102,6 +104,10 @@ public class VenomShooting : MonoBehaviour
             if (xP_System != null)
             {
                 xP_System.DropXP(transform.position, 5);
+            }
+            if (drop_Materials != null)
+            {
+                drop_Materials.DropMaterial(1, 2, 3);
             }
         }
     }

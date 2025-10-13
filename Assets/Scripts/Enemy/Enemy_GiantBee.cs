@@ -33,6 +33,7 @@ public class BeeEnemy : MonoBehaviour
   private Vector3 lungeStartPosition;
   private Collider2D playerCollider; // NEW: Reference to player's 
   private HealthSystem playerHealth;
+  private Drop_Materials drop_Materials;
 
   private void Awake()
   {
@@ -45,6 +46,7 @@ public class BeeEnemy : MonoBehaviour
     rb = GetComponent<Rigidbody2D>();
     player = GameObject.FindGameObjectWithTag("Player");
     playerHealth = player.GetComponent<HealthSystem>();
+    drop_Materials = GetComponent<Drop_Materials>();
 
     // NEW: Get player's collider for feet targeting
     if (player != null)
@@ -229,6 +231,10 @@ public class BeeEnemy : MonoBehaviour
       if (xP_System != null)
       {
         xP_System.DropXP(transform.position, 3);
+      }
+      if (drop_Materials != null)
+      {
+        drop_Materials.DropMaterial(1, 2, 3);
       }
     }
   }

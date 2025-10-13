@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 6401071433118823938}
   - component: {fileID: 3644659762282663999}
   - component: {fileID: 3117738573874044794}
+  - component: {fileID: -2165011026002690327}
   m_Layer: 7
   m_Name: Bee
   m_TagString: Enemy
@@ -202,3 +203,19 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.92609024, y: 0.95565414}
   m_EdgeRadius: 0
+--- !u!114 &-2165011026002690327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8379307940926905367}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e616ffe88f71c145929265635770b0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stone: {fileID: 11400000, guid: c794599bb4cdcca4a8001e4ff1cba7fb, type: 2}
+  wood: {fileID: 11400000, guid: 321063f8e7c67734da1616587ab2def1, type: 2}
+  rope: {fileID: 11400000, guid: 32410df1c793ac94eaf344c30dad367a, type: 2}
+  material_particle: {fileID: 3009273275518452482, guid: 4faa844a12452a64982a14b05e65a988, type: 3}

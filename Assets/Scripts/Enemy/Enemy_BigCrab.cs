@@ -17,10 +17,13 @@ public class Enemy : MonoBehaviour
   XP_System xP_System;
   private Rigidbody2D rb;
 
+  private Drop_Materials drop_Materials;
+
   private void Awake()
   {
     healthSystem = GetComponent<HealthSystem>();
     healthSystem.OnHealthChanged += OnHealthChanged;
+    drop_Materials = GetComponent<Drop_Materials>();
   }
 
   private void Start()
@@ -111,6 +114,10 @@ public class Enemy : MonoBehaviour
       {
         xP_System.DropXP(transform.position, 3);
       }
+      if (drop_Materials != null)
+      {
+        drop_Materials.DropMaterial(1, 2, 3);
+      }
     }
   }
 
@@ -119,10 +126,6 @@ public class Enemy : MonoBehaviour
     if (collision.gameObject.layer == LayerMask.NameToLayer("FallLevel"))
     {
       healthSystem.TakeDamage(healthSystem.CurrentHealth);
-      if (xP_System != null)
-      {
-        xP_System.DropXP(transform.position, 3);
-      }
     }
   }
 

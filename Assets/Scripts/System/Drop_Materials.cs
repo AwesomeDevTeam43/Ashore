@@ -10,19 +10,16 @@ public class Drop_Materials : MonoBehaviour
 
     void Start()
     {
-        
+
     }
 
     void Update()
     {
-        // Test dropping materials (remove this in production)
-        if (Input.GetKeyDown(KeyCode.O))
-        {
-            DropMaterial(2, 1, 3); // Drop 2 wood, 1 stone, 3 rope
-        }
+
+
     }
 
-    private void DropMaterial(int woodAmount, int stoneAmount, int ropeAmount)
+    public void DropMaterial(int woodAmount, int stoneAmount, int ropeAmount)
     {
         // Drop wood particles
         for (int i = 0; i < woodAmount; i++)
@@ -81,7 +78,7 @@ public class Drop_Materials : MonoBehaviour
         int woodCount = Random.Range(0, 3);
         int stoneCount = Random.Range(0, 2);
         int ropeCount = Random.Range(0, 2);
-        
+
         DropMaterial(woodCount, stoneCount, ropeCount);
     }
 }

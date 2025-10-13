@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2320399452680389737}
   - component: {fileID: 9023469275235641710}
   - component: {fileID: 7324065520476466136}
+  - component: {fileID: -2770615711749428176}
   m_Layer: 7
   m_Name: Big Crab
   m_TagString: Enemy
@@ -195,3 +196,19 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.63593966, y: 0.40914798}
   m_EdgeRadius: 0
+--- !u!114 &-2770615711749428176
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1772538608698774022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e616ffe88f71c145929265635770b0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stone: {fileID: 11400000, guid: c794599bb4cdcca4a8001e4ff1cba7fb, type: 2}
+  wood: {fileID: 11400000, guid: 321063f8e7c67734da1616587ab2def1, type: 2}
+  rope: {fileID: 11400000, guid: 32410df1c793ac94eaf344c30dad367a, type: 2}
+  material_particle: {fileID: 3009273275518452482, guid: 4faa844a12452a64982a14b05e65a988, type: 3}
