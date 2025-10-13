@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Heal_Plant : MonoBehaviour
 {
-    [SerializeField] private GameObject player;
+    private GameObject player;
     private Player_InputHandler player_InputHandler;
     private Player_Controller player_Controller;
 
@@ -11,26 +11,72 @@ public class Heal_Plant : MonoBehaviour
 
     [SerializeField] private GameObject heal_particle;
 
-    private bool isDead = false;
+
+    [SerializeField] private bool isDead = false;
     private bool playerNearby = false;
 
     void Start()
     {
+        // Find player and validate
         player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
+        {
+            Debug.LogError($"Heal_Plant on {gameObject.name}: Player not found with tag 'Player'!");
+            enabled = false;
+            return;
+        }
+
+        // Get components and validate
         spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer == null)
+        {
+            Debug.LogError($"Heal_Plant on {gameObject.name}: SpriteRenderer component missing!");
+        }
+
         player_InputHandler = player.GetComponent<Player_InputHandler>();
+        if (player_InputHandler == null)
+        {
+            Debug.LogError($"Heal_Plant on {gameObject.name}: Player_InputHandler component not found on player!");
+            enabled = false;
+            return;
+        }
+
         player_Controller = player.GetComponent<Player_Controller>();
+        if (player_Controller == null)
+        {
+            Debug.LogError($"Heal_Plant on {gameObject.name}: Player_Controller component not found on player!");
+            enabled = false;
+            return;
+        }
+
+        // Validate prefab assignment
+        if (heal_particle == null)
+        {
+            Debug.LogWarning($"Heal_Plant on {gameObject.name}: Heal particle prefab is not assigned!");
+        }
+
+        if (plant_dead == null)
+        {
+            Debug.LogWarning($"Heal_Plant on {gameObject.name}: Plant dead sprite is not assigned!");
+        }
+
+        Debug.Log($"Heal_Plant on {gameObject.name}: Successfully initialized!");
     }
 
     private void Update()
     {
+        // Add null checks to prevent errors
+        if (player == null || player_Controller == null || player_InputHandler == null)
+            return;
+
         if (player_Controller.IsAlive)
         {
             float distance = Vector3.Distance(transform.position, player.transform.position);
             playerNearby = distance <= 1f;
-
-            if (playerNearby && player_InputHandler.InteractActionTriggered)
+            
+            if (playerNearby && player_InputHandler.InteractActionTriggered && !isDead)
             {
+                Debug.Log($"Player interacting with heal plant: {gameObject.name}");
                 DropHeal();
             }
         }
@@ -40,9 +86,11 @@ public class Heal_Plant : MonoBehaviour
     {
         if (!isDead)
         {
+            Debug.Log($"DropHeal called on {gameObject.name}");
+            
             if (heal_particle == null)
             {
-                Debug.LogWarning("XP Particle prefab is not assigned!");
+                Debug.LogWarning($"Heal_Plant on {gameObject.name}: Heal Particle prefab is not assigned!");
                 return;
             }
 
@@ -67,7 +115,12 @@ public class Heal_Plant : MonoBehaviour
             }
 
             isDead = true;
-            spriteRenderer.sprite = plant_dead;
+            if (spriteRenderer != null && plant_dead != null)
+            {
+                spriteRenderer.sprite = plant_dead;
+            }
+            
+            Debug.Log($"Heal plant {gameObject.name} is now dead");
         }
     }
 

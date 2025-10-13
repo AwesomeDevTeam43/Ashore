@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Chest : MonoBehaviour
 {
-    [SerializeField] private GameObject player;
+    private GameObject player;
     private Player_InputHandler player_InputHandler;
     private Player_Controller player_Controller;
 

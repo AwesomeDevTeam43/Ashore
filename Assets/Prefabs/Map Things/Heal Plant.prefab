@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6805210733261809109}
   - component: {fileID: 8714142457020957197}
-  - component: {fileID: 8211082627469108099}
+  - component: {fileID: 4286927151320119484}
   m_Layer: 0
   m_Name: Heal Plant
   m_TagString: Untagged
@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 529411751994010414}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12.88, y: -4.57, z: -0.0460505}
+  m_LocalPosition: {x: 180.54337, y: 10.468972, z: -0.0460505}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -88,7 +88,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &8211082627469108099
+--- !u!114 &4286927151320119484
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -103,3 +103,4 @@ MonoBehaviour:
   player: {fileID: 0}
   plant_dead: {fileID: 8116476127508738298, guid: 7b1765bed85561e48afc16909fb94c04, type: 3}
   heal_particle: {fileID: 6643727125893635682, guid: eb62d858bd93346489f3820509685166, type: 3}
+  isDead: 0
