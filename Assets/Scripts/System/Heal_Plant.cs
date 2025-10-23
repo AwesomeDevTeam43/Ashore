@@ -60,7 +60,7 @@ public class Heal_Plant : MonoBehaviour
             Debug.LogWarning($"Heal_Plant on {gameObject.name}: Plant dead sprite is not assigned!");
         }
 
-        Debug.Log($"Heal_Plant on {gameObject.name}: Successfully initialized!");
+        //Debug.Log($"Heal_Plant on {gameObject.name}: Successfully initialized!");
     }
 
     private void Update()

@@ -52,7 +52,7 @@ public class Inventoy_UI : MonoBehaviour
             slots = itemsParent.GetComponentsInChildren<InventorySlot>();
         }
 
-        Debug.Log($"Inventoy_UI: found {slots.Length} InventorySlot(s) under itemsParent '{itemsParent?.name}'");
+        //Debug.Log($"Inventoy_UI: found {slots.Length} InventorySlot(s) under itemsParent '{itemsParent?.name}'");
 
         if (descriptionImage == null || descriptionText == null || descriptionButton == null)
         {
@@ -160,7 +160,7 @@ public class Inventoy_UI : MonoBehaviour
             }
             string iconName = childIcon != null && childIcon.sprite != null ? childIcon.sprite.name : "(none)";
             CanvasGroup cg = s.GetComponentInParent<CanvasGroup>();
-            Debug.Log($"Inventoy_UI DIAG: Slot[{i}]='{s.name}' hasButton={hasButton} rootImg={(rootImg != null ? rootImg.name : "null")} rootImgRaycast={rootImgRaycast} childIcon={iconName} childIconRaycast={(childIcon != null ? childIcon.raycastTarget.ToString() : "n/a")} CanvasGroup={(cg != null ? cg.name + " alpha=" + cg.alpha + " interactable=" + cg.interactable : "none")} ");
+            //Debug.Log($"Inventoy_UI DIAG: Slot[{i}]='{s.name}' hasButton={hasButton} rootImg={(rootImg != null ? rootImg.name : "null")} rootImgRaycast={rootImgRaycast} childIcon={iconName} childIconRaycast={(childIcon != null ? childIcon.raycastTarget.ToString() : "n/a")} CanvasGroup={(cg != null ? cg.name + " alpha=" + cg.alpha + " interactable=" + cg.interactable : "none")} ");
         }
 
         // We'll wire description buttons dynamically in ShowDetails

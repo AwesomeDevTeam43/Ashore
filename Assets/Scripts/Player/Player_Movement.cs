@@ -9,7 +9,10 @@ public class Player_Movement : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask platformLayer;
+    private int combinedGroundLayers;
     [SerializeField] private float downwardAttackBounce = 10f;
+    [SerializeField] private float coyoteTime = 0.15f;
+    private float coyoteTimer = 0f;
 
     private Player_Controller player_Controller;
 
@@ -33,6 +36,7 @@ public class Player_Movement : MonoBehaviour
         player_Controller = GetComponent<Player_Controller>();
         moveSpeed = player_Controller.MoveSpeed;
         jumpingPower = player_Controller.JumpForce;
+        combinedGroundLayers = groundLayer | platformLayer;
     }
 
     void FixedUpdate()
@@ -44,13 +48,11 @@ public class Player_Movement : MonoBehaviour
 
     public bool IsGrounded()
     {
-        LayerMask layers = groundLayer | platformLayer;
-        return Physics2D.OverlapCircle(groundCheck.position, 0.2f, layers);
+        return Physics2D.OverlapCircle(groundCheck.position, 0.2f, combinedGroundLayers);
     }
 
     private void HandleMovement()
     {
-        // Calculate platform movement
         Vector2 platformMovement = Vector2.zero;
         if (currentPlatform != null && IsGrounded())
         {
@@ -59,7 +61,6 @@ public class Player_Movement : MonoBehaviour
             lastPlatformPosition = currentPlatformPos;
         }
 
-        // Apply player input movement + platform movement
         float targetX = player_InputHandler.MovementInput.x * moveSpeed + platformMovement.x / Time.fixedDeltaTime;
         rb.linearVelocity = new Vector2(targetX, rb.linearVelocity.y);
     }
@@ -86,17 +87,27 @@ public class Player_Movement : MonoBehaviour
         else
         {
             attackZone.transform.localPosition = startPos;
-            isDownwardAttacking = false ;
+            isDownwardAttacking = false;
         }
     }
 
     private void HandleJump()
     {
-        if (player_InputHandler.JumpTriggered && IsGrounded())
+        if (IsGrounded())
+        {
+            coyoteTimer = coyoteTime;
+        }
+        else
+        {
+            coyoteTimer -= Time.fixedDeltaTime;
+        }
+
+        if (player_InputHandler.JumpTriggered && (IsGrounded() || coyoteTimer > 0f))
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpingPower);
-
+            coyoteTimer = 0f;
         }
+        
         if (!player_InputHandler.JumpTriggered && rb.linearVelocity.y > 0f)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
