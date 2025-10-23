@@ -14,6 +14,10 @@ public class Player_Movement : MonoBehaviour
     [SerializeField] private float coyoteTime = 0.15f;
     private float coyoteTimer = 0f;
 
+    [SerializeField] private float acceleration = 5f;
+    [SerializeField] private float deceleration = 5f;
+    private float velocityXSmoothing;
+
     private Player_Controller player_Controller;
 
     private float moveSpeed;
@@ -61,8 +65,18 @@ public class Player_Movement : MonoBehaviour
             lastPlatformPosition = currentPlatformPos;
         }
 
-        float targetX = player_InputHandler.MovementInput.x * moveSpeed + platformMovement.x / Time.fixedDeltaTime;
-        rb.linearVelocity = new Vector2(targetX, rb.linearVelocity.y);
+        float targetX = player_InputHandler.MovementInput.x * moveSpeed;
+
+        if (platformMovement != Vector2.zero)
+            targetX += platformMovement.x / Time.fixedDeltaTime;
+
+        bool hasInput = Mathf.Abs(player_InputHandler.MovementInput.x) > 0.01f;
+        float smoothTime = hasInput ? 1f / acceleration : 1f / deceleration;
+
+        float currentX = rb.linearVelocity.x;
+        float newX = Mathf.SmoothDamp(currentX, targetX, ref velocityXSmoothing, smoothTime);
+
+        rb.linearVelocity = new Vector2(newX, rb.linearVelocity.y);
     }
 
     private void HandleDirection()
@@ -107,7 +121,7 @@ public class Player_Movement : MonoBehaviour
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpingPower);
             coyoteTimer = 0f;
         }
-        
+
         if (!player_InputHandler.JumpTriggered && rb.linearVelocity.y > 0f)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
