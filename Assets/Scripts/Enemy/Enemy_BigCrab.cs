@@ -2,8 +2,6 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-
-  public int health;
   public float speed;
   public float followPlayerRange;
   private bool inRange;
@@ -28,7 +26,7 @@ public class Enemy : MonoBehaviour
 
   private void Start()
   {
-    healthSystem.Initialize(health);
+    healthSystem.Initialize(healthSystem.MaxHealth);
     rb = GetComponent<Rigidbody2D>();
     if (rb == null)
     {

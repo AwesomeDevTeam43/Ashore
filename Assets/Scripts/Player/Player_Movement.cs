@@ -24,6 +24,7 @@ public class Player_Movement : MonoBehaviour
     private bool isDownwardAttacking = false;
 
     public bool IsFacingRight => isFacingRight;
+    public bool IsFacingLeft => !isFacingRight;
 
     void Start()
     {

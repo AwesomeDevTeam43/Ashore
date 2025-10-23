@@ -109,7 +109,6 @@ GameObject:
   - component: {fileID: 40117648189917489}
   - component: {fileID: 6494822104957315991}
   - component: {fileID: 7609287017837383225}
-  - component: {fileID: 6317419510644124579}
   - component: {fileID: -8307651892915196505}
   m_Layer: 3
   m_Name: Player
@@ -268,31 +267,6 @@ MonoBehaviour:
   hitAmplitudeGain: 2
   hitFrequencyGain: 2
   shakeTime: 0.1
---- !u!114 &6317419510644124579
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4299354313336116005}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc22e6b8241b75145af2af3e0c54033d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player_InputHandler: {fileID: 40117648189917489}
-  player_Camera: {fileID: 7609287017837383225}
-  attackOrigin: {fileID: 1625790816454333443}
-  attackRadius: 1.14
-  damage: 1
-  enemyLayer:
-    serializedVersion: 2
-    m_Bits: 128
-  cooldownTime: 0.5
-  knockbackForce: 6
-  knockbackDuration: 0.3
-  meleeEffectPrefab: {fileID: 1388199414278010597, guid: 0d4c2f106a06ce544b9681fb658011f5, type: 3}
-  effectDuration: 0.3
 --- !u!212 &-8307651892915196505
 SpriteRenderer:
   m_ObjectHideFlags: 0
