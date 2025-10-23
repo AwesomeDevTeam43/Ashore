@@ -2,9 +2,6 @@ using UnityEngine;
 
 public class Player_MeleeManager : MonoBehaviour
 {
-    [Header("Player Melee Settings")]
-    public float movementTime = 0.2f;
-
     [Header("Cooldown Settings")]
     [SerializeField] private float cooldownTime = 0.5f;
     private float cooldownTimer = 0f;

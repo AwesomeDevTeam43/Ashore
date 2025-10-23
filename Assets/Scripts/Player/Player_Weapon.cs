@@ -7,7 +7,7 @@ public class Weapon : MonoBehaviour
     public Transform shotPoint;
     private float timeBetweenShots;
     public float startTimeBetweenShots;
-    public enum WeaponDirection { Right, Left, Up, Down }
+    public enum WeaponDirection { Right, Left, Up, Down, UpRight, UpLeft, DownRight, DownLeft }
     public WeaponDirection weaponDirection;
     [SerializeField] private Player_Movement Player_Movement;
     [SerializeField] private Player_InputHandler player_InputHandler;
@@ -23,6 +23,14 @@ public class Weapon : MonoBehaviour
                 return Vector2.up;
             case WeaponDirection.Down:
                 return Vector2.down;
+            case WeaponDirection.UpRight:
+                return new Vector2(1, 1).normalized;
+            case WeaponDirection.UpLeft:
+                return new Vector2(-1, 1).normalized;
+            case WeaponDirection.DownRight:
+                return new Vector2(1, -1).normalized;
+            case WeaponDirection.DownLeft:
+                return new Vector2(-1, -1).normalized;
             default: return Vector2.right;
         }
     }
@@ -48,7 +56,6 @@ public class Weapon : MonoBehaviour
 
                 if (proj != null)
                 {
-                    // Define direção do disparo conforme o estado atual da weapon
                     Vector2 shootDir = GetShootDirection();
                     proj.SetDirection(shootDir);
                 }
@@ -65,13 +72,27 @@ public class Weapon : MonoBehaviour
     {
         if (inputDir == Vector2.zero)
         {
-            // Se não tem input, segue orientação do player (esquerda/direita)
             weaponDirection = Player_Movement.IsFacingRight ? WeaponDirection.Right : WeaponDirection.Left;
             return;
         }
 
-        // Decide o estado conforme direção dominante
-        if (Mathf.Abs(inputDir.x) > Mathf.Abs(inputDir.y))
+        if (inputDir.x > 0 && inputDir.y > 0)
+        {
+            weaponDirection = WeaponDirection.UpRight;
+        }
+        else if (inputDir.x < 0 && inputDir.y > 0)
+        {
+            weaponDirection = WeaponDirection.UpLeft;
+        }
+        else if (inputDir.x > 0 && inputDir.y < 0)
+        {
+            weaponDirection = WeaponDirection.DownRight;
+        }
+        else if (inputDir.x < 0 && inputDir.y < 0)
+        {
+            weaponDirection = WeaponDirection.DownLeft;
+        }
+        else if (Mathf.Abs(inputDir.x) > Mathf.Abs(inputDir.y))
         {
             weaponDirection = inputDir.x > 0 ? WeaponDirection.Right : WeaponDirection.Left;
         }
