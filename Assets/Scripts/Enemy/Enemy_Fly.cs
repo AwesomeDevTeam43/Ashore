@@ -3,8 +3,8 @@ using UnityEngine;
 public class Enemy_Fly : MonoBehaviour
 {
     [Header("Patrol Points")]
-    public GameObject pointFinal;
-    public GameObject pointInitial;
+    public Transform pointFinal;
+    public Transform pointInitial;
     private Rigidbody2D rb;
     private Transform currentPoint;
     public float speed;
@@ -27,7 +27,6 @@ public class Enemy_Fly : MonoBehaviour
 
     void Start()
     {
-
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = 0; // garantir que não desce
         rb.constraints = RigidbodyConstraints2D.FreezeRotation; // não rodar
@@ -35,7 +34,34 @@ public class Enemy_Fly : MonoBehaviour
         xP_System = player.GetComponent<XP_System>();
         drop_Materials = GetComponent<Drop_Materials>();
 
-        currentPoint = pointInitial.transform;
+        // Se não estiverem atribuídos no Inspector, tenta encontrar filhos com esses nomes
+        if (pointInitial == null)
+        {
+            var found = transform.Find("PointInitial");
+            if (found != null) pointInitial = found;
+            else
+            {
+                var go = new GameObject("PointInitial");
+                go.transform.SetParent(transform);
+                go.transform.localPosition = new Vector3(-2f, 0f, 0f); // ajuste padrão
+                pointInitial = go.transform;
+            }
+        }
+
+        if (pointFinal == null)
+        {
+            var found = transform.Find("PointFinal");
+            if (found != null) pointFinal = found;
+            else
+            {
+                var go = new GameObject("PointFinal");
+                go.transform.SetParent(transform);
+                go.transform.localPosition = new Vector3(2f, 0f, 0f); // ajuste padrão
+                pointFinal = go.transform;
+            }
+        }
+
+        currentPoint = pointInitial;
     }
 
     void Update()
@@ -52,7 +78,7 @@ public class Enemy_Fly : MonoBehaviour
             FlipSprite();
 
             // Troca de ponto
-            currentPoint = (currentPoint == pointInitial.transform) ? pointFinal.transform : pointInitial.transform;
+            currentPoint = (currentPoint == pointInitial) ? pointFinal : pointInitial;
         }
     }
 
@@ -68,9 +94,9 @@ public class Enemy_Fly : MonoBehaviour
         if (pointFinal != null && pointInitial != null)
         {
             Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(pointFinal.transform.position, 1f);
-            Gizmos.DrawWireSphere(pointInitial.transform.position, 1f);
-            Gizmos.DrawLine(pointFinal.transform.position, pointInitial.transform.position);
+            Gizmos.DrawWireSphere(pointFinal.position, 1f);
+            Gizmos.DrawWireSphere(pointInitial.position, 1f);
+            Gizmos.DrawLine(pointFinal.position, pointInitial.position);
         }
     }
 

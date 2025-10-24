@@ -2,19 +2,14 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
-  public float speed;
-  public float followPlayerRange;
+  public BigCrab_Stats stats;
   private bool inRange;
-  public float attackRange;
-  public float startTimeBtwAttack;
   private float timeBtwAttack;
-  public int biteDamage;
   public Transform player;
 
   HealthSystem healthSystem;
   XP_System xP_System;
   private Rigidbody2D rb;
-
   private Drop_Materials drop_Materials;
 
   private void Awake()
@@ -28,42 +23,37 @@ public class Enemy : MonoBehaviour
   {
     healthSystem.Initialize(healthSystem.MaxHealth);
     rb = GetComponent<Rigidbody2D>();
-    if (rb == null)
-    {
-      rb = gameObject.AddComponent<Rigidbody2D>();
-    }
-    if (player != null)
-    {
-      xP_System = player.GetComponent<XP_System>();
-    }
+
+    if (rb == null) rb = gameObject.AddComponent<Rigidbody2D>();
+    
+    if (player != null) xP_System = player.GetComponent<XP_System>();
+  
+    if (stats != null) timeBtwAttack = 0f;
   }
 
   private void Update()
   {
-    if (player == null)
+    if (player == null || stats == null)
       return;
 
     FlipSprite();
     CheckPlayerDistance();
   }
 
-
   private void FixedUpdate()
   {
-    if (player == null)
-    {
+    if (player == null || stats == null)
       return;
-    }
     if (inRange)
     {
-      transform.position = Vector2.MoveTowards(transform.position, player.position, speed * Time.fixedDeltaTime);
+      transform.position = Vector2.MoveTowards(transform.position, player.position, stats.speed * Time.fixedDeltaTime);
     }
   }
 
   void CheckPlayerDistance()
   {
     float distanceToPlayer = Vector2.Distance(transform.position, player.position);
-    if (distanceToPlayer <= followPlayerRange)
+    if (distanceToPlayer <= stats.followPlayerRange)
     {
       inRange = true;
     }
@@ -72,13 +62,12 @@ public class Enemy : MonoBehaviour
       inRange = false;
     }
 
-    if (distanceToPlayer <= attackRange)
+    if (distanceToPlayer <= stats.attackRange)
     {
       if (timeBtwAttack <= 0)
       {
         CheckEnemyAttack();
-        Debug.Log("Levaste nos dentes do caranguejo");
-        timeBtwAttack = startTimeBtwAttack;
+        timeBtwAttack = stats.startTimeBtwAttack;
       }
       else
       {
@@ -89,16 +78,25 @@ public class Enemy : MonoBehaviour
 
   void CheckEnemyAttack()
   {
+    if (player == null) return;
 
-    if (player != null)
+    HealthSystem playerHealth = null;
+    if (!player.TryGetComponent<HealthSystem>(out playerHealth))
     {
-      HealthSystem playerHealth = player.GetComponent<HealthSystem>();
-      if (playerHealth != null)
-      {
-        playerHealth.TakeDamage(biteDamage);
-        Debug.Log("Player Hit!");
-        Debug.Log(playerHealth.CurrentHealth);
-      }
+      playerHealth = player.GetComponentInParent<HealthSystem>();
+    }
+
+
+    if (playerHealth != null)
+    {
+      if (stats.biteDamage <= 0) Debug.LogWarning("Enemy: biteDamage <= 0");
+      playerHealth.TakeDamage(stats.biteDamage);
+      Debug.Log("Player Hit!");
+      Debug.Log(playerHealth.CurrentHealth);
+    }
+    else
+    {
+      Debug.LogWarning("Enemy: Player HealthSystem not found on assigned player Transform.");
     }
   }
 
@@ -110,39 +108,48 @@ public class Enemy : MonoBehaviour
       Destroy(gameObject);
       if (xP_System != null)
       {
-        xP_System.DropXP(transform.position, 3);
+        xP_System.DropXP(transform.position, stats.xpOnDeath);
       }
       if (drop_Materials != null)
       {
-        drop_Materials.DropMaterial(1, 2, 3);
+        drop_Materials.DropMaterial(stats.dropA, stats.dropB, stats.dropC);
       }
     }
   }
 
-  void OnTriggerEnter2D(Collider2D collision)
+  void OnCollisionEnter2D(Collision2D collision)
   {
-    if (collision.gameObject.layer == LayerMask.NameToLayer("FallLevel"))
+    if (collision.collider.CompareTag("Player"))
     {
-      healthSystem.TakeDamage(healthSystem.CurrentHealth);
+      var hp = collision.collider.GetComponent<HealthSystem>() ?? collision.collider.GetComponentInParent<HealthSystem>();
+      if (hp != null)
+      {
+        hp.TakeDamage(stats.biteDamage);
+        Debug.Log("Enemy contact: damaged player by " + stats.biteDamage);
+      }
+      else
+      {
+        Debug.LogWarning("Enemy contact: Player HealthSystem not found.");
+      }
     }
   }
 
   void OnDrawGizmos()
   {
+    if (stats == null) return;
     Gizmos.color = Color.red;
-    Gizmos.DrawWireSphere(transform.position, followPlayerRange);
+    Gizmos.DrawWireSphere(transform.position, stats.followPlayerRange);
     Gizmos.color = Color.blue;
-    Gizmos.DrawWireSphere(transform.position, attackRange);
+    Gizmos.DrawWireSphere(transform.position, stats.attackRange);
   }
+
   void FlipSprite()
   {
-    if (player.transform.position.x <= 0.01f)
-    {
-      transform.localScale = new Vector3(-3.34f, 3.34f, 1);
-    }
-    else if (player.transform.position.x >= -0.01f)
-    {
-      transform.localScale = new Vector3(3.34f, 3.34f, 1);
-    }
+    if (stats == null || player == null) return;
+    // direção: 1 para direita, -1 para esquerda (evita 0)
+    float dir = (player.position.x >= transform.position.x) ? 1f : -1f;
+    Vector3 s = stats.baseScale;
+    s.x = Mathf.Abs(s.x) * dir;
+    transform.localScale = s;
   }
 }
