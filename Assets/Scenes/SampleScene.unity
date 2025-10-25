@@ -11640,6 +11640,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6284675892622559299, guid: 8fc457a6a36d05945a1bfa6446a5a9b7, type: 3}
+      propertyPath: stats
+      value: 
+      objectReference: {fileID: 11400000, guid: 6cd5ce0ad94975c468742e32ec259006, type: 2}
     - target: {fileID: 8379307940926905367, guid: 8fc457a6a36d05945a1bfa6446a5a9b7, type: 3}
       propertyPath: m_Name
       value: Bee (2)
@@ -11981,6 +11985,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5818011355362210075, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
+      propertyPath: stats
+      value: 
+      objectReference: {fileID: 11400000, guid: 3f76e932fbaef8d46b067d0cfb367d5c, type: 2}
     - target: {fileID: 5818011355362210075, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
       propertyPath: biteDamage
       value: 1
@@ -12780,7 +12788,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 117.66, y: -2.91, z: -10}
+  m_LocalPosition: {x: 147.99, y: -1.43, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -13293,6 +13301,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6284675892622559299, guid: 8fc457a6a36d05945a1bfa6446a5a9b7, type: 3}
+      propertyPath: stats
+      value: 
+      objectReference: {fileID: 11400000, guid: 6cd5ce0ad94975c468742e32ec259006, type: 2}
     - target: {fileID: 8379307940926905367, guid: 8fc457a6a36d05945a1bfa6446a5a9b7, type: 3}
       propertyPath: m_Name
       value: Bee
@@ -14886,6 +14898,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5818011355362210075, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
+      propertyPath: stats
+      value: 
+      objectReference: {fileID: 11400000, guid: 3f76e932fbaef8d46b067d0cfb367d5c, type: 2}
+    - target: {fileID: 5818011355362210075, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
       propertyPath: biteDamage
       value: 1
       objectReference: {fileID: 0}
@@ -15463,6 +15479,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5818011355362210075, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
+      propertyPath: stats
+      value: 
+      objectReference: {fileID: 11400000, guid: 3f76e932fbaef8d46b067d0cfb367d5c, type: 2}
     - target: {fileID: 5818011355362210075, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
       propertyPath: biteDamage
       value: 1
@@ -16600,6 +16620,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5818011355362210075, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
+      propertyPath: stats
+      value: 
+      objectReference: {fileID: 11400000, guid: 3f76e932fbaef8d46b067d0cfb367d5c, type: 2}
     - target: {fileID: 5818011355362210075, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
       propertyPath: biteDamage
       value: 1
@@ -20183,6 +20207,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6284675892622559299, guid: 8fc457a6a36d05945a1bfa6446a5a9b7, type: 3}
+      propertyPath: stats
+      value: 
+      objectReference: {fileID: 11400000, guid: 6cd5ce0ad94975c468742e32ec259006, type: 2}
     - target: {fileID: 8379307940926905367, guid: 8fc457a6a36d05945a1bfa6446a5a9b7, type: 3}
       propertyPath: m_Name
       value: Bee (4)
@@ -21706,6 +21734,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5818011355362210075, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
+      propertyPath: stats
+      value: 
+      objectReference: {fileID: 11400000, guid: 3f76e932fbaef8d46b067d0cfb367d5c, type: 2}
     - target: {fileID: 5818011355362210075, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
       propertyPath: biteDamage
       value: 1
@@ -26574,6 +26606,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5818011355362210075, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
+      propertyPath: stats
+      value: 
+      objectReference: {fileID: 11400000, guid: 3f76e932fbaef8d46b067d0cfb367d5c, type: 2}
+    - target: {fileID: 5818011355362210075, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
       propertyPath: biteDamage
       value: 1
       objectReference: {fileID: 0}
@@ -27211,6 +27247,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6284675892622559299, guid: 8fc457a6a36d05945a1bfa6446a5a9b7, type: 3}
+      propertyPath: stats
+      value: 
+      objectReference: {fileID: 11400000, guid: 6cd5ce0ad94975c468742e32ec259006, type: 2}
     - target: {fileID: 8379307940926905367, guid: 8fc457a6a36d05945a1bfa6446a5a9b7, type: 3}
       propertyPath: m_Name
       value: Bee (3)
@@ -119735,6 +119775,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5818011355362210075, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
+      propertyPath: stats
+      value: 
+      objectReference: {fileID: 11400000, guid: 3f76e932fbaef8d46b067d0cfb367d5c, type: 2}
+    - target: {fileID: 5818011355362210075, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
       propertyPath: biteDamage
       value: 1
       objectReference: {fileID: 0}
@@ -122297,11 +122341,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5180964667360105844, guid: 079959426cc54094799ac211fb7ca3e0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 117.66
+      value: 147.99
       objectReference: {fileID: 0}
     - target: {fileID: 5180964667360105844, guid: 079959426cc54094799ac211fb7ca3e0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.91
+      value: -1.43
       objectReference: {fileID: 0}
     - target: {fileID: 5180964667360105844, guid: 079959426cc54094799ac211fb7ca3e0, type: 3}
       propertyPath: m_LocalPosition.z
@@ -122514,6 +122558,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6284675892622559299, guid: 8fc457a6a36d05945a1bfa6446a5a9b7, type: 3}
+      propertyPath: stats
+      value: 
+      objectReference: {fileID: 11400000, guid: 6cd5ce0ad94975c468742e32ec259006, type: 2}
     - target: {fileID: 8379307940926905367, guid: 8fc457a6a36d05945a1bfa6446a5a9b7, type: 3}
       propertyPath: m_Name
       value: Bee
