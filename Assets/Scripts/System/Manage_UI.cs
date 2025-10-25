@@ -31,11 +31,39 @@ public class Manage_UI : MonoBehaviour
         healthSystem.OnHealthChanged += UpdateHPBar;
 
         UpdateXPBar(0);
-        UpdateLevel(1);
     }
+
+private void OnEnable()
+{
+    Player_Controller.OnPlayerLoad += UpdateAllUI;
+}
+
+private void OnDisable()
+{
+    Player_Controller.OnPlayerLoad -= UpdateAllUI;
+}
+
+private void UpdateAllUI()
+{
+    // Re-acquire references to ensure they are valid after a scene load
+    player = GameObject.FindGameObjectWithTag("Player");
+    if (player == null) return;
+
+    xpSystem = player.GetComponent<XP_System>();
+    healthSystem = player.GetComponent<HealthSystem>();
+
+    if (xpSystem != null && healthSystem != null)
+    {
+        
+        UpdateXPBar(0); // The argument here doesn't matter, it just triggers a refresh
+        UpdateHPBar(healthSystem.CurrentHealth, healthSystem.MaxHealth);
+        UpdateLevel(xpSystem.CurrentLevel);
+    }
+}
 
     private void Update()
     {
+        
         if (player_Controller.CurrentEquipment != null)
         {
             equipment_1.enabled = true;

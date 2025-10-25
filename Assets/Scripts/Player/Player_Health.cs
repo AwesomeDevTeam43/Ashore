@@ -38,6 +38,10 @@ public class Player_Health : MonoBehaviour
 
     private void OnEnable()
     {
+        if (GameFlowState.IsLoading)
+        {
+            return;
+        }
         if (playerStats != null)
         {
             UpdateHealthStat(1); // Initialize with level 1 stats
@@ -46,6 +50,10 @@ public class Player_Health : MonoBehaviour
 
     private void Start()
     {
+        if (GameFlowState.IsLoading)
+        {
+            return;
+        }
         Debug.Log($"Initializing HealthSystem with {currentHealth} HP");
         healthSystem.Initialize(currentHealth);
         previousHealth = healthSystem.CurrentHealth;
@@ -64,7 +72,7 @@ public class Player_Health : MonoBehaviour
         }
     }
 
-    private void UpdateHealthStat(int level)
+    public void UpdateHealthStat(int level)
     {
         int previousMaxHealth = currentHealth;
         int currentHealthPoints = healthSystem != null ? healthSystem.CurrentHealth : 0;
@@ -80,6 +88,12 @@ public class Player_Health : MonoBehaviour
             healthSystem.MaxHealth = currentHealth;
             healthSystem.SetHealth(newCurrentHealth);
         }
+    }
+
+    public void SetHealth(int health)
+    {
+        healthSystem.SetHealth(health);
+        previousHealth = health;
     }
 
     private void OnPlayerHealthChanged(int currentHealth, int maxHealth)

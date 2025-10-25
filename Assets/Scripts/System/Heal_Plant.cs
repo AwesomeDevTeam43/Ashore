@@ -1,6 +1,7 @@
 using UnityEngine;
 
-public class Heal_Plant : MonoBehaviour
+[RequireComponent(typeof(GuidComponent))]
+public class Heal_Plant : MonoBehaviour, ISaveable
 {
     private GameObject player;
     private Player_InputHandler player_InputHandler;
@@ -124,6 +125,35 @@ public class Heal_Plant : MonoBehaviour
 
             Debug.Log($"Heal plant {gameObject.name} is now dead");
         }
+    }
+
+    public object CaptureState()
+    {
+        return new PlantSaveData
+        {
+            isUsed = this.isDead
+        };
+    }
+
+    public void RestoreState(object state)
+    {
+        var saveData = (PlantSaveData)state;
+        this.isDead = saveData.isUsed;
+
+        if (isDead)
+        {
+            if (spriteRenderer == null)
+            {
+                spriteRenderer = GetComponent<SpriteRenderer>();
+            }
+            spriteRenderer.sprite = plant_dead;
+        }
+    }
+
+    [System.Serializable]
+    private struct PlantSaveData
+    {
+        public bool isUsed;
     }
 
     private void OnDrawGizmosSelected()

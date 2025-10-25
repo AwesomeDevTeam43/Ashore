@@ -21,6 +21,14 @@ public class XP_System : MonoBehaviour
         _levelGap = levelGap;
     }
 
+    public void Initialize(int level, int currentXp, int maxXp, int levelGap)
+    {
+        _Current_Level = level;
+        _current_Xp = currentXp;
+        _Max_Xp_PerLevel = maxXp;
+        _levelGap = levelGap;
+    }
+
     public void IncreaseXP(int xpAmount)
     {
         _current_Xp += xpAmount;
@@ -28,6 +36,23 @@ public class XP_System : MonoBehaviour
         LevelUp();
 
         Debug.Log($"XP collected: {xpAmount}, Current XP : {_current_Xp}");
+    }
+
+    public void SetLevel(int level)
+    {
+        _Current_Level = level;
+        // Recalculate max XP for the new level
+        _Max_Xp_PerLevel = 100; // Assuming 100 is the base XP for level 1
+        for (int i = 1; i < level; i++)
+        {
+            _Max_Xp_PerLevel += _levelGap;
+        }
+        OnLevelUp?.Invoke(_Current_Level);
+    }
+
+    public void SetXP(int xp)
+    {
+        _current_Xp = xp;
     }
 
     private void LevelUp()

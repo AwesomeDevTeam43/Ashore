@@ -19,6 +19,7 @@ public class Manage_MainMenu : MonoBehaviour
 
     private void OnStartClicked()
     {
+        GameFlowState.LoadGameOnStart = true;
         SceneManager.LoadScene(gameSceneName);
     }
 

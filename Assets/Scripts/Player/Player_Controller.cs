@@ -1,9 +1,12 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System;
 
 public class Player_Controller : MonoBehaviour
 {
+  public static event Action OnPlayerLoad;
   private XP_System xP_System;
+  private Player_Health playerHealth;
 
   [Header("Player Stats")]
   [SerializeField] private PlayerStats playerStats;
@@ -36,24 +39,45 @@ public class Player_Controller : MonoBehaviour
   {
     if (playerStats != null)
     {
-      UpdateStats(1);
+      if (!GameFlowState.IsLoading)
+      {
+        UpdateStats(1);
+      }
     }
   }
 
-  private void Awake()
-  {
+
+private void Awake()
+{
     xP_System = GetComponent<XP_System>();
+    playerHealth = GetComponent<Player_Health>();
 
     if (xP_System != null)
     {
-      xP_System.OnLevelUp += UpdateStats;
+        xP_System.OnLevelUp += UpdateStats;
     }
-  }
 
-  private void Start()
-  {
-    xP_System.Initialize(LVL1XpAmount, LvlGap);
-  }
+    // Loading is handled in Start to avoid double init/reset order issues
+}
+// In Player_Controller.cs
+
+private void Start()
+{
+    if (GameFlowState.LoadGameOnStart)
+    {
+      // A save file should be loaded.
+      GameFlowState.IsLoading = true;
+      LoadGame();
+      GameFlowState.LoadGameOnStart = false; // Reset the flag
+      GameFlowState.IsLoading = false;
+    }
+    else
+    {
+      // No save file to load, so start a fresh game.
+      xP_System.Initialize(LVL1XpAmount, LvlGap);
+    }
+}
+
 
   private void OnDisable()
   {
@@ -66,6 +90,18 @@ public class Player_Controller : MonoBehaviour
   private void Update()
   {
     useEquipment();
+
+    if (Input.GetKeyDown(KeyCode.F5))
+    {
+        SaveGame();
+    }
+    if (Input.GetKeyDown(KeyCode.F9))
+    {
+        // We are now handling loading through the main menu and GameFlowState
+        // so this key press is no longer needed for loading.
+        // You could re-enable it for debugging if you wish.
+        // LoadGame();
+    }
   }
 
   void useEquipment()
@@ -99,6 +135,55 @@ public class Player_Controller : MonoBehaviour
     currentJumpForce = playerStats.GetJumpForce(level);
 
     Debug.Log($"Stats updated! Level {level}: ATK={currentAttackPower}, Speed={currentMoveSpeed}, Jump={currentJumpForce}");
+  }
+
+  public void SaveGame()
+  {
+      SaveSystem.SavePlayer(this, xP_System, playerHealth, Inventory.instance);
+  }
+
+  public void LoadGame()
+  {
+      PlayerData data = SaveSystem.LoadPlayer();
+
+      if (data != null)
+      {
+          // Re-initialize systems with saved state
+          GetComponent<HealthSystem>().MaxHealth = data.maxHealth;
+          playerHealth.SetHealth(data.currentHealth);
+          xP_System.Initialize(data.level, data.currentXp, data.maxXp, LvlGap);
+
+          // Restore other stats and notify other systems of the level change
+          UpdateStats(data.level);
+          // Restore other stats (attack/move/jump) based on level only
+
+          // Restore Position
+          transform.position = new Vector3(data.position[0], data.position[1], data.position[2]);
+
+          // Restore Inventory
+          Inventory.instance.Clear();
+          for (int i = 0; i < data.inventoryItemNames.Count; i++)
+          {
+              // NOTE: This requires a way to find ItemData by name.
+              ItemData item = Resources.Load<ItemData>("Items/" + data.inventoryItemNames[i]);
+              if (item != null)
+              {
+                  Inventory.instance.Add(item, data.inventoryItemQuantities[i]);
+              }
+          }
+
+          // Restore Equipment
+          currentEquipment = null;
+          if (!string.IsNullOrEmpty(data.equippedItemName))
+          {
+              // You would need a way to find the equipment in the inventory and equip it.
+              // This is a complex step that depends on your inventory and equipment system.
+          }
+
+          SaveSystem.RestoreWorldState(data);
+
+          OnPlayerLoad?.Invoke();
+      }
   }
 
   public void ReturnToLastPoint()

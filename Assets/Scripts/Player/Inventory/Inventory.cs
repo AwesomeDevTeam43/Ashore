@@ -28,6 +28,16 @@ public class Inventory : MonoBehaviour
     // Keep this for backward compatibility with UI
     public List<ItemData> items = new List<ItemData>();
 
+    public void Clear()
+    {
+        inventoryItems.Clear();
+        items.Clear();
+        if (onItemChangedCallback != null)
+        {
+            onItemChangedCallback.Invoke();
+        }
+    }
+
     public bool Add(ItemData item, int quantity = 1)
     {
         if (item == null) return false;
