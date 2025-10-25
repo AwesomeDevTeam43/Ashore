@@ -17,12 +17,16 @@ public class Projectile : MonoBehaviour
     private void Update()
     {
         RaycastHit2D hitInfo = Physics2D.Raycast(transform.position, moveDir, distance, whatIsSolid);
-        if(hitInfo.collider != null)
+        if (hitInfo.collider != null)
         {
             if (hitInfo.collider.CompareTag("Enemy"))
             {
                 Debug.Log("Enemy must take damage");
-                hitInfo.collider.GetComponent<HealthSystem>().TakeDamage(damage);
+                var enemyHealth = hitInfo.collider.GetComponent<Enemy_Health>();
+                if (enemyHealth != null)
+                {
+                    enemyHealth.TakeDamage(damage);
+                }
             }
             DestroyProjectile();
         }

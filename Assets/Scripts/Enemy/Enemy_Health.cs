@@ -3,21 +3,33 @@ using UnityEngine;
 
 public class Enemy_Health : MonoBehaviour
 {
-    [SerializeField]
-    private int maxHealth;
-    [SerializeField]
-    private bool damageable = true;
-    [SerializeField]
-    private float invincibilityDuration = .2f;
+    public BigCrab_Stats stats;
+    [SerializeField] private int maxHealth;
+    [SerializeField] private bool damageable = true;
+    [SerializeField] private float invincibilityDuration = .2f;
+
     private bool hit;
     private HealthSystem healthSystem;
+    private XP_System xP_System;
+    private Drop_Materials drop_Materials;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Awake()
     {
         healthSystem = GetComponent<HealthSystem>();
-        healthSystem.OnHealthChanged += OnPlayerHealthChanged;
+        drop_Materials = GetComponent<Drop_Materials>();
+    }
+
+    private void Start()
+    {
+        if (healthSystem == null)
+        {
+            Debug.LogError($"{gameObject.name}: Missing HealthSystem component!");
+            return;
+        }
+
+        healthSystem.OnHealthChanged += OnEnemyHealthChanged;
         healthSystem.Initialize(maxHealth);
+        xP_System = GameObject.FindGameObjectWithTag("Player")?.GetComponent<XP_System>();
     }
 
     public void TakeDamage(int damage)
@@ -26,20 +38,29 @@ public class Enemy_Health : MonoBehaviour
         {
             hit = true;
             healthSystem.TakeDamage(damage, gameObject);
-            OnPlayerHealthChanged(healthSystem.CurrentHealth, healthSystem.MaxHealth);
         }
     }
 
-    private void OnPlayerHealthChanged(int currentHealth, int maxHealth)
+    private void OnEnemyHealthChanged(int currentHealth, int maxHealth)
     {
+        if (healthSystem.CurrentHealth != currentHealth)
+            return;
+
+        Debug.Log($"{gameObject.name} current health: {currentHealth}/{maxHealth}");
+
         if (currentHealth <= 0)
         {
             Debug.Log($"{gameObject.name} has died.");
+            if (xP_System != null && stats != null)
+                xP_System.DropXP(transform.position, stats.xpOnDeath);
+
+            if (drop_Materials != null && stats != null)
+                drop_Materials.DropMaterial(stats.dropA, stats.dropB, stats.dropC);
+
             Destroy(gameObject);
         }
         else
         {
-            Debug.Log($"{gameObject.name} took damage. Current health: {currentHealth}/{maxHealth}");
             StartCoroutine(TurnOffHit());
         }
     }
@@ -48,5 +69,11 @@ public class Enemy_Health : MonoBehaviour
     {
         yield return new WaitForSeconds(invincibilityDuration);
         hit = false;
+    }
+
+    private void OnDestroy()
+    {
+        if (healthSystem != null)
+            healthSystem.OnHealthChanged -= OnEnemyHealthChanged;
     }
 }

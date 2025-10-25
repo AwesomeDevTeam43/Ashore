@@ -15,7 +15,6 @@ public class Enemy : MonoBehaviour
   private void Awake()
   {
     healthSystem = GetComponent<HealthSystem>();
-    healthSystem.OnHealthChanged += OnHealthChanged;
     drop_Materials = GetComponent<Drop_Materials>();
   }
 
@@ -97,23 +96,6 @@ public class Enemy : MonoBehaviour
     else
     {
       Debug.LogWarning("Enemy: Player HealthSystem not found on assigned player Transform.");
-    }
-  }
-
-  void OnHealthChanged(int current, int max)
-  {
-    Debug.Log($"Enemy Health changed {current} {max}");
-    if (current <= 0)
-    {
-      Destroy(gameObject);
-      if (xP_System != null)
-      {
-        xP_System.DropXP(transform.position, stats.xpOnDeath);
-      }
-      if (drop_Materials != null)
-      {
-        drop_Materials.DropMaterial(stats.dropA, stats.dropB, stats.dropC);
-      }
     }
   }
 

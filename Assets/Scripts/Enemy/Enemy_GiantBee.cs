@@ -6,7 +6,6 @@ public class BeeEnemy : MonoBehaviour
   private GameObject player;
   private HealthSystem healthSystem;
   private XP_System xP_System;
-  [SerializeField] private int enemyHealth;
 
   [Header("Movement")]
   [SerializeField] private float roamSpeed = 4f;
@@ -38,7 +37,6 @@ public class BeeEnemy : MonoBehaviour
   private void Awake()
   {
     healthSystem = GetComponent<HealthSystem>();
-    healthSystem.OnHealthChanged += OnHealthChanged;
   }
 
   private void Start()
@@ -55,7 +53,6 @@ public class BeeEnemy : MonoBehaviour
       xP_System = player.GetComponent<XP_System>();
     }
 
-    healthSystem.Initialize(enemyHealth);
     enemyState = EnemyState.Roaming;
     currentCooldown = 0f;
   }
@@ -222,22 +219,6 @@ public class BeeEnemy : MonoBehaviour
     }
   }
 
-  void OnHealthChanged(int current, int max)
-  {
-    Debug.Log($"Health changed {current} {max}");
-    if (current <= 0)
-    {
-      Destroy(gameObject);
-      if (xP_System != null)
-      {
-        xP_System.DropXP(transform.position, 3);
-      }
-      if (drop_Materials != null)
-      {
-        drop_Materials.DropMaterial(1, 2, 3);
-      }
-    }
-  }
   void FlipSprite()
   {
     if (player.transform.position.x <= 0.01f)

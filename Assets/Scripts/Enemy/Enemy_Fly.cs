@@ -10,7 +10,6 @@ public class Enemy_Fly : MonoBehaviour
     public float speed;
 
     [Header("Enemy Settings")]
-    public int health;
     private HealthSystem healthSystem;
     private XP_System xP_System;
     public GameObject player;
@@ -21,8 +20,6 @@ public class Enemy_Fly : MonoBehaviour
     private void Awake()
     {
         healthSystem = GetComponent<HealthSystem>();
-        healthSystem.Initialize(health);
-        healthSystem.OnHealthChanged += OnHealthChanged;
     }
 
     void Start()
@@ -97,23 +94,6 @@ public class Enemy_Fly : MonoBehaviour
             Gizmos.DrawWireSphere(pointFinal.position, 1f);
             Gizmos.DrawWireSphere(pointInitial.position, 1f);
             Gizmos.DrawLine(pointFinal.position, pointInitial.position);
-        }
-    }
-
-    void OnHealthChanged(int current, int max)
-    {
-        Debug.Log($"Enemy Health changed {current} {max}");
-        if (current <= 0)
-        {
-            Destroy(gameObject);
-            if (xP_System != null)
-            {
-                xP_System.DropXP(transform.position, 1);
-            }
-            if (drop_Materials != null)
-            {
-                drop_Materials.DropMaterial(1, 2, 3);
-            }
         }
     }
 }

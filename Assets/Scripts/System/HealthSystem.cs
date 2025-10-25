@@ -30,16 +30,10 @@ public class HealthSystem : MonoBehaviour
     public void TakeDamage(int damage, GameObject damageSource = null)
     {
         _currentHealth = Mathf.Max(0, _currentHealth - damage);
+        Debug.Log($"Damage taken: {damage} by {gameObject.name}. Current health: {_currentHealth}/{_maxHealth}");
 
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
         OnDamageTaken?.Invoke(damageSource);
-
-        if (player_Camera != null)
-        {
-            player_Camera.StartCameraShake();
-        }
-
-        Debug.Log($"Damage taken: {damage} by {gameObject.name}. Current health: {_currentHealth}/{_maxHealth}");
     }
 
     public void Heal(int heal)
