@@ -7,25 +7,13 @@ public class Enemy : MonoBehaviour
   private float timeBtwAttack;
   public Transform player;
 
-  HealthSystem healthSystem;
-  XP_System xP_System;
   private Rigidbody2D rb;
-  private Drop_Materials drop_Materials;
-
-  private void Awake()
-  {
-    healthSystem = GetComponent<HealthSystem>();
-    drop_Materials = GetComponent<Drop_Materials>();
-  }
 
   private void Start()
   {
-    healthSystem.Initialize(healthSystem.MaxHealth);
     rb = GetComponent<Rigidbody2D>();
 
     if (rb == null) rb = gameObject.AddComponent<Rigidbody2D>();
-    
-    if (player != null) xP_System = player.GetComponent<XP_System>();
   
     if (stats != null) timeBtwAttack = 0f;
   }

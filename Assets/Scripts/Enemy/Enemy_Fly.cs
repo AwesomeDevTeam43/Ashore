@@ -10,26 +10,13 @@ public class Enemy_Fly : MonoBehaviour
     public float speed;
 
     [Header("Enemy Settings")]
-    private HealthSystem healthSystem;
-    private XP_System xP_System;
     public GameObject player;
-
-    private Drop_Materials drop_Materials;
-
-
-    private void Awake()
-    {
-        healthSystem = GetComponent<HealthSystem>();
-    }
-
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.gravityScale = 0; // garantir que não desce
         rb.constraints = RigidbodyConstraints2D.FreezeRotation; // não rodar
         player = GameObject.FindGameObjectWithTag("Player");
-        xP_System = player.GetComponent<XP_System>();
-        drop_Materials = GetComponent<Drop_Materials>();
 
         // Se não estiverem atribuídos no Inspector, tenta encontrar filhos com esses nomes
         if (pointInitial == null)

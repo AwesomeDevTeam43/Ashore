@@ -4,8 +4,6 @@ public class BeeEnemy : MonoBehaviour
 {
   [SerializeField] private float speed;
   private GameObject player;
-  private HealthSystem healthSystem;
-  private XP_System xP_System;
 
   [Header("Movement")]
   [SerializeField] private float roamSpeed = 4f;
@@ -32,25 +30,16 @@ public class BeeEnemy : MonoBehaviour
   private Vector3 lungeStartPosition;
   private Collider2D playerCollider; // NEW: Reference to player's 
   private HealthSystem playerHealth;
-  private Drop_Materials drop_Materials;
-
-  private void Awake()
-  {
-    healthSystem = GetComponent<HealthSystem>();
-  }
 
   private void Start()
   {
     rb = GetComponent<Rigidbody2D>();
     player = GameObject.FindGameObjectWithTag("Player");
     playerHealth = player.GetComponent<HealthSystem>();
-    drop_Materials = GetComponent<Drop_Materials>();
-
     // NEW: Get player's collider for feet targeting
     if (player != null)
     {
       playerCollider = player.GetComponent<Collider2D>();
-      xP_System = player.GetComponent<XP_System>();
     }
 
     enemyState = EnemyState.Roaming;

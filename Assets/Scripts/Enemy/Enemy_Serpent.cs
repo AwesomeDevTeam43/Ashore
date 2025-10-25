@@ -8,30 +8,15 @@ public class VenomShooting : MonoBehaviour
     private float timer;
     public float distanceToPlayer;
     public float meleeRange;
-    private HealthSystem healthSystem;
-    private XP_System xP_System;
     public int biteDamage;
     public float startTimeBtwAttack;
     private float timeBtwAttack;
     private bool inRange;
-    private Rigidbody2D rb;
-    private Drop_Materials drop_Materials;
 
-
-    void Awake()
-    {
-        healthSystem = GetComponent<HealthSystem>();
-    }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
-        rb = GetComponent<Rigidbody2D>();
-        drop_Materials = GetComponent<Drop_Materials>();
-        if (player != null)
-        {
-            xP_System = player.GetComponent<XP_System>();
-        }
     }
 
     // Update is called once per frame
