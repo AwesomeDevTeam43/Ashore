@@ -8,6 +8,7 @@ TagManager:
   - Enemy
   - MovingPlatform
   - Shootpoint
+  - RestPoint
   layers:
   - Default
   - TransparentFX
@@ -21,7 +22,7 @@ TagManager:
   - MovingPlatform
   - Equipment
   - FallLevel
-  - 
+  - RestPoint
   - 
   - 
   - 

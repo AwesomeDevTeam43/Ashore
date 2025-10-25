@@ -139,11 +139,16 @@ private void Start()
 
   public void SaveGame()
   {
-      SaveSystem.SavePlayer(this, xP_System, playerHealth, Inventory.instance);
+    Debug.Log("Saving game...");
+    SaveSystem.SavePlayer(this, xP_System, playerHealth, Inventory.instance);
   }
+
+
 
   public void LoadGame()
   {
+      Debug.Log("Loading game...");
+
       PlayerData data = SaveSystem.LoadPlayer();
 
       if (data != null)
@@ -197,8 +202,30 @@ private void Start()
     }
   }
 
+  private void OnTriggerStay2D(Collider2D collision)
+  {
+    if (LayerMask.LayerToName(collision.gameObject.layer) == "RestPoint")
+    {
+      if (Input.GetKeyDown(KeyCode.B))
+      {
+        playerHealth.SetHealth(playerHealth.GetComponent<HealthSystem>().MaxHealth);
+        SaveGame();
+      }
+    }
+  }
+   
   private void OnTriggerEnter2D(Collider2D collision)
   {
+    if (LayerMask.LayerToName(collision.gameObject.layer) == "RestPoint")
+    {
+      if (Input.GetKeyDown(KeyCode.B))
+      {
+      playerHealth.SetHealth(playerHealth.GetComponent<HealthSystem>().MaxHealth);
+      SaveGame();
+    }
+  }
+
+
     Equipment equipment = collision.GetComponent<Equipment>();
     if (equipment != null && !equipment.isEquipped)
     {
