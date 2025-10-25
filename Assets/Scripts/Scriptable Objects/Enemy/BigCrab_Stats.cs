@@ -3,6 +3,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "BigCrab_Stats", menuName = "Enemies/BigCrab_Stats")]
 public class BigCrab_Stats : ScriptableObject
 {
+    public int maxHealth = 5;
     public float speed = 2f;
     public float followPlayerRange = 5f;
     public float attackRange = 1f;

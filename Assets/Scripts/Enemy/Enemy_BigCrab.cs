@@ -3,6 +3,7 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
   public BigCrab_Stats stats;
+  private Enemy_Health enemyHealth;
   private bool inRange;
   private float timeBtwAttack;
   public Transform player;
@@ -11,10 +12,15 @@ public class Enemy : MonoBehaviour
 
   private void Start()
   {
-    rb = GetComponent<Rigidbody2D>();
+    enemyHealth = GetComponent<Enemy_Health>();
+    if (enemyHealth != null && stats != null)
+    {
+      enemyHealth.Initialize(stats.maxHealth, stats.xpOnDeath, stats.dropA, stats.dropB, stats.dropC);
+    }
 
+    rb = GetComponent<Rigidbody2D>();
     if (rb == null) rb = gameObject.AddComponent<Rigidbody2D>();
-  
+
     if (stats != null) timeBtwAttack = 0f;
   }
 

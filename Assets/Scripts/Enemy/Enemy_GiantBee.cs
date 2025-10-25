@@ -2,48 +2,61 @@ using UnityEngine;
 
 public class BeeEnemy : MonoBehaviour
 {
-  [SerializeField] private float speed;
+  public GiantBee_Stats stats;
+  private Enemy_Health enemyHealth;
+
   private GameObject player;
-
-  [Header("Movement")]
-  [SerializeField] private float roamSpeed = 4f;
-  [SerializeField] private float lungingForce = 7f;
-  [SerializeField] private float retreatSpeed = 6f;
-
-  [Header("Detection")]
-  [SerializeField] private float playerDetect = 8f;
-  [SerializeField] private float lungeRange = 4f;
-  [SerializeField] private float retreatRange = 5f;
-  [SerializeField] private LayerMask playerLayer;
-
-  [Header("Timers")]
-  [SerializeField] private float lungeCooldown = 2f;
-  [SerializeField] private float currentCooldown;
-  [SerializeField] private float lungeDuration = 1f;
-  private float lungeTimer;
+  private Rigidbody2D rb;
+  private Collider2D playerCollider;
+  private HealthSystem playerHealth;
 
   private enum EnemyState { Roaming, Lunging, Retreating }
   private EnemyState enemyState;
-  private Rigidbody2D rb;
+
+  private float currentCooldown;
+  private float lungeTimer;
+
   private Vector3 retreatTargetPosition;
   private Vector3 playerAttackPoint;
   private Vector3 lungeStartPosition;
-  private Collider2D playerCollider; // NEW: Reference to player's 
-  private HealthSystem playerHealth;
 
   private void Start()
   {
+    enemyHealth = GetComponent<Enemy_Health>();
+    if (enemyHealth != null && stats != null)
+    {
+      enemyHealth.Initialize(stats.maxHealth, stats.xpOnDeath, stats.dropA, stats.dropB, stats.dropC);
+    }
+
     rb = GetComponent<Rigidbody2D>();
+    if (rb == null) rb = gameObject.AddComponent<Rigidbody2D>();
+
     player = GameObject.FindGameObjectWithTag("Player");
-    playerHealth = player.GetComponent<HealthSystem>();
-    // NEW: Get player's collider for feet targeting
     if (player != null)
     {
+      playerHealth = player.GetComponent<HealthSystem>();
       playerCollider = player.GetComponent<Collider2D>();
     }
 
-    enemyState = EnemyState.Roaming;
-    currentCooldown = 0f;
+    if (stats == null)
+    {
+      Debug.LogWarning("BeeEnemy: stats (GiantBee_Stats) not assigned. This enemy will not run.");
+      enabled = false;
+      return;
+    }
+
+    transform.localScale = stats.baseScale;
+  }
+
+  private void Update()
+  {
+    if (player == null || stats == null) return;
+
+    if (currentCooldown > 0f) currentCooldown -= Time.deltaTime;
+    FlipSprite();
+
+    float playerDistance = Vector3.Distance(transform.position, player.transform.position);
+    StateMachine(playerDistance);
   }
 
   private void StateMachine(float playerDistance)
@@ -53,43 +66,29 @@ public class BeeEnemy : MonoBehaviour
       case EnemyState.Roaming:
         RoamBehavior(playerDistance);
         break;
-
       case EnemyState.Lunging:
         LungeBehavior(playerDistance);
         break;
-
       case EnemyState.Retreating:
         RetreatBehavior(playerDistance);
         break;
     }
   }
 
-  private void Update()
+  private void RoamBehavior(float playerDistance)
   {
-    if (player == null)
-      return;
-
-    if (currentCooldown > 0)
-      currentCooldown -= Time.deltaTime;
-    FlipSprite();
-    float playerDistance = Vector3.Distance(transform.position, player.transform.position);
-    StateMachine(playerDistance);
-  }
-
-  void RoamBehavior(float playerDistance)
-  {
-    if (playerDistance <= playerDetect)
+    if (playerDistance <= stats.playerDetect)
     {
-      if (currentCooldown <= 0 && playerDistance <= lungeRange)
+      if (currentCooldown <= 0f && playerDistance <= stats.lungeRange)
       {
         StartLunge();
       }
-      else if (currentCooldown <= 0 && playerDistance > lungeRange)
+      else if (currentCooldown <= 0f && playerDistance > stats.lungeRange)
       {
-        Vector2 directionToPlayer = (player.transform.position - transform.position).normalized;
-        rb.linearVelocity = directionToPlayer * roamSpeed;
+        Vector2 dir = (player.transform.position - transform.position).normalized;
+        rb.linearVelocity = dir * stats.roamSpeed;
       }
-      else if (currentCooldown > 0)
+      else
       {
         rb.linearVelocity = Vector2.zero;
       }
@@ -100,61 +99,50 @@ public class BeeEnemy : MonoBehaviour
     }
   }
 
-  void StartLunge()
+  private void StartLunge()
   {
     lungeStartPosition = transform.position;
-
-    // NEW: Calculate attack point at player's feet
     playerAttackPoint = GetPlayerFeetPosition();
-
     lungeTimer = 0f;
     enemyState = EnemyState.Lunging;
     Debug.Log("Starting lunge towards player's feet!");
   }
 
-  // NEW: Method to get player's feet position
-  Vector3 GetPlayerFeetPosition()
+  private Vector3 GetPlayerFeetPosition()
   {
     if (playerCollider != null)
     {
-      // Get the bottom of the player's collider
       Bounds bounds = playerCollider.bounds;
       return new Vector3(bounds.center.x, bounds.min.y, bounds.center.z);
     }
-    else
-    {
-      // Fallback: position slightly below player's transform
-      return player.transform.position + Vector3.down * 0.5f;
-    }
+    return player.transform.position + Vector3.down * 0.5f;
   }
 
-  void LungeBehavior(float playerDistance)
+  private void LungeBehavior(float playerDistance)
   {
     lungeTimer += Time.deltaTime;
+    Vector2 lungeDir = (playerAttackPoint - transform.position).normalized;
+    rb.linearVelocity = lungeDir * stats.lungingForce;
 
-    Vector2 lungeDirection = (playerAttackPoint - transform.position).normalized;
-    rb.linearVelocity = lungeDirection * lungingForce;
-
-    if (lungeTimer >= lungeDuration || Vector2.Distance(transform.position, playerAttackPoint) < 0.3f)
+    if (lungeTimer >= stats.lungeDuration || Vector2.Distance(transform.position, playerAttackPoint) < 0.3f)
     {
       EndLunge();
     }
   }
 
-  void EndLunge()
+  private void EndLunge()
   {
-    Vector2 retreatDirection = (lungeStartPosition - transform.position).normalized;
-    retreatTargetPosition = transform.position + (Vector3)retreatDirection * retreatRange;
-
-    currentCooldown = lungeCooldown;
+    Vector2 retreatDir = (lungeStartPosition - transform.position).normalized;
+    retreatTargetPosition = transform.position + (Vector3)retreatDir * stats.retreatRange;
+    currentCooldown = stats.lungeCooldown;
     enemyState = EnemyState.Retreating;
     Debug.Log("Lunge ended, retreating!");
   }
 
-  void RetreatBehavior(float playerDistance)
+  private void RetreatBehavior(float playerDistance)
   {
-    Vector2 directionToTarget = (retreatTargetPosition - transform.position).normalized;
-    rb.linearVelocity = directionToTarget * retreatSpeed;
+    Vector2 dir = (retreatTargetPosition - transform.position).normalized;
+    rb.linearVelocity = dir * stats.retreatSpeed;
 
     if (Vector2.Distance(transform.position, retreatTargetPosition) < 0.5f)
     {
@@ -164,28 +152,32 @@ public class BeeEnemy : MonoBehaviour
     }
   }
 
-  void OnCollisionEnter2D(Collision2D collision)
+  private void OnCollisionEnter2D(Collision2D collision)
   {
     if (enemyState == EnemyState.Lunging && collision.gameObject == player)
     {
       Debug.Log("Stung the player! Retreating.");
-      playerHealth.TakeDamage(2);
+      if (playerHealth != null)
+      {
+        playerHealth.TakeDamage(stats.stingDamage);
+      }
       EndLunge();
     }
   }
 
-  void OnDrawGizmos()
+  private void OnDrawGizmos()
   {
+    if (stats == null) return;
+
     Gizmos.color = Color.yellow;
-    Gizmos.DrawWireSphere(transform.position, playerDetect);
+    Gizmos.DrawWireSphere(transform.position, stats.playerDetect);
 
     Gizmos.color = Color.red;
-    Gizmos.DrawWireSphere(transform.position, lungeRange);
+    Gizmos.DrawWireSphere(transform.position, stats.lungeRange);
 
     Gizmos.color = Color.blue;
-    Gizmos.DrawWireSphere(transform.position, retreatRange);
+    Gizmos.DrawWireSphere(transform.position, stats.retreatRange);
 
-    // Show player's feet attack point
     if (Application.isPlaying && player != null)
     {
       Vector3 feetPos = GetPlayerFeetPosition();
@@ -198,7 +190,6 @@ public class BeeEnemy : MonoBehaviour
     {
       Gizmos.color = Color.white;
       Gizmos.DrawWireSphere(lungeStartPosition, 0.3f);
-
       if (enemyState == EnemyState.Retreating)
       {
         Gizmos.color = Color.green;
@@ -208,15 +199,12 @@ public class BeeEnemy : MonoBehaviour
     }
   }
 
-  void FlipSprite()
+  private void FlipSprite()
   {
-    if (player.transform.position.x <= 0.01f)
-    {
-      transform.localScale = new Vector3(-2, 2, 1);
-    }
-    else if (player.transform.position.x >= -0.01f)
-    {
-      transform.localScale = new Vector3(2, 2, 1);
-    }
+    if (player == null || stats == null) return;
+    float dir = (player.transform.position.x >= transform.position.x) ? 1f : -1f;
+    Vector3 s = stats.baseScale;
+    s.x = Mathf.Abs(s.x) * dir;
+    transform.localScale = s;
   }
 }

@@ -3,8 +3,7 @@ using UnityEngine;
 
 public class Enemy_Health : MonoBehaviour
 {
-    public BigCrab_Stats stats;
-    [SerializeField] private int maxHealth;
+    [SerializeField] private int maxHealth = 5;
     [SerializeField] private bool damageable = true;
     [SerializeField] private float invincibilityDuration = .2f;
 
@@ -12,6 +11,11 @@ public class Enemy_Health : MonoBehaviour
     private HealthSystem healthSystem;
     private XP_System xP_System;
     private Drop_Materials drop_Materials;
+
+    private int xpOnDeath;
+    private int dropA;
+    private int dropB;
+    private int dropC;
 
     private void Awake()
     {
@@ -21,47 +25,56 @@ public class Enemy_Health : MonoBehaviour
 
     private void Start()
     {
+        xP_System = GameObject.FindGameObjectWithTag("Player")?.GetComponent<XP_System>();
+
         if (healthSystem == null)
         {
-            Debug.LogError($"{gameObject.name}: Missing HealthSystem component!");
+            Debug.LogError($"{name}: missing HealthSystem component.");
             return;
         }
 
-        healthSystem.OnHealthChanged += OnEnemyHealthChanged;
         healthSystem.Initialize(maxHealth);
-        xP_System = GameObject.FindGameObjectWithTag("Player")?.GetComponent<XP_System>();
+        healthSystem.OnHealthChanged += OnEnemyHealthChanged;
+    }
+
+    public void Initialize(int maxHp, int xpOnDeath, int dropA, int dropB, int dropC)
+    {
+        this.maxHealth = maxHp;
+        this.xpOnDeath = xpOnDeath;
+        this.dropA = dropA;
+        this.dropB = dropB;
+        this.dropC = dropC;
+
+        if (healthSystem != null)
+        {
+            healthSystem.Initialize(this.maxHealth);
+        }
     }
 
     public void TakeDamage(int damage)
     {
-        if (damageable && !hit && healthSystem.CurrentHealth > 0)
-        {
-            hit = true;
-            healthSystem.TakeDamage(damage, gameObject);
-        }
+        if (!damageable || hit || healthSystem == null || healthSystem.CurrentHealth <= 0) return;
+
+        hit = true;
+        healthSystem.TakeDamage(damage);
+        StartCoroutine(TurnOffHit());
     }
 
     private void OnEnemyHealthChanged(int currentHealth, int maxHealth)
     {
-        if (healthSystem.CurrentHealth != currentHealth)
-            return;
-
-        Debug.Log($"{gameObject.name} current health: {currentHealth}/{maxHealth}");
-
         if (currentHealth <= 0)
         {
-            Debug.Log($"{gameObject.name} has died.");
-            if (xP_System != null && stats != null)
-                xP_System.DropXP(transform.position, stats.xpOnDeath);
+            if (xP_System != null)
+            {
+                xP_System.DropXP(transform.position, xpOnDeath);
+            }
 
-            if (drop_Materials != null && stats != null)
-                drop_Materials.DropMaterial(stats.dropA, stats.dropB, stats.dropC);
+            if (drop_Materials != null)
+            {
+                drop_Materials.DropMaterial(dropA, dropB, dropC);
+            }
 
             Destroy(gameObject);
-        }
-        else
-        {
-            StartCoroutine(TurnOffHit());
         }
     }
 

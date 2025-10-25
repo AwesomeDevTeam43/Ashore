@@ -16223,6 +16223,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6284675892622559299, guid: 8fc457a6a36d05945a1bfa6446a5a9b7, type: 3}
+      propertyPath: stats
+      value: 
+      objectReference: {fileID: 11400000, guid: 6cd5ce0ad94975c468742e32ec259006, type: 2}
     - target: {fileID: 8379307940926905367, guid: 8fc457a6a36d05945a1bfa6446a5a9b7, type: 3}
       propertyPath: m_Name
       value: Bee (1)
@@ -21108,7 +21112,6 @@ MonoBehaviour:
   pointFinal: {fileID: 0}
   pointInitial: {fileID: 0}
   speed: 2
-  health: 5
   player: {fileID: 0}
 --- !u!61 &1000034602
 BoxCollider2D:
@@ -47911,7 +47914,6 @@ MonoBehaviour:
   pointFinal: {fileID: 0}
   pointInitial: {fileID: 0}
   speed: 2
-  health: 5
   player: {fileID: 0}
 --- !u!61 &1767133594
 BoxCollider2D:
