@@ -93,10 +93,6 @@ public class Enemy : MonoBehaviour
         }
         break;
     }
-    if (oldState != currentState)
-    {
-      Debug.Log("Mudou de estado: " + oldState + " -> " + currentState);
-    }
   }
 
   private void HandleStateActions()

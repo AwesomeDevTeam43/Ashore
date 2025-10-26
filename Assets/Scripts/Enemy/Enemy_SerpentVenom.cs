@@ -2,44 +2,54 @@ using UnityEngine;
 
 public class Enemy_SerpentVenom : MonoBehaviour
 {
-    private GameObject player;
+    // NOVO: Tornar o dano público para ser definido antes da criação
+    [HideInInspector] public int damageAmount;
+
+    public float speed = 10f;
+    public float lifetime = 10f;
     private Rigidbody2D rb;
-    public float speed;
-    public float timer;
-    private SpriteRenderer sprite;
-    private HealthSystem healthSystem;
+    // Opcional: Adicionar a referência ao inimigo pai para obter stats se necessário
+    // public VenomShooting parentShooter;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        sprite = GetComponent<SpriteRenderer>();
-        player = GameObject.FindGameObjectWithTag("Player");
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
 
-        Vector2 direction = (player.transform.position - transform.position).normalized;
-        rb.linearVelocity = direction * speed;
+        if (player != null)
+        {
+            Vector2 direction = (player.transform.position - transform.position).normalized;
 
-        float rot = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(0, 0, rot);
-    }
+            // CORREÇÃO CRÍTICA: Use 'velocity' e não 'linearVelocity'
+            rb.linearVelocity = direction * speed;
 
-    void Update()
-    {
-        timer += Time.deltaTime;
-        if (timer > 10)
+            float rot = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.Euler(0, 0, rot);
+        }
+        else
         {
             Destroy(gameObject);
+            return;
         }
+        Destroy(gameObject, lifetime);
     }
 
+    // ... OnTriggerEnter2D ...
     void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player"))
         {
-            healthSystem = collision.GetComponent<HealthSystem>();
+            HealthSystem healthSystem = collision.GetComponent<HealthSystem>() ?? collision.GetComponentInParent<HealthSystem>();
+
             if (healthSystem != null)
             {
-                healthSystem.TakeDamage(5);
+                // NOVO: Usar damageAmount
+                healthSystem.TakeDamage(damageAmount);
             }
+            Destroy(gameObject);
+        }
+        else if (collision.CompareTag("MovingPlatform") || collision.CompareTag("Ground"))
+        {
             Destroy(gameObject);
         }
     }

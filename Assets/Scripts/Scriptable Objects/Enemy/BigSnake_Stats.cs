@@ -16,6 +16,7 @@ public class Serpent_Stats : ScriptableObject
 
     [Header("Combat")]
     public int biteDamage = 2;
+    public int venomDamage = 5;
     public float startTimeBtwAttack = 1f;
 
     [Header("Visual")]

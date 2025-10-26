@@ -18,7 +18,8 @@ MonoBehaviour:
   dropB: 0
   dropC: 0
   distanceToPlayer: 8
-  meleeRange: 1.2
+  meleeRange: 2
   biteDamage: 2
+  venomDamage: 5
   startTimeBtwAttack: 1
   baseScale: {x: 2, y: 2, z: 1}
