@@ -12788,7 +12788,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 147.99, y: -1.43, z: -10}
+  m_LocalPosition: {x: -15.5, y: -3.1, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -26893,6 +26893,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1468674986171170441, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
+      propertyPath: m_FlipX
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5083669464025086213, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
       propertyPath: m_Name
       value: Serpent
@@ -26958,6 +26962,10 @@ PrefabInstance:
       value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 5818011355362210075, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
+      propertyPath: venomPrefab
+      value: 
+      objectReference: {fileID: 3782958444212843831, guid: bc3e400054c204a42bede3e5714f13f7, type: 3}
+    - target: {fileID: 5818011355362210075, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
       propertyPath: distanceToPlayer
       value: 15
       objectReference: {fileID: 0}
@@ -26972,29 +26980,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5083669464025086213, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1370096874}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
---- !u!1 &1370096873 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5083669464025086213, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
-  m_PrefabInstance: {fileID: 1370096872}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1370096874
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1370096873}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 09d9d23da9bfbab408c72e9d111f9abf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  equipmentPrefab: {fileID: 1841228293332522625, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
 --- !u!1 &1379969782
 GameObject:
   m_ObjectHideFlags: 0
@@ -29716,7 +29703,7 @@ GameObject:
   - component: {fileID: 1738684676}
   m_Layer: 6
   m_Name: Map 1
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -122725,7 +122712,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1885416273422072935, guid: 079959426cc54094799ac211fb7ca3e0, type: 3}
       propertyPath: cooldownTime
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2638460659533045755, guid: 079959426cc54094799ac211fb7ca3e0, type: 3}
       propertyPath: playerUI
@@ -122755,17 +122742,21 @@ PrefabInstance:
       propertyPath: descriptionSecondaryButton
       value: 
       objectReference: {fileID: 67582312}
+    - target: {fileID: 4133048855591393955, guid: 079959426cc54094799ac211fb7ca3e0, type: 3}
+      propertyPath: m_BodyType
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4299354313336116005, guid: 079959426cc54094799ac211fb7ca3e0, type: 3}
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 5180964667360105844, guid: 079959426cc54094799ac211fb7ca3e0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 147.99
+      value: -15.5
       objectReference: {fileID: 0}
     - target: {fileID: 5180964667360105844, guid: 079959426cc54094799ac211fb7ca3e0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1.43
+      value: -3.1
       objectReference: {fileID: 0}
     - target: {fileID: 5180964667360105844, guid: 079959426cc54094799ac211fb7ca3e0, type: 3}
       propertyPath: m_LocalPosition.z
@@ -122925,6 +122916,18 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 1225151848}
+    - target: {fileID: 3948023291333459219, guid: bc940fb5bf7481f4381a28755685a66e, type: 3}
+      propertyPath: m_BodyType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3948023291333459219, guid: bc940fb5bf7481f4381a28755685a66e, type: 3}
+      propertyPath: m_Constraints
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3948023291333459219, guid: bc940fb5bf7481f4381a28755685a66e, type: 3}
+      propertyPath: m_GravityScale
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

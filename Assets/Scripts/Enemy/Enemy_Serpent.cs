@@ -2,24 +2,37 @@ using UnityEngine;
 
 public class VenomShooting : MonoBehaviour
 {
+    // Variáveis públicas
     public Serpent_Stats stats;
-    public GameObject venom;
+    public GameObject venomPrefab; // Nome alterado para seguir convenções (venom -> venomPrefab)
     public Transform shootPoint;
-
     private Enemy_Health enemyHealth;
-    private GameObject player;
-    private float timer;
-    private float timeBtwAttack;
-    private bool inRange;
+    private Transform player;
 
+    public enum EnemyState { Idle, Biting, PreparingToShoot, Shooting }
+    private EnemyState currentState;
+    private float meleeCooldownTimer;
+    private float shootCooldownTimer;
+    private SpriteRenderer spriteRenderer;
+    private Color originalColor;
+    public Color chargeColor = Color.green;
+    private float currentChargeTime;
+    public const float chargeDuration = 0.5f; // Duração fixa para o carregamento do disparo
     void Start()
     {
         enemyHealth = GetComponent<Enemy_Health>();
-        player = GameObject.FindGameObjectWithTag("Player");
-
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null)
+        {
+            originalColor = spriteRenderer.color;
+        }
+        if (playerObject != null)
+        {
+            player = playerObject.transform;
+        }
         if (stats == null)
         {
-            Debug.LogWarning("VenomShooting: Serpent_Stats not assigned -> disabling script.");
             enabled = false;
             return;
         }
@@ -30,63 +43,169 @@ public class VenomShooting : MonoBehaviour
         }
 
         transform.localScale = stats.baseScale;
-        timeBtwAttack = 0f;
+        meleeCooldownTimer = 0f;
+        shootCooldownTimer = 0f;
+        currentState = EnemyState.Idle;
     }
 
     void Update()
     {
         if (player == null || stats == null) return;
 
-        float distance = Vector2.Distance(player.transform.position, transform.position);
+        float distance = Vector2.Distance(player.position, transform.position);
 
+        // --- 1. Gestão de Cooldowns ---
+        if (meleeCooldownTimer > 0f) meleeCooldownTimer -= Time.deltaTime;
+        if (shootCooldownTimer > 0f) shootCooldownTimer -= Time.deltaTime;
+
+        // --- 2. Transições de Estado (A FSM) ---
+        HandleStateTransitions(distance);
+
+        // --- 3. Ações de Estado ---
+        HandleStateActions(distance);
+
+        // --- 4. Virar o sprite ---
+        // Faz o flip apenas se estiver ativo (Chasing, Preparando, Atacando)
+        if (currentState != EnemyState.Idle)
+        {
+            FacePlayer();
+        }
+    }
+
+    // NOVO MÉTODO PARA GERIR AS TRANSIÇÕES
+    void HandleStateTransitions(float distance)
+    {
+        // Melee tem a prioridade máxima
         if (distance < stats.meleeRange)
         {
-            inRange = true;
-            Bite();
+            currentState = EnemyState.Biting;
+            return;
+        }
+
+        // Se saiu do alcance melee, volta a transição normal
+        if (currentState == EnemyState.Biting)
+        {
+            currentState = EnemyState.Idle;
+        }
+
+        // Se estiver no estado de disparo/preparação, mantém-se até o ciclo terminar.
+        if (currentState == EnemyState.PreparingToShoot || currentState == EnemyState.Shooting)
+        {
+            return;
+        }
+
+        // Lógica para iniciar o ciclo de Disparo
+        if (distance < stats.distanceToPlayer)
+        {
+            if (shootCooldownTimer <= 0f)
+            {
+                // Começa o ciclo de disparo entrando em PREPARAÇÃO
+                currentState = EnemyState.PreparingToShoot;
+                currentChargeTime = chargeDuration; // Reset do timer de carga
+                return;
+            }
+            else
+            {
+                // Está no alcance mas em cooldown, fica Idle
+                currentState = EnemyState.Idle;
+            }
         }
         else
         {
-            inRange = false;
-            if (distance < stats.distanceToPlayer)
-            {
-                timer += Time.deltaTime;
-                if (timer > 2f)
-                {
-                    timer = 0f;
-                    Shoot();
-                }
-            }
+            // Fora do alcance, fica Idle
+            currentState = EnemyState.Idle;
         }
+    }
 
-        if (timeBtwAttack > 0f) timeBtwAttack -= Time.deltaTime;
+    void HandleStateActions(float distance)
+    {
+        switch (currentState)
+        {
+            case EnemyState.Biting:
+                Bite();
+                break;
+            case EnemyState.PreparingToShoot:
+                // --- Ação: Reduzir o Timer e Mudar a Cor ---
+
+                // 1. Reduz o tempo de preparação
+                currentChargeTime -= Time.deltaTime;
+
+                // 2. Efeito visual: Calcula a proporção de 0 a 1
+                float t = 1f - (currentChargeTime / GetChargeDuration()); // t vai de 0 a 1
+                if (spriteRenderer != null)
+                {
+                    // Lerp: Interpola suavemente entre a cor original e a cor de carga
+                    spriteRenderer.color = Color.Lerp(originalColor, chargeColor, t);
+                }
+                if (currentChargeTime <= 0f)
+                {
+                    // Transição para Disparo (AÇÃO INSTANTÂNEA)
+                    currentState = EnemyState.Shooting;
+                }
+                break;
+
+            case EnemyState.Shooting:
+                Shoot();
+                // 1. IMPORTANTE: Reinicia a cor para a original imediatamente após disparar
+                if (spriteRenderer != null)
+                {
+                    spriteRenderer.color = originalColor;
+                }
+                // 2. Reinicia o Cooldown
+                shootCooldownTimer = stats.startTimeBtwAttack;
+
+                // 3. Volta imediatamente para o estado Idle (ou Chasing, dependendo do alcance)
+                currentState = EnemyState.Idle;
+                break;
+
+            case EnemyState.Idle:
+                break;
+        }
+    }
+
+    private float GetChargeDuration()
+    {
+        return chargeDuration; // Retorna a duração fixa definida
     }
 
     void Shoot()
     {
-        if (venom != null && shootPoint != null)
-            Instantiate(venom, shootPoint.position, Quaternion.identity);
+        // Certifica-se de que o prefab está atribuído
+        if (venomPrefab != null && shootPoint != null)
+        {
+            GameObject projectile = Instantiate(venomPrefab, shootPoint.position, Quaternion.identity);
+        }
     }
 
     void Bite()
     {
-        if (player == null || !inRange) return;
-
-        if (timeBtwAttack <= 0f)
+        // Usa o meleeCooldownTimer
+        if (meleeCooldownTimer <= 0f)
         {
-            if (player.TryGetComponent<HealthSystem>(out var ph))
+            if (player.TryGetComponent<HealthSystem>(out var ph) || (ph = player.GetComponentInParent<HealthSystem>()) != null)
             {
                 if (stats.biteDamage <= 0) Debug.LogWarning("VenomShooting: biteDamage <= 0");
                 ph.TakeDamage(stats.biteDamage);
+                Debug.Log("Serpent Bite! Player hit.");
             }
             else
             {
-                var phParent = player.GetComponentInParent<HealthSystem>();
-                if (phParent != null) phParent.TakeDamage(stats.biteDamage);
-                else Debug.LogWarning("VenomShooting: Player HealthSystem not found.");
+                Debug.LogWarning("VenomShooting: Player HealthSystem not found.");
             }
 
-            timeBtwAttack = stats.startTimeBtwAttack;
+            meleeCooldownTimer = stats.startTimeBtwAttack;
         }
+    }
+
+    // Função para virar o sprite para onde o player está
+    void FacePlayer()
+    {
+        if (player == null) return;
+
+        float dir = (player.position.x >= transform.position.x) ? 1f : -1f;
+        Vector3 s = stats.baseScale;
+        s.x = Mathf.Abs(s.x) * dir;
+        transform.localScale = s;
     }
 
     void OnDrawGizmos()
