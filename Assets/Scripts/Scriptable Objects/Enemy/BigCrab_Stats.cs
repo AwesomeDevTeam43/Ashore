@@ -9,6 +9,8 @@ public class BigCrab_Stats : ScriptableObject
     public float attackRange = 1f;
     public float startTimeBtwAttack = 1f;
     public int biteDamage = 1;
+    public float knockbackForce = 5f;
+    public float knockbackDuration = 0.2f;
     public int xpOnDeath = 3;
     public int dropA = 1;
     public int dropB = 2;

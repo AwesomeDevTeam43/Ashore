@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -11,7 +12,7 @@ public class Enemy : MonoBehaviour
   public enum EnemyState { Idle, Chasing, Attacking }
   private EnemyState currentState;
 
-  private float timeBtwAttack; 
+  private float timeBtwAttack;
 
   private void Start()
   {
@@ -27,16 +28,12 @@ public class Enemy : MonoBehaviour
     {
       player = playerObject.transform;
     }
-    else
-    {
-      Debug.LogError("Enemy: Jogador não encontrado. Verifique se ele tem a tag 'Player'.");
-    }
 
     if (stats != null)
     {
-      timeBtwAttack = 0f; 
+      timeBtwAttack = 0f;
     }
-    currentState = EnemyState.Idle; 
+    currentState = EnemyState.Idle;
   }
 
   private void Update()
@@ -106,22 +103,19 @@ public class Enemy : MonoBehaviour
     switch (currentState)
     {
       case EnemyState.Idle:
-        // Ação: Parar
         rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
         break;
 
       case EnemyState.Chasing:
-        // Ação: Mover em direção ao jogador
         float moveDirection = (player.position.x > transform.position.x) ? 1f : -1f;
         rb.linearVelocity = new Vector2(moveDirection * stats.speed, rb.linearVelocity.y);
         FlipSpriteOnMove(); // Vira o sprite com base na direção do movimento
         break;
 
       case EnemyState.Attacking:
-        // Ação: Parar de se mover e tentar atacar
         rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
         FacePlayer(); // Garante que está virado para o jogador
-        AttemptAttack(); // Tenta executar o ataque (controlado pelo timer)
+        AttemptAttack();
         break;
     }
   }
@@ -147,21 +141,58 @@ public class Enemy : MonoBehaviour
     if (player == null) return;
 
     HealthSystem playerHealth = null;
+    Rigidbody2D playerRb = null;
     if (!player.TryGetComponent<HealthSystem>(out playerHealth))
     {
       playerHealth = player.GetComponentInParent<HealthSystem>();
+      if (playerHealth != null)
+      {
+        playerRb = playerHealth.GetComponent<Rigidbody2D>();
+      }
+    }
+    else
+    {
+      playerRb = player.GetComponent<Rigidbody2D>();
     }
 
     if (playerHealth != null)
     {
       if (stats.biteDamage <= 0) Debug.LogWarning("Enemy: biteDamage <= 0");
+
       playerHealth.TakeDamage(stats.biteDamage);
-      Debug.Log("Player Hit! (Ataque Ativo)");
-      Debug.Log(playerHealth.CurrentHealth);
+      if (playerRb != null)
+      {
+        StartCoroutine(ApplyPlayerKnockback(playerRb, player));
+      }
     }
-    else
+  }
+
+  private IEnumerator ApplyPlayerKnockback(Rigidbody2D playerRb, Transform playerTransform)
+  {
+    if (playerRb == null || stats == null) yield break;
+
+    Transform attackOrigin = transform;
+
+    Vector2 dir = (playerTransform.position - attackOrigin.position).normalized;
+
+    playerRb.linearVelocity = Vector2.zero;
+
+    playerRb.AddForce(dir * stats.knockbackForce, ForceMode2D.Impulse);
+
+    float t = 0f;
+
+    Vector2 startVel = playerRb.linearVelocity;
+
+    while (t < stats.knockbackDuration && playerRb != null)
     {
-      Debug.LogWarning("Enemy: Player HealthSystem not found on assigned player Transform.");
+      playerRb.linearVelocity = Vector2.Lerp(startVel, Vector2.zero, t / stats.knockbackDuration);
+      t += Time.deltaTime;
+      yield return null;
+    }
+
+    if (playerRb != null)
+    {
+      playerRb.linearVelocity = Vector2.zero;
     }
   }
 
@@ -179,7 +210,6 @@ public class Enemy : MonoBehaviour
   void FacePlayer()
   {
     if (player == null) return;
-
     float dir = (player.position.x >= transform.position.x) ? 1f : -1f;
     Vector3 s = stats.baseScale;
     s.x = Mathf.Abs(s.x) * dir;
