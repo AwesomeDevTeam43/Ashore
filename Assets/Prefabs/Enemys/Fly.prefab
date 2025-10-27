@@ -24,6 +24,10 @@ PrefabInstance:
       propertyPath: m_FlipX
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3626916397498700004, guid: 4443a681c5281b94b9ce6fa8cac0af50, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -427066485589525634, guid: 2bb232b0638936641844fc25215ec1b6, type: 3}
     - target: {fileID: 7878350319992209165, guid: 4443a681c5281b94b9ce6fa8cac0af50, type: 3}
       propertyPath: m_LocalScale.x
       value: 1.5
@@ -164,8 +168,8 @@ BoxCollider2D:
   m_Offset: {x: 0.015625, y: 0.484375}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.48387095, y: 0}
-    oldSize: {x: 0.96875, y: 0.96875}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 1, y: 1}
     newSize: {x: 0.96875, y: 0.96875}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -186,16 +190,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stats: {fileID: 11400000, guid: 4e199f8ba61d170429644b72141d0cf6, type: 2}
-  speed: 2
-  directionChangeInterval: 2
-  maxRadius: 5
-  centerPoint: {x: 0, y: 0}
   obstacleLayer:
     serializedVersion: 2
-    m_Bits: 0
-  obstacleAvoidanceDistance: 1
-  collisionDamage: 1
-  damageInterval: 0.5
+    m_Bits: 64
+  boundaryLayer:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!114 &3966688931334613896
 MonoBehaviour:
   m_ObjectHideFlags: 0
