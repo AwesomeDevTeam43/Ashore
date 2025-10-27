@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class BeeEnemy : MonoBehaviour
+public class BeeEnemy : EnemyBase
 {
-  public GiantBee_Stats stats;
+  private GiantBee_Stats typedStats;
   private Enemy_Health enemyHealth;
 
   private GameObject player;
@@ -22,11 +22,13 @@ public class BeeEnemy : MonoBehaviour
 
   private void Start()
   {
-    enemyHealth = GetComponent<Enemy_Health>();
-    if (enemyHealth != null && stats != null)
-    {
-      enemyHealth.Initialize(stats.maxHealth, stats.xpOnDeath, stats.dropA, stats.dropB, stats.dropC);
-    }
+    typedStats = stats as GiantBee_Stats;
+
+        enemyHealth = GetComponent<Enemy_Health>();
+        if (enemyHealth != null && typedStats != null)
+        {
+            enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.dropA, typedStats.dropB, typedStats.dropC);
+        }
 
     rb = GetComponent<Rigidbody2D>();
     if (rb == null) rb = gameObject.AddComponent<Rigidbody2D>();
@@ -77,16 +79,16 @@ public class BeeEnemy : MonoBehaviour
 
   private void RoamBehavior(float playerDistance)
   {
-    if (playerDistance <= stats.playerDetect)
+    if (playerDistance <= typedStats.playerDetect)
     {
-      if (currentCooldown <= 0f && playerDistance <= stats.lungeRange)
+      if (currentCooldown <= 0f && playerDistance <= typedStats.lungeRange)
       {
         StartLunge();
       }
-      else if (currentCooldown <= 0f && playerDistance > stats.lungeRange)
+      else if (currentCooldown <= 0f && playerDistance > typedStats.lungeRange)
       {
         Vector2 dir = (player.transform.position - transform.position).normalized;
-        rb.linearVelocity = dir * stats.roamSpeed;
+        rb.linearVelocity = dir * typedStats.roamSpeed;
       }
       else
       {
@@ -122,9 +124,9 @@ public class BeeEnemy : MonoBehaviour
   {
     lungeTimer += Time.deltaTime;
     Vector2 lungeDir = (playerAttackPoint - transform.position).normalized;
-    rb.linearVelocity = lungeDir * stats.lungingForce;
+    rb.linearVelocity = lungeDir * typedStats.lungingForce;
 
-    if (lungeTimer >= stats.lungeDuration || Vector2.Distance(transform.position, playerAttackPoint) < 0.3f)
+    if (lungeTimer >= typedStats.lungeDuration || Vector2.Distance(transform.position, playerAttackPoint) < 0.3f)
     {
       EndLunge();
     }
@@ -133,8 +135,8 @@ public class BeeEnemy : MonoBehaviour
   private void EndLunge()
   {
     Vector2 retreatDir = (lungeStartPosition - transform.position).normalized;
-    retreatTargetPosition = transform.position + (Vector3)retreatDir * stats.retreatRange;
-    currentCooldown = stats.lungeCooldown;
+    retreatTargetPosition = transform.position + (Vector3)retreatDir * typedStats.retreatRange;
+    currentCooldown = typedStats.lungeCooldown;
     enemyState = EnemyState.Retreating;
     Debug.Log("Lunge ended, retreating!");
   }
@@ -142,7 +144,7 @@ public class BeeEnemy : MonoBehaviour
   private void RetreatBehavior(float playerDistance)
   {
     Vector2 dir = (retreatTargetPosition - transform.position).normalized;
-    rb.linearVelocity = dir * stats.retreatSpeed;
+    rb.linearVelocity = dir * typedStats.retreatSpeed;
 
     if (Vector2.Distance(transform.position, retreatTargetPosition) < 0.5f)
     {
@@ -159,7 +161,7 @@ public class BeeEnemy : MonoBehaviour
       Debug.Log("Stung the player! Retreating.");
       if (playerHealth != null)
       {
-        playerHealth.TakeDamage(stats.stingDamage);
+        playerHealth.TakeDamage(typedStats.stingDamage);
       }
       EndLunge();
     }
@@ -170,13 +172,13 @@ public class BeeEnemy : MonoBehaviour
     if (stats == null) return;
 
     Gizmos.color = Color.yellow;
-    Gizmos.DrawWireSphere(transform.position, stats.playerDetect);
+    Gizmos.DrawWireSphere(transform.position, typedStats.playerDetect);
 
     Gizmos.color = Color.red;
-    Gizmos.DrawWireSphere(transform.position, stats.lungeRange);
+    Gizmos.DrawWireSphere(transform.position, typedStats.lungeRange);
 
     Gizmos.color = Color.blue;
-    Gizmos.DrawWireSphere(transform.position, stats.retreatRange);
+    Gizmos.DrawWireSphere(transform.position, typedStats.retreatRange);
 
     if (Application.isPlaying && player != null)
     {

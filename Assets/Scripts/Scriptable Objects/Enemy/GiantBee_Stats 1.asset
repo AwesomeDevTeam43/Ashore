@@ -12,6 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10c4223c818086b4ea6b3d914c52e241, type: 3}
   m_Name: GiantBee_Stats 1
   m_EditorClassIdentifier: 
+  maxHealth: 5
+  xpOnDeath: 1
+  dropA: 5
+  dropB: 4
+  dropC: 5
+  baseScale: {x: 2, y: 2, z: 1}
   roamSpeed: 4
   lungingForce: 7
   retreatSpeed: 6
@@ -21,4 +27,3 @@ MonoBehaviour:
   lungeCooldown: 2
   lungeDuration: 1
   stingDamage: 2
-  baseScale: {x: 2, y: 2, z: 1}

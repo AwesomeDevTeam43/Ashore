@@ -119,7 +119,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!114 &2320399452680389737
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -133,7 +133,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stats: {fileID: 11400000, guid: 715748681221ae44b8b019b8b0e44337, type: 2}
-  player: {fileID: 0}
 --- !u!114 &9023469275235641710
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -220,7 +219,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cacfc9d7f5bd07c41a8a6ee8979339ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stats: {fileID: 11400000, guid: 715748681221ae44b8b019b8b0e44337, type: 2}
   maxHealth: 3
   damageable: 1
   invincibilityDuration: 0.2

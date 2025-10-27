@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 15
   xpOnDeath: 3
-  dropA: 0
-  dropB: 0
-  dropC: 0
+  dropA: 3
+  dropB: 2
+  dropC: 4
+  baseScale: {x: 2, y: 2, z: 1}
   distanceToPlayer: 8
   meleeRange: 2
   biteDamage: 2
   venomDamage: 5
   startTimeBtwAttack: 1
-  baseScale: {x: 2, y: 2, z: 1}

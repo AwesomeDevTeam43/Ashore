@@ -13,13 +13,15 @@ MonoBehaviour:
   m_Name: BigCrab_Stats 1
   m_EditorClassIdentifier: 
   maxHealth: 5
+  xpOnDeath: 3
+  dropA: 5
+  dropB: 2
+  dropC: 3
+  baseScale: {x: 3.34, y: 3.34, z: 1}
   speed: 2
   followPlayerRange: 5
   attackRange: 2
   startTimeBtwAttack: 1
   biteDamage: 1
-  xpOnDeath: 3
-  dropA: 1
-  dropB: 2
-  dropC: 3
-  baseScale: {x: 3.34, y: 3.34, z: 1}
+  knockbackForce: 5
+  knockbackDuration: 0.2

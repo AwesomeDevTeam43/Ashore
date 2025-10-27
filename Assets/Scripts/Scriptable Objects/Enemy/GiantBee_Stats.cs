@@ -1,10 +1,8 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "GiantBee_Stats", menuName = "Enemies/GiantBee_Stats")]
-public class GiantBee_Stats : ScriptableObject
+public class GiantBee_Stats : Enemy_Stats
 {
-    public int maxHealth = 5;
-    
     [Header("Movement")]
     public float roamSpeed = 4f;
     public float lungingForce = 7f;
@@ -21,13 +19,4 @@ public class GiantBee_Stats : ScriptableObject
 
     [Header("Combat")]
     public int stingDamage = 2;
-
-    [Header("Visual")]
-    public Vector3 baseScale = new Vector3(2f, 2f, 1f);
-
-    [Header("Rewards")]
-    public int xpOnDeath = 3;
-    public int dropA = 1;
-    public int dropB = 2;
-    public int dropC = 3;
 }

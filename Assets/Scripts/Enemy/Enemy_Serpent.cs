@@ -1,9 +1,9 @@
 using UnityEngine;
 
-public class VenomShooting : MonoBehaviour
+public class VenomShooting : EnemyBase
 {
     // Variáveis públicas
-    public Serpent_Stats stats;
+    private Serpent_Stats typedStats;
     public GameObject venomPrefab; // Nome alterado para seguir convenções (venom -> venomPrefab)
     public Transform shootPoint;
     private Enemy_Health enemyHealth;
@@ -20,6 +20,8 @@ public class VenomShooting : MonoBehaviour
     public const float chargeDuration = 0.5f; // Duração fixa para o carregamento do disparo
     void Start()
     {
+        typedStats = stats as Serpent_Stats;
+
         enemyHealth = GetComponent<Enemy_Health>();
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -37,9 +39,9 @@ public class VenomShooting : MonoBehaviour
             return;
         }
 
-        if (enemyHealth != null)
+        if (enemyHealth != null && typedStats != null)
         {
-            enemyHealth.Initialize(stats.maxHealth, stats.xpOnDeath, stats.dropA, stats.dropB, stats.dropC);
+            enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.dropA, typedStats.dropB, typedStats.dropC);
         }
 
         transform.localScale = stats.baseScale;
@@ -76,7 +78,7 @@ public class VenomShooting : MonoBehaviour
     void HandleStateTransitions(float distance)
     {
         // Melee tem a prioridade máxima
-        if (distance < stats.meleeRange)
+        if (distance < typedStats.meleeRange)
         {
             currentState = EnemyState.Biting;
             return;
@@ -95,7 +97,7 @@ public class VenomShooting : MonoBehaviour
         }
 
         // Lógica para iniciar o ciclo de Disparo
-        if (distance < stats.distanceToPlayer)
+        if (distance < typedStats.distanceToPlayer)
         {
             if (shootCooldownTimer <= 0f)
             {
@@ -152,7 +154,7 @@ public class VenomShooting : MonoBehaviour
                     spriteRenderer.color = originalColor;
                 }
                 // 2. Reinicia o Cooldown
-                shootCooldownTimer = stats.startTimeBtwAttack;
+                shootCooldownTimer = typedStats.startTimeBtwAttack;
 
                 // 3. Volta imediatamente para o estado Idle (ou Chasing, dependendo do alcance)
                 currentState = EnemyState.Idle;
@@ -184,8 +186,8 @@ public class VenomShooting : MonoBehaviour
         {
             if (player.TryGetComponent<HealthSystem>(out var ph) || (ph = player.GetComponentInParent<HealthSystem>()) != null)
             {
-                if (stats.biteDamage <= 0) Debug.LogWarning("VenomShooting: biteDamage <= 0");
-                ph.TakeDamage(stats.biteDamage);
+                if (typedStats.biteDamage <= 0) Debug.LogWarning("VenomShooting: biteDamage <= 0");
+                ph.TakeDamage(typedStats.biteDamage);
                 Debug.Log("Serpent Bite! Player hit.");
             }
             else
@@ -193,7 +195,7 @@ public class VenomShooting : MonoBehaviour
                 Debug.LogWarning("VenomShooting: Player HealthSystem not found.");
             }
 
-            meleeCooldownTimer = stats.startTimeBtwAttack;
+            meleeCooldownTimer = typedStats.startTimeBtwAttack;
         }
     }
 
@@ -212,8 +214,8 @@ public class VenomShooting : MonoBehaviour
     {
         if (stats == null) return;
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, stats.distanceToPlayer);
+        Gizmos.DrawWireSphere(transform.position, typedStats.distanceToPlayer);
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position, stats.meleeRange);
+        Gizmos.DrawWireSphere(transform.position, typedStats.meleeRange);
     }
 }

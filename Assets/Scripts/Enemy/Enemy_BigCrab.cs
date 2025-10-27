@@ -3,9 +3,9 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Enemy_Health))]
-public class Enemy : MonoBehaviour
+public class BigCrab : EnemyBase
 {
-  public BigCrab_Stats stats;
+  public BigCrab_Stats typedStats;
   private Enemy_Health enemyHealth;
   private Transform player;
   private Rigidbody2D rb;
@@ -16,12 +16,13 @@ public class Enemy : MonoBehaviour
 
   private void Start()
   {
+    typedStats = stats as BigCrab_Stats;
     enemyHealth = GetComponent<Enemy_Health>();
     rb = GetComponent<Rigidbody2D>();
 
     if (enemyHealth != null && stats != null)
     {
-      enemyHealth.Initialize(stats.maxHealth, stats.xpOnDeath, stats.dropA, stats.dropB, stats.dropC);
+      enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.dropA, typedStats.dropB, typedStats.dropC);
     }
     GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
     if (playerObject != null)
@@ -64,7 +65,7 @@ public class Enemy : MonoBehaviour
     {
       case EnemyState.Idle:
         // Transição: Idle -> Chasing
-        if (distanceToPlayer <= stats.followPlayerRange)
+        if (distanceToPlayer <= typedStats.followPlayerRange)
         {
           currentState = EnemyState.Chasing;
         }
@@ -72,19 +73,19 @@ public class Enemy : MonoBehaviour
 
       case EnemyState.Chasing:
         // Transição: Chasing -> Attacking
-        if (distanceToPlayer <= stats.attackRange)
+        if (distanceToPlayer <= typedStats.attackRange)
         {
           currentState = EnemyState.Attacking;
         }
         // Transição: Chasing -> Idle
-        else if (distanceToPlayer > stats.followPlayerRange)
+        else if (distanceToPlayer > typedStats.followPlayerRange)
         {
           currentState = EnemyState.Idle;
         }
         break;
 
       case EnemyState.Attacking:
-        if (distanceToPlayer > stats.attackRange)
+        if (distanceToPlayer > typedStats.attackRange)
         {
           currentState = EnemyState.Chasing;
         }
@@ -108,7 +109,7 @@ public class Enemy : MonoBehaviour
 
       case EnemyState.Chasing:
         float moveDirection = (player.position.x > transform.position.x) ? 1f : -1f;
-        rb.linearVelocity = new Vector2(moveDirection * stats.speed, rb.linearVelocity.y);
+        rb.linearVelocity = new Vector2(moveDirection * typedStats.speed, rb.linearVelocity.y);
         FlipSpriteOnMove(); // Vira o sprite com base na direção do movimento
         break;
 
@@ -124,13 +125,13 @@ public class Enemy : MonoBehaviour
   {
     if (timeBtwAttack <= 0)
     {
-      if (stats.startTimeBtwAttack <= 0)
+      if (typedStats.startTimeBtwAttack <= 0)
       {
         timeBtwAttack = 2f; // Define um padrão de 2s para evitar loop infinito
       }
       else
       {
-        timeBtwAttack = stats.startTimeBtwAttack; // Reinicia o cooldown
+        timeBtwAttack = typedStats.startTimeBtwAttack; // Reinicia o cooldown
       }
       CheckEnemyAttack();
     }
@@ -157,9 +158,9 @@ public class Enemy : MonoBehaviour
 
     if (playerHealth != null)
     {
-      if (stats.biteDamage <= 0) Debug.LogWarning("Enemy: biteDamage <= 0");
+      if (typedStats.biteDamage <= 0) Debug.LogWarning("Enemy: biteDamage <= 0");
 
-      playerHealth.TakeDamage(stats.biteDamage);
+      playerHealth.TakeDamage(typedStats.biteDamage);
       if (playerRb != null)
       {
         StartCoroutine(ApplyPlayerKnockback(playerRb, player));
@@ -177,15 +178,15 @@ public class Enemy : MonoBehaviour
 
     playerRb.linearVelocity = Vector2.zero;
 
-    playerRb.AddForce(dir * stats.knockbackForce, ForceMode2D.Impulse);
+    playerRb.AddForce(dir * typedStats.knockbackForce, ForceMode2D.Impulse);
 
     float t = 0f;
 
     Vector2 startVel = playerRb.linearVelocity;
 
-    while (t < stats.knockbackDuration && playerRb != null)
+    while (t < typedStats.knockbackDuration && playerRb != null)
     {
-      playerRb.linearVelocity = Vector2.Lerp(startVel, Vector2.zero, t / stats.knockbackDuration);
+      playerRb.linearVelocity = Vector2.Lerp(startVel, Vector2.zero, t / typedStats.knockbackDuration);
       t += Time.deltaTime;
       yield return null;
     }
@@ -220,8 +221,8 @@ public class Enemy : MonoBehaviour
   {
     if (stats == null) return;
     Gizmos.color = Color.yellow;
-    Gizmos.DrawWireSphere(transform.position, stats.followPlayerRange);
+    Gizmos.DrawWireSphere(transform.position, typedStats.followPlayerRange);
     Gizmos.color = Color.red;
-    Gizmos.DrawWireSphere(transform.position, stats.attackRange);
+    Gizmos.DrawWireSphere(transform.position, typedStats.attackRange);
   }
 }
