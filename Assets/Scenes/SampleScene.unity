@@ -16806,7 +16806,7 @@ GameObject:
   - component: {fileID: 868290342}
   - component: {fileID: 868290343}
   m_Layer: 0
-  m_Name: SpawnPoint (01)
+  m_Name: SP_Giant Bee (01)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -20295,6 +20295,8 @@ Transform:
   m_Children:
   - {fileID: 868290342}
   - {fileID: 1345136932}
+  - {fileID: 1682613216}
+  - {fileID: 1758418954}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &926293773
@@ -21353,6 +21355,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -2253911629886400664, guid: 4443a681c5281b94b9ce6fa8cac0af50, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1000034604}
+    - targetCorrespondingSourceObject: {fileID: -2253911629886400664, guid: 4443a681c5281b94b9ce6fa8cac0af50, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1000034608}
   m_SourcePrefab: {fileID: -8435245712485981826, guid: 4443a681c5281b94b9ce6fa8cac0af50, type: 3}
 --- !u!1 &1000034598 stripped
 GameObject:
@@ -21371,10 +21376,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8293de8adc6c45642b45e5d506e713a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pointFinal: {fileID: 0}
-  pointInitial: {fileID: 0}
+  stats: {fileID: 0}
   speed: 2
-  player: {fileID: 0}
+  directionChangeInterval: 2
+  maxRadius: 5
+  centerPoint: {x: 0, y: 0}
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  obstacleAvoidanceDistance: 1
+  collisionDamage: 1
+  damageInterval: 0.5
 --- !u!61 &1000034602
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -21465,6 +21477,21 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7878350319992209165, guid: 4443a681c5281b94b9ce6fa8cac0af50, type: 3}
   m_PrefabInstance: {fileID: 1000034597}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1000034608
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1000034598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cacfc9d7f5bd07c41a8a6ee8979339ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 5
+  damageable: 1
+  invincibilityDuration: 0.2
 --- !u!1 &1001387500
 GameObject:
   m_ObjectHideFlags: 0
@@ -26611,7 +26638,7 @@ GameObject:
   - component: {fileID: 1345136932}
   - component: {fileID: 1345136933}
   m_Layer: 0
-  m_Name: SpawnPoint (02)
+  m_Name: SP_Big Crab (01)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29460,6 +29487,55 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &1682613215
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1682613216}
+  - component: {fileID: 1682613217}
+  m_Layer: 0
+  m_Name: SP_Serpent (01)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1682613216
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1682613215}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 9.85, y: -5.93, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 900758912}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1682613217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1682613215}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca224eb259bd1194595701ddb03381d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyPrefab: {fileID: 5083669464025086213, guid: 6021c360f01e7bc4faf382ef65a6da4d, type: 3}
+  enemyStatsOverride: {fileID: 11400000, guid: 3f76e932fbaef8d46b067d0cfb367d5c, type: 2}
+  spawnOnStart: 1
+  singleSpawn: 1
+  hasSpawned: 0
 --- !u!1 &1689156159 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1211247639234732159, guid: 69d55de689756b9448543dd2c0224a20, type: 3}
@@ -48353,6 +48429,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 220408554}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1758418953
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1758418954}
+  - component: {fileID: 1758418955}
+  m_Layer: 0
+  m_Name: SP_Fly (01)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1758418954
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1758418953}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.24, y: -2.62, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 900758912}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1758418955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1758418953}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca224eb259bd1194595701ddb03381d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyPrefab: {fileID: 1211247639234732159, guid: 69d55de689756b9448543dd2c0224a20, type: 3}
+  enemyStatsOverride: {fileID: 11400000, guid: 4e199f8ba61d170429644b72141d0cf6, type: 2}
+  spawnOnStart: 1
+  singleSpawn: 1
+  hasSpawned: 0
 --- !u!1001 &1767133589
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -48447,6 +48572,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -2253911629886400664, guid: 4443a681c5281b94b9ce6fa8cac0af50, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1767133596}
+    - targetCorrespondingSourceObject: {fileID: -2253911629886400664, guid: 4443a681c5281b94b9ce6fa8cac0af50, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1767133600}
   m_SourcePrefab: {fileID: -8435245712485981826, guid: 4443a681c5281b94b9ce6fa8cac0af50, type: 3}
 --- !u!1 &1767133590 stripped
 GameObject:
@@ -48465,10 +48593,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8293de8adc6c45642b45e5d506e713a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pointFinal: {fileID: 0}
-  pointInitial: {fileID: 0}
+  stats: {fileID: 0}
   speed: 2
-  player: {fileID: 0}
+  directionChangeInterval: 2
+  maxRadius: 5
+  centerPoint: {x: 0, y: 0}
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  obstacleAvoidanceDistance: 1
+  collisionDamage: 1
+  damageInterval: 0.5
 --- !u!61 &1767133594
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -48559,6 +48694,21 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7878350319992209165, guid: 4443a681c5281b94b9ce6fa8cac0af50, type: 3}
   m_PrefabInstance: {fileID: 1767133589}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1767133600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1767133590}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cacfc9d7f5bd07c41a8a6ee8979339ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 5
+  damageable: 1
+  invincibilityDuration: 0.2
 --- !u!1 &1788108984
 GameObject:
   m_ObjectHideFlags: 0
