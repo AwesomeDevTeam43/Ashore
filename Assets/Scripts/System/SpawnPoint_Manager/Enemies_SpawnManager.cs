@@ -6,6 +6,7 @@ public class Enemies_SpawnManager : MonoBehaviour
     [SerializeField] private bool spawnOnStart = true;
 
     private EnemySpawnPoint[] spawnPoints;
+    private HealthSystem entityHealth;
 
     void Awake()
     {
