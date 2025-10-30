@@ -2,10 +2,12 @@ using UnityEngine;
 using System;
 using UnityEngine.SceneManagement;
 
-public class Boss : MonoBehaviour
+public class Boss : MonoBehaviour, ISaveable
 {
+    [SerializeField] public int enemyHealth = 5;
     private HealthSystem bossHealth;
-
+    bool isDead = false;
+    
     // Controls whether the boss is allowed to trigger its Laser attack.
     // When the Laser is used it will be disabled until a Combo run resets it.
     [HideInInspector]
@@ -43,10 +45,30 @@ public class Boss : MonoBehaviour
     private void Awake()
     {
         bossHealth = GetComponent<HealthSystem>();
-        bossHealth.Initialize(35);
+        bossHealth.Initialize(enemyHealth);
         bossHealth.OnHealthChanged += OnHealthChanged;
 
         anim = GetComponent<Animator>();
+    }
+
+    public object CaptureState()
+    {
+        return new BossData
+        {
+            hasDied = this.isDead
+        };
+
+    }
+    
+    public void RestoreState(object state)
+    {
+        var saveData = (BossData)state;
+        this.isDead = saveData.hasDied;
+
+        if (isDead)
+        {
+            Destroy(this);
+        }
     }
 
     [Header("Laser Spawn")]
@@ -180,8 +202,15 @@ public class Boss : MonoBehaviour
         if (currentHealth <= 0)
         {
             Debug.Log("Boss defeated");
+            isDead = true;
             SceneManager.LoadScene("MainMenu");
             Destroy(gameObject);
         }
+    }
+
+    [System.Serializable]
+    private struct BossData
+    {
+        public bool hasDied;
     }
 }
