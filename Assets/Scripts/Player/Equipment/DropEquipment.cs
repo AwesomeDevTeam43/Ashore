@@ -3,7 +3,7 @@ using UnityEngine;
 public class DropEquipment : MonoBehaviour
 {
     [SerializeField] private GameObject equipmentPrefab;
-    private HealthSystem health;
+   // private HealthSystem health;
     void Awake()
     {
 
@@ -12,41 +12,43 @@ public class DropEquipment : MonoBehaviour
         {
             Debug.LogError("Equipment prefab is not assigned!");
         }
-        health = GetComponent<HealthSystem>();
+        //health = GetComponent<HealthSystem>();
         
-        health.OnHealthChanged += OnHealthChanged;
+        //health.OnHealthChanged += OnHealthChanged;
     }
 
     void OnDestroy()
     {
-        if (health != null)
-        {
-            health.OnHealthChanged -= OnHealthChanged;
-        }
+        //if (health != null)
+      //  {
+        //    health.OnHealthChanged -= OnHealthChanged;
+      //  }
     }
 
     void OnDisable()
     {
-        if (health != null)
-        {
-            health.OnHealthChanged -= OnHealthChanged;
-        }
+       // if (health != null)
+      //  {
+       //     health.OnHealthChanged -= OnHealthChanged;
+      //  }
     }
 
-    void OnHealthChanged(int currentHealth, int maxHealth)
-    {
-        if (currentHealth <= 0)
-        {
-            Drop();
-        }
-    }
+   // void OnHealthChanged(int currentHealth, int maxHealth)
+   // {
+   //     if (currentHealth <= 0)
+    //    {
+   //         Drop();
+   //     }
+   // }
 
-    private void Drop()
+    public void Drop()
     {
         if (equipmentPrefab != null)
         {
             equipmentPrefab.GetComponent<Equipment>().isEquipped = false;
             Instantiate(equipmentPrefab, transform.position, Quaternion.identity);
+
+            Debug.Log("EU SPAWNEI");
         }
     }
 }

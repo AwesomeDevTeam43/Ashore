@@ -504,7 +504,7 @@ public class Inventoy_UI : MonoBehaviour
             return;
         }
 
-        // Copy base ItemData fields
+    // Copy base ItemData fields
         runtimeInstance.itemName = proto.itemName;
         runtimeInstance.icon = proto.icon;
         runtimeInstance.description = proto.description;
@@ -512,6 +512,10 @@ public class Inventoy_UI : MonoBehaviour
         runtimeInstance.isCraftable = false; // crafted product shouldn't be a recipe
         runtimeInstance.isStackable = proto.isStackable;
         runtimeInstance.maxStackSize = proto.maxStackSize;
+
+    // Ensure the runtime instance's asset name matches the prototype asset name
+    // so our save system (which loads by resource name) can restore it later.
+    runtimeInstance.name = proto.name;
 
         // If the prototype is an EquipmentData, copy equipment-specific fields as well
         var protoEquip = proto as EquipmentData;

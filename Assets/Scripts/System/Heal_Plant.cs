@@ -137,7 +137,16 @@ public class Heal_Plant : MonoBehaviour, ISaveable
 
     public void RestoreState(object state)
     {
-        var saveData = (PlantSaveData)state;
+        PlantSaveData saveData;
+        // Handle both direct struct instance and JObject (when deserialized generically)
+        if (state is Newtonsoft.Json.Linq.JObject jObj)
+        {
+            saveData = jObj.ToObject<PlantSaveData>();
+        }
+        else
+        {
+            saveData = (PlantSaveData)state;
+        }
         this.isDead = saveData.isUsed;
 
         if (isDead)

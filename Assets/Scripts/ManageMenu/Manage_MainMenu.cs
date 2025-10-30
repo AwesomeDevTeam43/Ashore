@@ -19,8 +19,18 @@ public class Manage_MainMenu : MonoBehaviour
 
     private void OnStartClicked()
     {
-        GameFlowState.LoadGameOnStart = true;
-        SceneManager.LoadScene(gameSceneName);
+        string savedScene = SaveSystem.GetSavedSceneName();
+        if (!string.IsNullOrEmpty(savedScene))
+        {
+            GameFlowState.LoadGameOnStart = true;
+            SceneManager.LoadScene(savedScene);
+        }
+        else
+        {
+            // No save found: start a fresh game
+            GameFlowState.LoadGameOnStart = false;
+            SceneManager.LoadScene(gameSceneName);
+        }
     }
 
     public void GoBackToMenu()

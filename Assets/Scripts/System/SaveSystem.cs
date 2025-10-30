@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 public static class SaveSystem
 {
@@ -12,7 +13,7 @@ public static class SaveSystem
     {
         PlayerData data = new PlayerData(player, xp, health, inventory);
 
-        var saveableEntities = Object.FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>();
+    var saveableEntities = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).OfType<ISaveable>();
 
         foreach (var saveable in saveableEntities)
         {
@@ -55,9 +56,26 @@ public static class SaveSystem
         }
     }
 
+    public static string GetSavedSceneName()
+    {
+        string path = Application.persistentDataPath + SAVE_FILE;
+        if (!File.Exists(path)) return null;
+        try
+        {
+            string json = File.ReadAllText(path);
+            var jo = JObject.Parse(json);
+            var token = jo["sceneName"];
+            return token != null ? token.ToString() : null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public static void RestoreWorldState(PlayerData data)
     {
-        var saveableEntities = Object.FindObjectsOfType<MonoBehaviour>(true).OfType<ISaveable>();
+    var saveableEntities = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).OfType<ISaveable>();
 
         foreach (var saveable in saveableEntities)
         {

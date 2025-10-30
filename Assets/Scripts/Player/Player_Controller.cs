@@ -166,24 +166,61 @@ private void Start()
           transform.position = new Vector3(data.position[0], data.position[1], data.position[2]);
 
           // Restore Inventory
-          Inventory.instance.Clear();
-          for (int i = 0; i < data.inventoryItemNames.Count; i++)
-          {
-              // NOTE: This requires a way to find ItemData by name.
-              ItemData item = Resources.Load<ItemData>("Items/" + data.inventoryItemNames[i]);
-              if (item != null)
-              {
-                  Inventory.instance.Add(item, data.inventoryItemQuantities[i]);
-              }
-          }
+      Inventory.instance.Clear();
+      // Prefer resource names if available; fall back to item names
+      var namesList = (data.inventoryResourceNames != null && data.inventoryResourceNames.Count > 0)
+        ? data.inventoryResourceNames
+        : data.inventoryItemNames;
+
+      for (int i = 0; i < namesList.Count && i < data.inventoryItemQuantities.Count; i++)
+      {
+        string key = namesList[i];
+        ItemData item = Resources.Load<ItemData>("Items/" + key);
+        if (item != null)
+        {
+          Inventory.instance.Add(item, data.inventoryItemQuantities[i]);
+        }
+        else
+        {
+          Debug.LogWarning($"LoadGame: Could not find ItemData at Resources/Items/{key}. Skipping.");
+        }
+      }
 
           // Restore Equipment
           currentEquipment = null;
-          if (!string.IsNullOrEmpty(data.equippedItemName))
+      // Prefer resource key for equipment
+      string equipKey = !string.IsNullOrEmpty(data.equippedResourceName) ? data.equippedResourceName : data.equippedItemName;
+      if (!string.IsNullOrEmpty(equipKey))
+      {
+        // Try to load EquipmentData by resource key and equip it
+        EquipmentData eqData = Resources.Load<EquipmentData>("Items/" + equipKey);
+        if (eqData != null)
+        {
+          if (EquipmentManager.instance != null)
           {
-              // You would need a way to find the equipment in the inventory and equip it.
-              // This is a complex step that depends on your inventory and equipment system.
+            EquipmentManager.instance.EquipFromInventory(eqData);
           }
+          else
+          {
+            // Fallback: direct instantiate and equip
+            if (eqData.equipmentPrefab != null)
+            {
+              GameObject equipObj = Instantiate(eqData.equipmentPrefab, transform);
+              equipObj.name = eqData.itemName + "_InventoryHolder";
+              equipObj.SetActive(false);
+              Equipment eq = equipObj.GetComponent<Equipment>();
+              if (eq != null)
+              {
+                SetCurrentEquipment(eq);
+                eq.isEquipped = true;
+                eq.Equip();
+                // Attempt removing from inventory if present (no-op if not there)
+                Inventory.instance.Remove(eqData);
+              }
+            }
+          }
+        }
+      }
 
           SaveSystem.RestoreWorldState(data);
 

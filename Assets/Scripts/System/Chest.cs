@@ -19,6 +19,8 @@ public class Chest : MonoBehaviour
 
     private Drop_Materials drop_Materials;
 
+    private DropEquipment dropEquipment;
+
     private void Awake()
     {
         player = GameObject.FindGameObjectWithTag("Player");
@@ -27,6 +29,13 @@ public class Chest : MonoBehaviour
         player_InputHandler = player.GetComponent<Player_InputHandler>();
         player_Controller = player.GetComponent<Player_Controller>();
         drop_Materials = GetComponent<Drop_Materials>();
+
+
+    }
+
+    void Start()
+    {
+        dropEquipment = this.GetComponent<DropEquipment>();
     }
 
     private void Update()
@@ -42,6 +51,7 @@ public class Chest : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.E))
             {
                 OpenChest();
+                dropEquipment.Drop();
             }
         }
     }
@@ -53,7 +63,7 @@ public class Chest : MonoBehaviour
             isOpen = true;
             spriteRenderer.sprite = openSprite;
             xP_System.DropXP(transform.position, xpReward);
-            drop_Materials.DropMaterial(1, 2, 3);
+//            drop_Materials.DropMaterial(1, 2, 3);
         }
     }
 
