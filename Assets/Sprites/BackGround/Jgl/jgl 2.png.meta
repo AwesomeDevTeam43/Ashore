@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 51e771af2a05a8e47b54711baf759e7a
+guid: 9f1311c5a927e05418b858e2c2a6b130
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1863785220895593441
-    second: JglBackground_0
+      213: -1465375117930830051
+    second: jgl 2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -40,13 +40,13 @@ TextureImporter:
     filterMode: 1
     aniso: 1
     mipBias: 0
-    wrapU: 0
-    wrapV: 0
-    wrapW: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: JglBackground_0
+      name: jgl 2_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 960
-        height: 280
+        width: 1024
+        height: 290
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1e3da1d98ce7dd910800000000000000
-      internalID: 1863785220895593441
+      spriteID: d1769091811f9abe0800000000000000
+      internalID: -1465375117930830051
       vertices: []
       indices: 
       edges: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      JglBackground_0: 1863785220895593441
+      jgl 2_0: -1465375117930830051
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
