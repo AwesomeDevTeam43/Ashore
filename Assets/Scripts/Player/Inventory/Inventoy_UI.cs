@@ -9,6 +9,8 @@ using UnityEngine.EventSystems;
 
 public class Inventoy_UI : MonoBehaviour
 {
+    [Header("Standalone Toggle (legacy)")]
+    [SerializeField] private bool allowStandaloneToggle = false; // Set true only if not using the new MenuController
     // --- Your existing fields ---
     private bool isOpen;
     [SerializeField] private GameObject canvasInventory;
@@ -185,7 +187,9 @@ public class Inventoy_UI : MonoBehaviour
 
     void Update()
     {
-        // Your existing toggle logic
+        // Legacy standalone toggle disabled by default (MenuController now owns menu open/close)
+        if (!allowStandaloneToggle) return;
+
         if (Input.GetKeyDown(KeyCode.I))
         {
             ToggleInventory();

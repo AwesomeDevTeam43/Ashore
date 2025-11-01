@@ -35,6 +35,24 @@ public class Player_InputHandler : MonoBehaviour
     public bool InteractActionTriggered { get; private set; }
     public bool InventoryActionTriggered { get; private set; }
 
+    // Public event to signal inventory open/close action instantly (avoids polling races)
+    public event Action OnInventoryPressed;
+
+    // Expose methods to enable/disable the entire player action map when UI is open
+    public void DisablePlayerActions()
+    {
+        if (playerControls == null) return;
+        var map = playerControls.FindActionMap(actionMapName);
+        if (map != null) map.Disable();
+    }
+
+    public void EnablePlayerActions()
+    {
+        if (playerControls == null) return;
+        var map = playerControls.FindActionMap(actionMapName);
+        if (map != null) map.Enable();
+    }
+
     [Header("8-Direction Inputs")]
     private Vector2[] directions8 = new Vector2[]
     {
@@ -109,7 +127,7 @@ public class Player_InputHandler : MonoBehaviour
         interactAction.performed += inputInfo => InteractActionTriggered = true;
         interactAction.canceled += inputInfo => InteractActionTriggered = false;
 
-        inventoryAction.performed += inputInfo => InventoryActionTriggered = true;
+        inventoryAction.performed += inputInfo => { InventoryActionTriggered = true; OnInventoryPressed?.Invoke(); };
         inventoryAction.canceled += inputInfo => InventoryActionTriggered = false;
     }
 
