@@ -13,17 +13,20 @@ public class MenuController : MonoBehaviour
     [Header("Tabs")] 
     [SerializeField] private Button inventoryTab;
     [SerializeField] private Button equipmentTab;
+    [SerializeField] private Button mapTab;
     // Gadgets tab removed per request
 
     [Header("Pages")] 
     [SerializeField] private GameObject inventoryPageGO;
     [SerializeField] private GameObject equipmentPageGO;
+    [SerializeField] private GameObject mapPageGO;
     // Gadgets page removed per request
 
     [Header("Page Behaviours (optional)")]
     [SerializeField] private InventoryPage inventoryPage; // assign if InventoryPage is on inventoryPageGO
     [SerializeField] private EquipmentPage equipmentPage; // optional, for simple equipped display
     [SerializeField] private GameObject defaultEquipmentFocus;
+    [SerializeField] private GameObject defaultMapFocus;
     [Header("Footer")]
     [SerializeField] private TextMeshProUGUI footerText; // Displays selected item info
 
@@ -38,7 +41,7 @@ public class MenuController : MonoBehaviour
     [Tooltip("UI action for moving to the next tab (e.g., RB).")]
     [SerializeField] private InputActionReference uiRightTabAction;
 
-    private int currentTabIndex = 0; // 0=Inventory,1=Equipment
+    private int currentTabIndex = 0; // 0=Inventory,1=Equipment,2=Map
     private EventSystem es;
     private Player_InputHandler inputHandler;
     private PlayerInput playerInput;
@@ -86,12 +89,15 @@ public class MenuController : MonoBehaviour
     private void Start()
     {
         // Wire tab buttons
-        if (inventoryTab != null) inventoryTab.onClick.AddListener(() => ShowPage(0));
-        if (equipmentTab != null) equipmentTab.onClick.AddListener(() => ShowPage(1));
+    if (inventoryTab != null) inventoryTab.onClick.AddListener(() => ShowPage(0));
+    if (equipmentTab != null) equipmentTab.onClick.AddListener(() => ShowPage(1));
+    if (mapTab != null) mapTab.onClick.AddListener(() => ShowPage(2));
         // Add highlight components for player feedback
-        EnsureSelectionHighlight(inventoryTab != null ? inventoryTab.gameObject : null);
-        EnsureSelectionHighlight(equipmentTab != null ? equipmentTab.gameObject : null);
+    EnsureSelectionHighlight(inventoryTab != null ? inventoryTab.gameObject : null);
+    EnsureSelectionHighlight(equipmentTab != null ? equipmentTab.gameObject : null);
+    EnsureSelectionHighlight(mapTab != null ? mapTab.gameObject : null);
         EnsureSelectionHighlight(defaultEquipmentFocus);
+    EnsureSelectionHighlight(defaultMapFocus);
     // no gadgets tab
     }
 
@@ -381,23 +387,35 @@ public class MenuController : MonoBehaviour
 
     public void NextTab()
     {
-    int next = (currentTabIndex + 1) % 2;
+        int tabs = GetTabCount();
+        int next = (currentTabIndex + 1 + tabs) % tabs;
         ShowPage(next);
     }
 
     public void PrevTab()
     {
-    int prev = (currentTabIndex + 2 - 1) % 2;
+        int tabs = GetTabCount();
+        int prev = (currentTabIndex - 1 + tabs) % tabs;
         ShowPage(prev);
+    }
+
+    private int GetTabCount()
+    {
+        int tabs = 0;
+        if (inventoryPageGO != null) tabs++;
+        if (equipmentPageGO != null) tabs++;
+        if (mapPageGO != null) tabs++;
+        return Mathf.Max(1, tabs);
     }
 
     public void ShowPage(int index)
     {
-    currentTabIndex = Mathf.Clamp(index, 0, 1);
+        int tabs = GetTabCount();
+        currentTabIndex = Mathf.Clamp(index, 0, tabs - 1);
 
         if (inventoryPageGO != null) inventoryPageGO.SetActive(currentTabIndex == 0);
         if (equipmentPageGO != null) equipmentPageGO.SetActive(currentTabIndex == 1);
-    // no gadgets page
+        if (mapPageGO != null) mapPageGO.SetActive(currentTabIndex == 2);
 
         // Focus
         if (es == null) es = EventSystem.current;
@@ -412,7 +430,9 @@ public class MenuController : MonoBehaviour
                 if (equipmentPage != null) equipmentPage.Refresh();
                 focus = defaultEquipmentFocus != null ? defaultEquipmentFocus : (equipmentTab != null ? equipmentTab.gameObject : null);
                 break;
-            // no gadgets case
+            case 2:
+                focus = defaultMapFocus != null ? defaultMapFocus : (mapTab != null ? mapTab.gameObject : null);
+                break;
         }
         if (es != null && focus != null)
         {
