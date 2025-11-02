@@ -65,18 +65,8 @@ public class Player_Movement : MonoBehaviour
             lastPlatformPosition = currentPlatformPos;
         }
 
-        float targetX = player_InputHandler.MovementInput.x * moveSpeed;
-
-        if (platformMovement != Vector2.zero)
-            targetX += platformMovement.x / Time.fixedDeltaTime;
-
-        bool hasInput = Mathf.Abs(player_InputHandler.MovementInput.x) > 0.01f;
-        float smoothTime = hasInput ? 1f / acceleration : 1f / deceleration;
-
-        float currentX = rb.linearVelocity.x;
-        float newX = Mathf.SmoothDamp(currentX, targetX, ref velocityXSmoothing, smoothTime);
-
-        rb.linearVelocity = new Vector2(newX, rb.linearVelocity.y);
+        float targetX = player_InputHandler.MovementInput.x * moveSpeed + platformMovement.x / Time.fixedDeltaTime;
+        rb.linearVelocity = new Vector2(targetX, rb.linearVelocity.y);
     }
 
     private void HandleDirection()
