@@ -50,7 +50,15 @@ public class MapPage : MonoBehaviour
     private Vector2 lastRTSize;
     private Vector3 currentCenter; // camera center in world space
     private float baseOrthoSize;   // computed to fit bounds
-    private int zoomFactor = 1;    // 1 or 2
+    [Header("Zoom")]
+    [Tooltip("When zoomed, show this fraction of the full-map height. 0.25 = 25% of map height (strong zoom).")]
+    [Range(0.05f, 0.9f)]
+    [SerializeField] private float zoomedCoverageFraction = 0.25f;
+    private bool isZoomed = false;
+    // Persist last map view across menu close/reopen (per play session)
+    private static bool s_HasState = false;
+    private static Vector3 s_SavedCenter;
+    private static bool s_SavedIsZoomed;
 
     private void Awake()
     {
@@ -94,6 +102,16 @@ public class MapPage : MonoBehaviour
         BuildOrUpdateCamera();
         ComputeWorldBounds();
         FitCameraToBounds();
+
+        // Restore previously saved state (if any)
+        if (s_HasState)
+        {
+            isZoomed = s_SavedIsZoomed;
+            currentCenter = s_SavedCenter;
+            mapCamera.orthographicSize = baseOrthoSize * (isZoomed ? Mathf.Clamp01(zoomedCoverageFraction) : 1f);
+            ApplyCameraTransform();
+        }
+
         UpdatePlayerDot();
     }
 
@@ -271,9 +289,9 @@ public class MapPage : MonoBehaviour
         var sizeX = worldBounds.extents.x;
         var sizeY = mapPlane == Plane.XY ? worldBounds.extents.y : worldBounds.extents.z;
         float aspect = rt != null ? (rt.width / (float)rt.height) : 1f;
-        float orthoSize = Mathf.Max(sizeY, sizeX / Mathf.Max(0.0001f, aspect));
-        baseOrthoSize = Mathf.Max(1f, orthoSize);
-        mapCamera.orthographicSize = baseOrthoSize / Mathf.Max(1, zoomFactor);
+    float orthoSize = Mathf.Max(sizeY, sizeX / Mathf.Max(0.0001f, aspect));
+    baseOrthoSize = Mathf.Max(1f, orthoSize);
+    mapCamera.orthographicSize = baseOrthoSize * (isZoomed ? Mathf.Clamp01(zoomedCoverageFraction) : 1f);
     }
 
     private void UpdatePlayerDot()
@@ -349,8 +367,26 @@ public class MapPage : MonoBehaviour
             }
             if (toggle)
             {
-                zoomFactor = (zoomFactor == 1) ? 2 : 1;
-                mapCamera.orthographicSize = baseOrthoSize / zoomFactor;
+                isZoomed = !isZoomed;
+                mapCamera.orthographicSize = baseOrthoSize * (isZoomed ? Mathf.Clamp01(zoomedCoverageFraction) : 1f);
+
+                // When entering zoomed mode, center on the player by default
+                if (isZoomed)
+                {
+                    if (player == null)
+                    {
+                        var pgo = GameObject.FindGameObjectWithTag("Player");
+                        if (pgo != null) player = pgo.transform;
+                    }
+                    if (player != null)
+                    {
+                        var p = player.position;
+                        if (mapPlane == Plane.XY)
+                            currentCenter = new Vector3(p.x, p.y, currentCenter.z);
+                        else
+                            currentCenter = new Vector3(p.x, currentCenter.y, p.z);
+                    }
+                }
             }
         }
     }
@@ -389,5 +425,18 @@ public class MapPage : MonoBehaviour
 
             mapCamera.transform.position = new Vector3(currentCenter.x, 1000f, currentCenter.z);
         }
+    }
+
+    private void OnDisable()
+    {
+        SaveState();
+    }
+
+    private void SaveState()
+    {
+        // Save last camera center and zoom flag
+        s_SavedCenter = currentCenter;
+        s_SavedIsZoomed = isZoomed;
+        s_HasState = true;
     }
 }

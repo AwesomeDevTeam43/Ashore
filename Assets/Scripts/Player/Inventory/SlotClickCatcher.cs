@@ -1,19 +1,13 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-// Simple component that forwards pointer clicks to the inventory UI. This is more
-// reliable in some setups than relying on Button components alone.
+// Legacy helper. Kept as a no-op to avoid compile references to the removed legacy inventory UI.
 public class SlotClickCatcher : MonoBehaviour, IPointerClickHandler
 {
-    public Inventoy_UI ui;
-    public int slotIndex = -1;
+    public int slotIndex = -1; // no longer used
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log($"SlotClickCatcher: pointer click on slotIndex={slotIndex} (gameObject={gameObject.name})");
-        if (ui != null && slotIndex >= 0)
-        {
-            ui.OnSlotClicked(slotIndex);
-        }
+        // Intentionally no-op; InventoryPage wires button clicks directly.
     }
 }

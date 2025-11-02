@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-// Attach this to any Canvas (or the Inventoy_UI GameObject) to get clickable diagnostics.
+// Attach this to any Canvas to get clickable diagnostics.
 // Left-click in Game view to print the list of UI elements under the cursor and where they come from.
 public class UIRaycastDebugger : MonoBehaviour
 {
@@ -89,12 +89,7 @@ public class UIRaycastDebugger : MonoBehaviour
                 Debug.Log($" - Total UI results across canvases: {totalResults}");
             }
 
-            // If an Inventoy_UI exists in the scene, call its slot-hit diagnostic helper
-            var ui = FindAnyObjectByType<Inventoy_UI>();
-            if (ui != null)
-            {
-                ui.LogSlotHitInfo(pos);
-            }
+            // Legacy Inventoy_UI diagnostics removed
         }
     }
 }
