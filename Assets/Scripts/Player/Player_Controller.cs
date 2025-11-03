@@ -7,6 +7,19 @@ public class Player_Controller : MonoBehaviour
   public static event Action OnPlayerLoad;
   private XP_System xP_System;
   private Player_Health playerHealth;
+  private Rigidbody2D rb2d;
+  private Rigidbody rb3d;
+
+  [Header("Animation")]
+  [SerializeField] private Animator animator; // Assign in Inspector or auto-fetch
+  [Tooltip("Float parameter to drive movement speed (optional). Leave empty to skip.")]
+  [SerializeField] private string speedParam = "Speed";
+  [Tooltip("Bool parameter to toggle running state (optional). Leave empty to skip.")]
+  [SerializeField] private string isRunningParam = "IsRunning";
+  [Tooltip("Speed threshold above which we consider the player running.")]
+  [SerializeField] private float runThreshold = 0.1f;
+  private bool hasSpeedParam = false;
+  private bool hasIsRunningParam = false;
 
   [Header("Player Stats")]
   [SerializeField] private PlayerStats playerStats;
@@ -51,6 +64,19 @@ private void Awake()
 {
     xP_System = GetComponent<XP_System>();
     playerHealth = GetComponent<Player_Health>();
+  rb2d = GetComponent<Rigidbody2D>();
+  rb3d = GetComponent<Rigidbody>();
+  if (animator == null) animator = GetComponent<Animator>();
+  if (animator != null)
+  {
+    foreach (var p in animator.parameters)
+    {
+      if (!hasSpeedParam && !string.IsNullOrEmpty(speedParam) && p.name == speedParam && p.type == AnimatorControllerParameterType.Float)
+        hasSpeedParam = true;
+      if (!hasIsRunningParam && !string.IsNullOrEmpty(isRunningParam) && p.name == isRunningParam && p.type == AnimatorControllerParameterType.Bool)
+        hasIsRunningParam = true;
+    }
+  }
 
     if (xP_System != null)
     {
@@ -91,6 +117,8 @@ private void Start()
   {
     useEquipment();
 
+    UpdateAnimationParameters();
+
     if (Input.GetKeyDown(KeyCode.F5))
     {
         SaveGame();
@@ -102,6 +130,22 @@ private void Start()
         // You could re-enable it for debugging if you wish.
         // LoadGame();
     }
+  }
+
+  private void UpdateAnimationParameters()
+  {
+    if (animator == null) return;
+
+    float speed = 0f;
+    if (rb2d != null)
+      speed = rb2d.linearVelocity.magnitude;
+    else if (rb3d != null)
+      speed = rb3d.linearVelocity.magnitude;
+
+    if (hasSpeedParam)
+      animator.SetFloat(speedParam, speed);
+    if (hasIsRunningParam)
+      animator.SetBool(isRunningParam, speed > runThreshold);
   }
 
   void useEquipment()

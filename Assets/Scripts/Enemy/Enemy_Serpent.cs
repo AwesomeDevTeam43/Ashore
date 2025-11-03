@@ -213,6 +213,11 @@ public class VenomShooting : EnemyBase
     void OnDrawGizmos()
     {
         if (stats == null) return;
+        if (typedStats == null)
+        {
+            typedStats = stats as Serpent_Stats;
+            if (typedStats == null) return;
+        }
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, typedStats.distanceToPlayer);
         Gizmos.color = Color.green;
