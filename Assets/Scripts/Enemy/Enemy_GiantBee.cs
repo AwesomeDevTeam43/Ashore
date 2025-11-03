@@ -39,11 +39,11 @@ public class BeeEnemy : EnemyBase
   {
     typedStats = stats as GiantBee_Stats;
 
-        enemyHealth = GetComponent<Enemy_Health>();
-        if (enemyHealth != null && typedStats != null)
-        {
-            enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.dropA, typedStats.dropB, typedStats.dropC);
-        }
+    enemyHealth = GetComponent<Enemy_Health>();
+    if (enemyHealth != null && typedStats != null)
+    {
+      enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.dropA, typedStats.dropB, typedStats.dropC);
+    }
 
     rb = GetComponent<Rigidbody2D>();
     if (rb == null) rb = gameObject.AddComponent<Rigidbody2D>();
@@ -436,16 +436,17 @@ public class BeeEnemy : EnemyBase
 
   private void OnDrawGizmos()
   {
-    if (stats == null) return;
+    var ts = typedStats ?? (stats as GiantBee_Stats);
+    if (ts == null) return;
 
     Gizmos.color = Color.yellow;
-    Gizmos.DrawWireSphere(transform.position, typedStats.playerDetect);
+    Gizmos.DrawWireSphere(transform.position, ts.playerDetect);
 
     Gizmos.color = Color.red;
-    Gizmos.DrawWireSphere(transform.position, typedStats.lungeRange);
+    Gizmos.DrawWireSphere(transform.position, ts.lungeRange);
 
     Gizmos.color = Color.blue;
-    Gizmos.DrawWireSphere(transform.position, typedStats.retreatRange);
+    Gizmos.DrawWireSphere(transform.position, ts.retreatRange);
 
     if (Application.isPlaying && player != null)
     {
