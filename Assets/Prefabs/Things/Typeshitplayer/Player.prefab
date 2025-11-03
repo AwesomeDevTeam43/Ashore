@@ -276,6 +276,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc8766c9ed9be6b48ab8ab30bf4b470c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  animator: {fileID: 0}
+  speedParam: Speed
+  isRunningParam: IsRunning
+  runThreshold: 0.1
   playerStats: {fileID: 11400000, guid: bd35a466862b3c849af092f1d041e9c1, type: 2}
   currentEquipment: {fileID: 0}
   spearPrefab: {fileID: 1841228293332522625, guid: e6b8f07b99d5b9245b42f8daf795dcdf, type: 3}
@@ -561,7 +565,7 @@ Animator:
   m_GameObject: {fileID: 6252809459483690441}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 01a66cb2138f406499536798a803576e, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
