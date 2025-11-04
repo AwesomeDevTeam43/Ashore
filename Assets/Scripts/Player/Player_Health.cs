@@ -7,6 +7,8 @@ public class Player_Health : MonoBehaviour
     private HealthSystem healthSystem;
     private XP_System xP_System;
 
+    public bool godMode = false;
+
     [Header("Player Stats")]
     [SerializeField] private PlayerStats playerStats;
     public bool IsAlive = true;
@@ -109,6 +111,11 @@ public class Player_Health : MonoBehaviour
         {
             IsAlive = false;
             SceneManager.LoadScene("MainMenu");
+        }
+
+        if (godMode && currentHealth < maxHealth)
+        {
+            healthSystem.SetHealth(maxHealth);
         }
     }
 

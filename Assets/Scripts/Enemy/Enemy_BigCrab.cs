@@ -9,6 +9,8 @@ public class BigCrab : EnemyBase
   private Enemy_Health enemyHealth;
   private Transform player;
   private Rigidbody2D rb;
+  private Animator animator;
+  [SerializeField] private string walkBoolName = "isWalking"; // Animator bool
   public enum EnemyState { Idle, Chasing, Attacking }
   private EnemyState currentState;
 
@@ -19,6 +21,7 @@ public class BigCrab : EnemyBase
     typedStats = stats as BigCrab_Stats;
     enemyHealth = GetComponent<Enemy_Health>();
     rb = GetComponent<Rigidbody2D>();
+  animator = GetComponentInChildren<Animator>();
 
     if (enemyHealth != null && stats != null)
     {
@@ -98,6 +101,7 @@ public class BigCrab : EnemyBase
     if (player == null)
     {
       rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+      if (animator != null) animator.SetBool(walkBoolName, false);
       return;
     }
 
@@ -105,18 +109,22 @@ public class BigCrab : EnemyBase
     {
       case EnemyState.Idle:
         rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+        if (animator != null) animator.SetBool(walkBoolName, false);
         break;
 
       case EnemyState.Chasing:
+        // Move toward player like before and drive the animation from movement
         float moveDirection = (player.position.x > transform.position.x) ? 1f : -1f;
         rb.linearVelocity = new Vector2(moveDirection * typedStats.speed, rb.linearVelocity.y);
-        FlipSpriteOnMove(); // Vira o sprite com base na direção do movimento
+        FlipSpriteOnMove(); // flip based on move dir
+        if (animator != null) animator.SetBool(walkBoolName, true);
         break;
 
       case EnemyState.Attacking:
         rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
         FacePlayer(); // Garante que está virado para o jogador
         AttemptAttack();
+        if (animator != null) animator.SetBool(walkBoolName, false);
         break;
     }
   }
