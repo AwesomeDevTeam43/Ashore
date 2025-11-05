@@ -4,6 +4,7 @@ using System;
 
 public class Player_Controller : MonoBehaviour
 {
+  
   public static event Action OnPlayerLoad;
   private XP_System xP_System;
   private Player_Health playerHealth;

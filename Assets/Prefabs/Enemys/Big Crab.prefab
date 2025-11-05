@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 7324065520476466136}
   - component: {fileID: -2770615711749428176}
   - component: {fileID: 7973088768013213042}
+  - component: {fileID: -548673277206740306}
   m_Layer: 7
   m_Name: Big Crab
   m_TagString: Enemy
@@ -133,6 +134,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stats: {fileID: 11400000, guid: 715748681221ae44b8b019b8b0e44337, type: 2}
+  typedStats: {fileID: 0}
+  walkBoolName: isWalking
 --- !u!114 &9023469275235641710
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -222,3 +225,25 @@ MonoBehaviour:
   maxHealth: 3
   damageable: 1
   invincibilityDuration: 0.2
+--- !u!95 &-548673277206740306
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1772538608698774022}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 5d854b978074f5e4180296a97df740f9, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
