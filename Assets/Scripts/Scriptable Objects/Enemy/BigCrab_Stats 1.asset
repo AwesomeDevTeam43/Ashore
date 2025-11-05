@@ -21,7 +21,7 @@ MonoBehaviour:
   speed: 2
   followPlayerRange: 5
   attackRange: 2
-  startTimeBtwAttack: 1
+  startTimeBtwAttack: 0.5
   biteDamage: 1
   knockbackForce: 5
   knockbackDuration: 0.2
