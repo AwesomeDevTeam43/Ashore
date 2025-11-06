@@ -15,8 +15,6 @@ public class Chest : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private XP_System xP_System;
     private bool isOpen = false;
-    private bool playerNearby = false;
-
     private Drop_Materials drop_Materials;
 
     private DropEquipment dropEquipment;

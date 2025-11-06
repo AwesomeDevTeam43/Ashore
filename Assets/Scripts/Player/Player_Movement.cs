@@ -28,7 +28,6 @@ public class Player_Movement : MonoBehaviour
 
     private Map_PlatformMoves currentPlatform;
     private Vector2 lastPlatformPosition;
-    private bool isDownwardAttacking = false;
 
     public bool IsFacingRight => isFacingRight;
     public bool IsFacingLeft => !isFacingRight;
@@ -81,17 +80,14 @@ public class Player_Movement : MonoBehaviour
         if (player_InputHandler.MovementInput.y < 0f && !IsGrounded())
         {
             attackZone.transform.localPosition = -vertAtk;
-            isDownwardAttacking = true;
         }
         else if (player_InputHandler.MovementInput.y > 0f)
         {
             attackZone.transform.localPosition = vertAtk;
-            isDownwardAttacking = false;
         }
         else
         {
             attackZone.transform.localPosition = startPos;
-            isDownwardAttacking = false;
         }
     }
 
