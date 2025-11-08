@@ -23,6 +23,7 @@ public class MeleeWeapon : MonoBehaviour
     private Player_Camera playerCamera;
 
     private Vector2 direction;
+    private Animator animator;
 
     void Start()
     {
@@ -30,11 +31,17 @@ public class MeleeWeapon : MonoBehaviour
         playerMovement = GetComponentInParent<Player_Movement>();
         playerMelee = GetComponentInParent<Player_MeleeManager>();
         playerCamera = GetComponentInParent<Player_Camera>();
+        animator = GetComponentInParent<Animator>();
     }
 
     public void PerformAttack()
     {
         DetermineAttackDirection();
+        Attack_Animation();
+    }
+
+    public void Attack()
+    {
         SpawnMeleeEffect(direction);
         DetectAndDamageEnemies();
     }
@@ -134,6 +141,11 @@ public class MeleeWeapon : MonoBehaviour
         }
 
         Destroy(effect, effectDuration);
+    }
+
+    private void Attack_Animation()
+    {
+        animator.SetTrigger("Meele Attack");
     }
 
     private void OnDrawGizmos()
