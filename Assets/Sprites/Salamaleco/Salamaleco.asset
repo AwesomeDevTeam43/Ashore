@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3939404905f2097428914b5f4ef5d59b, type: 3}
+  m_Name: Salamaleco
+  m_EditorClassIdentifier: 
+  maxHealth: 5
+  xpOnDeath: 1
+  dropA: 1
+  dropB: 1
+  dropC: 1
+  baseScale: {x: 1, y: 1, z: 1}
+  moveSpeed: 2.5
+  retreatSpeed: 3.5
+  shootRange: 8
+  biteRange: 1.5
+  biteDamage: 1
