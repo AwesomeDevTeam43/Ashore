@@ -4,7 +4,6 @@ using System;
 
 public class Player_Controller : MonoBehaviour
 {
-  
   public static event Action OnPlayerLoad;
   private XP_System xP_System;
   private Player_Health playerHealth;
@@ -21,6 +20,12 @@ public class Player_Controller : MonoBehaviour
   [SerializeField] private float runThreshold = 0.1f;
   private bool hasSpeedParam = false;
   private bool hasIsRunningParam = false;
+
+  [Header("Input")]
+  [Tooltip("Optional: reference to the Player_InputHandler to use input-driven animation toggles.")]
+  [SerializeField] private Player_InputHandler playerInputHandler;
+  [Tooltip("Input magnitude deadzone used to decide whether player is giving movement input.")]
+  [SerializeField] private float inputDeadzone = 0.01f;
 
   [Header("Player Stats")]
   [SerializeField] private PlayerStats playerStats;
@@ -66,7 +71,8 @@ private void Awake()
     xP_System = GetComponent<XP_System>();
     playerHealth = GetComponent<Player_Health>();
   rb2d = GetComponent<Rigidbody2D>();
-  rb3d = GetComponent<Rigidbody>();
+    rb3d = GetComponent<Rigidbody>();
+  playerInputHandler = GetComponent<Player_InputHandler>();
   if (animator == null) animator = GetComponent<Animator>();
   if (animator != null)
   {
@@ -146,7 +152,24 @@ private void Start()
     if (hasSpeedParam)
       animator.SetFloat(speedParam, speed);
     if (hasIsRunningParam)
-      animator.SetBool(isRunningParam, speed > runThreshold);
+    {
+      // Prefer input-driven running/walking intent if a Player_InputHandler is available.
+      bool hasMovementInput = false;
+      if (playerInputHandler != null)
+      {
+        Vector2 mv = playerInputHandler.MovementInput;
+        hasMovementInput = mv.sqrMagnitude > (inputDeadzone * inputDeadzone);
+      }
+      else
+      {
+        // Fallback to legacy axes if no input handler is provided; keeps previous behavior.
+        float inputX = 0f;
+        float inputY = 0f;
+        try { inputX = Input.GetAxisRaw("Horizontal"); inputY = Input.GetAxisRaw("Vertical"); } catch { }
+        hasMovementInput = Mathf.Abs(inputX) > 0.01f || Mathf.Abs(inputY) > 0.01f;
+      }
+      animator.SetBool(isRunningParam, hasMovementInput);
+    }
   }
 
   void useEquipment()
