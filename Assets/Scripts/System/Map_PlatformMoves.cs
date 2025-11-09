@@ -200,4 +200,48 @@ public class Map_PlatformMoves : MonoBehaviour
         playerOnTop = false;
         canMove = false;
     }
+
+    private void OnDrawGizmos()
+    {
+        Vector3 basePos = Application.isPlaying ? startPos : transform.position;
+
+        Vector3 minPos;
+        Vector3 maxPos;
+
+        if (horizontal)
+        {
+            minPos = basePos + Vector3.left * amplitude;
+            maxPos = basePos + Vector3.right * amplitude;
+        }
+        else
+        {
+            minPos = basePos + Vector3.down * amplitude;
+            maxPos = basePos + Vector3.up * amplitude;
+        }
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawLine(minPos, maxPos);
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(minPos, 0.15f);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(maxPos, 0.15f);
+
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(basePos, 0.1f);
+
+        if (Application.isPlaying)
+        {
+            float phaseValue = Mathf.Sin(movementTime * speed);
+            Vector3 currentTarget = basePos;
+            if (vertical)
+                currentTarget = basePos + Vector3.up * (phaseValue * amplitude);
+            else
+                currentTarget = basePos + Vector3.right * (phaseValue * amplitude);
+
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawSphere(currentTarget, 0.08f);
+            Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f);
+            Gizmos.DrawLine(transform.position, currentTarget);
+        }
+    }
 }
