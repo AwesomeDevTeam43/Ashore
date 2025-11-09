@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e58a1ea7b8f8cf478ae50ed3935c761, type: 3}
+  m_Name: GrapplingData
+  m_EditorClassIdentifier: 
+  itemName: GrapplingHook
+  icon: {fileID: 8597003345833862616, guid: f425af0b17cfdcd459b58694ae3d9c91, type: 3}
+  description: 
+  isUsable: 0
+  isCraftable: 0
+  craftIngredients: []
+  craftResult: {fileID: 0}
+  maxStackSize: 50
+  isStackable: 0
+  equipmentPrefab: {fileID: 2511649203567988147, guid: 6ff72a742784f9945a3ac9be03f96fb6, type: 3}

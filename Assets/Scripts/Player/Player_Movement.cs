@@ -10,6 +10,10 @@ public class Player_Movement : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask platformLayer;
     private int combinedGroundLayers;
+    // expose the ground check transform for accurate raycasts
+    public Transform GroundCheck => groundCheck;
+    // expose combined ground layers so other systems (animator, etc.) can raycast using the same mask
+    public LayerMask CombinedGroundLayers => combinedGroundLayers;
     [SerializeField] private float downwardAttackBounce = 10f;
     [SerializeField] private float coyoteTime = 0.15f;
     private float coyoteTimer = 0f;
