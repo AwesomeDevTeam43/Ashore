@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a6be8cefcb44ca45b0251212381635f, type: 3}
+  m_Name: RuinBoss
+  m_EditorClassIdentifier: 
+  maxHealth: 20
+  xpOnDeath: 20
+  dropA: 5
+  dropB: 0
+  dropC: 5
+  baseScale: {x: 1, y: 1, z: 1}
+  moveSpeed: 2
+  followPlayerRange: 8
+  attackRange: 1.5
+  startTimeBtwAttack: 2
+  attackDamage: 1
+  knockbackForce: 6
+  knockbackDuration: 0.35
