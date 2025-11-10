@@ -20,6 +20,8 @@ public class Player_Health : MonoBehaviour
     private Color originalColor;
     private int previousHealth;
 
+    private Player_Camera playerCamera;
+
     private void Awake()
     {
         healthSystem = GetComponent<HealthSystem>();
@@ -36,6 +38,8 @@ public class Player_Health : MonoBehaviour
         {
             originalColor = spriteRenderer.color;
         }
+
+        playerCamera = FindFirstObjectByType<Player_Camera>();
     }
 
     private void OnEnable()
@@ -103,6 +107,7 @@ public class Player_Health : MonoBehaviour
         if (currentHealth < previousHealth)
         {
             StartCoroutine(DamageEffect());
+            playerCamera?.StartCameraShake();
         }
 
         previousHealth = currentHealth;
