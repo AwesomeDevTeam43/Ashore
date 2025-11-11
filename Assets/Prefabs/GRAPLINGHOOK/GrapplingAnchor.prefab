@@ -56,3 +56,4 @@ MonoBehaviour:
   maxRopeLength: 24
   minRopeLength: 0.5
   fallbackPickupPrefab: {fileID: 2511649203567988147, guid: 6ff72a742784f9945a3ac9be03f96fb6, type: 3}
+  ropeColor: {r: 0.7372549, g: 0.56078434, b: 0.40392157, a: 1}

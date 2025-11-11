@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class GrappleAnchor : MonoBehaviour
 {
@@ -15,7 +16,7 @@ public class GrappleAnchor : MonoBehaviour
     [Header("Fallback")]
     [SerializeField] private float minRopeLength = 0.5f; // if computed rope length is shorter, consider it not attachable
     [SerializeField] private GameObject fallbackPickupPrefab; // optional prefab to spawn so player can pick the hook back up
-
+    [SerializeField] private Color ropeColor;
     private Transform player;
     private Player_InputHandler inputHandler;
     private Rigidbody2D playerRb;
@@ -76,7 +77,7 @@ public class GrappleAnchor : MonoBehaviour
         // create a white sprite (1x1) with pivot at top so scale.y extends down
         Sprite whiteSprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, 1, 1), new Vector2(0.5f, 1f), 1f);
         sr.sprite = whiteSprite;
-        sr.color = Color.white;
+        sr.color = ropeColor;
         // Ensure sprite uses the default sprite shader and is drawn on top
         sr.material = new Material(Shader.Find("Sprites/Default"));
         try
@@ -118,7 +119,7 @@ public class GrappleAnchor : MonoBehaviour
                 // ensure top of sprite stays at anchor position
                 ropeGO.transform.position = transform.position;
                 // also draw a debug line so rope is visible in Game view (and Scene view)
-                Debug.DrawLine(transform.position, transform.position + Vector3.down * currentRopeLength, Color.white, 0f, false);
+                Debug.DrawLine(transform.position, transform.position + Vector3.down * currentRopeLength, new Color(188, 141, 103));
             }
             yield return null;
         }

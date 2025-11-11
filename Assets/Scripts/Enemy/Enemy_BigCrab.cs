@@ -268,7 +268,7 @@ public class BigCrab : EnemyBase
       playerRb = player.GetComponent<Rigidbody2D>();
     }
 
-    if (playerHealth != null)
+    if (playerHealth != null && Physics2D.OverlapCircle(transform.position, typedStats.attackRange, LayerMask.GetMask("Player")) != null)
     {
       if (typedStats.biteDamage <= 0) Debug.LogWarning("Enemy: biteDamage <= 0");
 

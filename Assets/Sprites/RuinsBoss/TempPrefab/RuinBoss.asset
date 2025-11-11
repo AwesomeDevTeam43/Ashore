@@ -20,7 +20,7 @@ MonoBehaviour:
   baseScale: {x: 1, y: 1, z: 1}
   moveSpeed: 2
   followPlayerRange: 8
-  attackRange: 1.5
+  attackRange: 2.5
   startTimeBtwAttack: 2
   attackDamage: 1
   knockbackForce: 6
