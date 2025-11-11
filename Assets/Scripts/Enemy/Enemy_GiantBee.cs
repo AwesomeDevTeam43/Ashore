@@ -11,7 +11,7 @@ public class BeeEnemy : EnemyBase
   private Collider2D playerCollider;
   private HealthSystem playerHealth;
 
-  private enum EnemyState { Roaming, Lunging, Retreating }
+  private enum EnemyState { Roaming, AttackWindup, Lunging, Retreating }
   private EnemyState enemyState;
 
   private float currentCooldown;
@@ -22,6 +22,20 @@ public class BeeEnemy : EnemyBase
   private Vector3 lungeStartPosition;
   private Vector3 spawnPosition;
   private Vector2 desiredVelocity;
+
+  [Header("Animation")]
+  [SerializeField] private Animator animator;
+  [SerializeField] private string isAttackingParam = "isAttacking";
+  [SerializeField] private string isLungingParam = "isLunging";
+  [SerializeField] private string isRetreatingParam = "isRetreating";
+
+  [Header("Stinger")] 
+  [SerializeField] private Collider2D stingerHitbox; // optional trigger hitbox to enable while stinger is out
+  [SerializeField] private SpriteRenderer stingerVisual; // optional separate visual; will be enabled/disabled with stinger
+
+  [Header("Attack Timings")] 
+  [SerializeField] private float windupDuration = 0.25f; // time pulling stinger out before lunge begins
+  private float windupTimer = 0f;
 
   [Header("Pathfinding")]
   [SerializeField] private LayerMask obstacleMask; // assign Ground | MovingPlatform
@@ -83,6 +97,20 @@ public class BeeEnemy : EnemyBase
     pathfinder.SetCache(true, 0.75f);
 
     spawnPosition = transform.position;
+
+    if (animator == null)
+    {
+      animator = GetComponentInChildren<Animator>();
+    }
+    if (animator != null)
+    {
+      animator.SetBool(isAttackingParam, false);
+      animator.SetBool(isLungingParam, false);
+      animator.SetBool(isRetreatingParam, false);
+    }
+
+    if (stingerHitbox != null) stingerHitbox.enabled = false;
+    if (stingerVisual != null) stingerVisual.enabled = false;
   }
 
   private void Update()
@@ -94,6 +122,18 @@ public class BeeEnemy : EnemyBase
 
     float playerDistance = Vector3.Distance(transform.position, player.transform.position);
     StateMachine(playerDistance);
+  }
+
+  public bool TryAttack()
+  {
+    if (currentCooldown > 0f) return false;
+    if (player == null) return false;
+    float playerDistance = Vector3.Distance(transform.position, player.transform.position);
+    if (playerDistance > typedStats.lungeRange) return false;
+    var feet = GetPlayerFeetPosition();
+    if (!HasLineOfSightToAttackPoint(feet)) return false;
+    StartAttackWindup();
+    return true;
   }
 
   private void FixedUpdate()
@@ -125,6 +165,9 @@ public class BeeEnemy : EnemyBase
       case EnemyState.Roaming:
         RoamBehavior(playerDistance);
         break;
+      case EnemyState.AttackWindup:
+        AttackWindupBehavior(playerDistance);
+        break;
       case EnemyState.Lunging:
         LungeBehavior(playerDistance);
         break;
@@ -149,7 +192,7 @@ public class BeeEnemy : EnemyBase
         Vector3 feet = GetPlayerFeetPosition();
         if (HasLineOfSightToAttackPoint(feet))
         {
-          StartLunge();
+          StartAttackWindup();
         }
         else
         {
@@ -178,6 +221,49 @@ public class BeeEnemy : EnemyBase
     }
   }
 
+  private void StartAttackWindup()
+  {
+    if (enemyState == EnemyState.AttackWindup || enemyState == EnemyState.Lunging || enemyState == EnemyState.Retreating) return;
+    lungeStartPosition = transform.position;
+    playerAttackPoint = GetPlayerFeetPosition();
+    windupTimer = 0f;
+    enemyState = EnemyState.AttackWindup;
+    if (animator != null)
+    {
+      animator.SetBool(isAttackingParam, true);
+      animator.SetBool(isLungingParam, false);
+      animator.SetBool(isRetreatingParam, false);
+    }
+    EnableStinger(true); // stinger visually out during windup
+  }
+
+  private void AttackWindupBehavior(float playerDistance)
+  {
+    desiredVelocity = Vector2.zero;
+    windupTimer += Time.deltaTime;
+    if (windupTimer >= windupDuration)
+    {
+      BeginLungeAfterWindup();
+    }
+  }
+
+  private void BeginLungeAfterWindup()
+  {
+    lungeTimer = 0f;
+    enemyState = EnemyState.Lunging;
+    if (animator != null)
+    {
+      animator.SetBool(isAttackingParam, false);
+      animator.SetBool(isLungingParam, true);
+    }
+  }
+
+  private void EnableStinger(bool on)
+  {
+    if (stingerHitbox != null) stingerHitbox.enabled = on;
+    if (stingerVisual != null) stingerVisual.enabled = on;
+  }
+
   private void StartLunge()
   {
     lungeStartPosition = transform.position;
@@ -200,8 +286,15 @@ public class BeeEnemy : EnemyBase
   private void LungeBehavior(float playerDistance)
   {
     lungeTimer += Time.deltaTime;
-    Vector2 lungeDir = (playerAttackPoint - transform.position).normalized;
-    desiredVelocity = lungeDir * typedStats.lungingForce;
+    // Use pathfinding-aware movement to avoid tunneling into ground during lunge
+    FollowPathTowards(playerAttackPoint, typedStats.lungingForce);
+    if (animator != null)
+    {
+      animator.SetBool(isAttackingParam, false);
+      animator.SetBool(isLungingParam, true);
+      animator.SetBool(isRetreatingParam, false);
+    }
+    EnableStinger(true);
 
     if (lungeTimer >= typedStats.lungeDuration || Vector2.Distance(transform.position, playerAttackPoint) < 0.3f)
     {
@@ -216,18 +309,36 @@ public class BeeEnemy : EnemyBase
     currentCooldown = typedStats.lungeCooldown;
     enemyState = EnemyState.Retreating;
     Debug.Log("Lunge ended, retreating!");
+    if (animator != null)
+    {
+      animator.SetBool(isLungingParam, false);
+      animator.SetBool(isRetreatingParam, true);
+    }
   }
 
   private void RetreatBehavior(float playerDistance)
   {
     // Use pathfinding to get back toward retreat target without tunneling through walls
     FollowPathTowards(retreatTargetPosition, typedStats.retreatSpeed);
+    EnableStinger(false);
+    if (animator != null)
+    {
+      animator.SetBool(isAttackingParam, false);
+      animator.SetBool(isLungingParam, false);
+      animator.SetBool(isRetreatingParam, true);
+    }
 
     if (Vector2.Distance(transform.position, retreatTargetPosition) < 0.5f)
     {
       rb.linearVelocity = Vector2.zero;
       enemyState = EnemyState.Roaming;
       Debug.Log("Retreat complete, back to roaming!");
+      if (animator != null)
+      {
+        animator.SetBool(isAttackingParam, false);
+        animator.SetBool(isLungingParam, false);
+        animator.SetBool(isRetreatingParam, false);
+      }
     }
   }
 
@@ -466,6 +577,16 @@ public class BeeEnemy : EnemyBase
         Gizmos.DrawLine(transform.position, retreatTargetPosition);
         Gizmos.DrawWireSphere(retreatTargetPosition, 0.2f);
       }
+      // Show planned lunge target
+      Gizmos.color = Color.magenta;
+      Gizmos.DrawWireSphere(playerAttackPoint, 0.15f);
+      // Show desired velocity vector
+      Gizmos.color = new Color(1f,0.5f,0f,0.8f);
+      Vector3 velEnd = transform.position + (Vector3)(desiredVelocity * 0.1f);
+      Gizmos.DrawLine(transform.position, velEnd);
+      // Show agent clearance based on collider
+      Gizmos.color = new Color(0.2f,0.8f,1f,0.6f);
+      Gizmos.DrawWireSphere(transform.position, GetClearance());
     }
   }
 

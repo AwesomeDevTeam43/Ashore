@@ -22,4 +22,4 @@ MonoBehaviour:
   meleeRange: 2
   biteDamage: 2
   venomDamage: 5
-  startTimeBtwAttack: 1
+  startTimeBtwAttack: 5

@@ -3,7 +3,7 @@ using UnityEngine;
 public class Enemy_SerpentVenom : MonoBehaviour
 {
     // NOVO: Tornar o dano público para ser definido antes da criação
-    [HideInInspector] public int damageAmount;
+    public int damageAmount;
 
     public float speed = 10f;
     public float lifetime = 10f;

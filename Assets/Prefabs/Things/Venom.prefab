@@ -16,6 +16,10 @@ PrefabInstance:
       propertyPath: m_FlipX
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3626916397498700004, guid: 48c354a3bca97304b83886a9596443fe, type: 3}
+      propertyPath: m_SortingOrder
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 7878350319992209165, guid: 48c354a3bca97304b83886a9596443fe, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -114,8 +118,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 510881e5a7894784bb9994976637ae2c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  damageAmount: 3
   speed: 15
-  timer: 0.25
+  lifetime: 10
 --- !u!61 &2597686715861406072
 BoxCollider2D:
   m_ObjectHideFlags: 0

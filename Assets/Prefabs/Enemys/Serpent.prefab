@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 3987620847154731664}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.439, y: 0.45, z: 0}
+  m_LocalPosition: {x: 0.464, y: 0.206, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -241,8 +241,9 @@ MonoBehaviour:
   venomPrefab: {fileID: 3782958444212843831, guid: bc3e400054c204a42bede3e5714f13f7, type: 3}
   shootPoint: {fileID: 4461074059452632901}
   animator: {fileID: 6046646683153675568}
-  spitTrigger: Spit
-  spitEventTimeout: 1
+  useAttackTrigger: 1
+  attackTrigger: Attack
+  attackBool: isAttacking
   chargeColor: {r: 0, g: 1, b: 0, a: 1}
 --- !u!114 &2255159184800752242
 MonoBehaviour:

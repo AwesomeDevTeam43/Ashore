@@ -19,7 +19,7 @@ MonoBehaviour:
   dropC: 5
   baseScale: {x: 2, y: 2, z: 1}
   roamSpeed: 4
-  lungingForce: 7
+  lungingForce: 15
   retreatSpeed: 6
   playerDetect: 8
   lungeRange: 4

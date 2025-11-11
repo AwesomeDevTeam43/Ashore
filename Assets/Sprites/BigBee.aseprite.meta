@@ -125,7 +125,7 @@ ScriptedImporter:
   animatedSpriteImportData:
   - name: BigBee
     originalName: 
-    pivot: {x: 0.5, y: -0.06896552}
+    pivot: {x: 0.44, y: 0.5}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 

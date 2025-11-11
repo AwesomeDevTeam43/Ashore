@@ -36,6 +36,12 @@ public class Enemy_Salamander : EnemyBase
   [SerializeField] private float hopForceY = 5f;
   [SerializeField] private float retreatTargetDistance = 4f; // distance to reach before resume approach
 
+  [Header("Retreat Behavior")]
+  [Tooltip("Maximum time (seconds) the salamander will spend retreating before stopping the run and re-engaging.")]
+  [SerializeField] private float maxRetreatDuration = 1.2f;
+  [Tooltip("If the player is this factor * BiteRange or closer while retreating, the salamander may stop retreating and attempt a bite (if not on cooldown).")]
+  [SerializeField] private float biteDuringRetreatDistanceFactor = 1.1f;
+
   [Header("Aggression / Shoot-to-Bite Switch")]
   [SerializeField] private float shootAggroTime = 2.5f; // time continuously shooting before considering forced bite
   [Range(0f,1f)] [SerializeField] private float shootToBiteChance = 0.6f; // chance to convert shooting into an aggressive rush + bite
@@ -56,6 +62,7 @@ public class Enemy_Salamander : EnemyBase
   private float aggressiveLockTimer; // counts down while in aggressive rush to avoid instant flip back to Shoot
   private float timeInShoot;
   private Vector3 homePosition;
+  private float retreatTimer = 0f;
 
   // Timers
   private float shotCooldown;
@@ -95,6 +102,9 @@ public class Enemy_Salamander : EnemyBase
 
     if (shotCooldown > 0f) shotCooldown -= Time.deltaTime;
     if (biteCooldown > 0f) biteCooldown -= Time.deltaTime;
+
+  // countdown retreat timer if active so retreat can't last forever
+  if (retreatTimer > 0f) retreatTimer -= Time.deltaTime;
 
     // Use horizontal distance for 2D side-scroller decisions
     float distX = Mathf.Abs(player.position.x - transform.position.x);
@@ -165,8 +175,20 @@ public class Enemy_Salamander : EnemyBase
         break;
 
       case State.Retreat:
-        // When far enough horizontally, go back to approach
-        if (distX >= retreatTargetDistance) state = State.Approach;
+        // When far enough horizontally or retreat timer expired, go back to approach
+        if (distX >= retreatTargetDistance || retreatTimer <= 0f)
+        {
+          state = State.Approach;
+        }
+        else
+        {
+          // allow an interrupt: if player chases closely while retreating, attempt a bite if off cooldown
+          float biteInterruptDist = BiteRange * biteDuringRetreatDistanceFactor;
+          if (distX <= biteInterruptDist && biteCooldown <= 0f)
+          {
+            state = State.Bite;
+          }
+        }
         break;
 
       case State.ReturnHome:
@@ -326,6 +348,9 @@ public class Enemy_Salamander : EnemyBase
     state = State.Retreat;
     timeInShoot = 0f; // reset shoot tracking after a bite
     aggressiveRush = false; // rush finished
+
+    // reset retreat timer was already set in DoRetreatHop; ensure it's not negative
+    if (retreatTimer < 0f) retreatTimer = 0f;
   }
 
   private void DoRetreatHop()
@@ -334,6 +359,8 @@ public class Enemy_Salamander : EnemyBase
     float dir = Mathf.Sign(transform.position.x - player.position.x);
     rb.linearVelocity = Vector2.zero;
     rb.AddForce(new Vector2(dir * hopForceX, hopForceY), ForceMode2D.Impulse);
+    // start retreat timer so the salamander won't run away indefinitely
+    retreatTimer = maxRetreatDuration;
   }
 
   private void ApplyBiteDamage()

@@ -155,14 +155,18 @@ public class NavGrid2D : MonoBehaviour
         Gizmos.DrawWireCube(origin + size*0.5f, size);
         if (grid != null)
         {
-            float a = gizmoAlpha * 2f;
+            float a = gizmoAlpha * 1.5f;
             for (int x = 0; x < gridX; x++)
             for (int y = 0; y < gridY; y++)
             {
                 var n = grid[x,y];
-                Gizmos.color = n.walkable ? new Color(0,1,0,a) : new Color(1,0,0,a);
-                Gizmos.DrawCube(n.worldPos, Vector3.one * (nodeRadius*1.8f));
+                Gizmos.color = n.walkable ? new Color(0,0.8f,0,a) : new Color(0.8f,0,0,a);
+                float sz = nodeRadius * 1.6f;
+                Gizmos.DrawCube(n.worldPos, new Vector3(sz, sz, sz));
             }
+            // Draw clearance ring reference
+            Gizmos.color = new Color(0.2f,0.5f,1f,0.4f);
+            Gizmos.DrawWireSphere(origin + size*0.5f, nodeRadius + clearance);
         }
     }
 }
