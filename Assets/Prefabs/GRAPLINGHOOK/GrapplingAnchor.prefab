@@ -44,7 +44,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 02140f8d2b1e058439379e035728fe29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ropeLifetime: 6
-  climbSpeed: 3
+  ropeLifetime: 50
+  climbSpeed: 8
   climbHorizontalTolerance: 0.6
   maxClimbHeightOffset: 0.5
+  ropeWidth: 0.08
+  ropeDropSpeed: 12
+  ropeStopLayers:
+    serializedVersion: 2
+    m_Bits: 64
+  maxRopeLength: 24
+  minRopeLength: 0.5
+  fallbackPickupPrefab: {fileID: 2511649203567988147, guid: 6ff72a742784f9945a3ac9be03f96fb6, type: 3}

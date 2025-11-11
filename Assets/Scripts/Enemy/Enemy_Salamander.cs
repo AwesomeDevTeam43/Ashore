@@ -286,11 +286,27 @@ public class Enemy_Salamander : EnemyBase
     {
       Transform spawn = projectileSpawnPoint != null ? projectileSpawnPoint : transform;
       var proj = Instantiate(spineProjectilePrefab, spawn.position, Quaternion.identity);
-      var rbp = proj.GetComponent<Rigidbody2D>();
-      if (rbp && player)
+      if (proj != null && player != null)
       {
-        Vector2 dir = (player.position - spawn.position).normalized;
-        rbp.linearVelocity = dir * projectileSpeed;
+        // If the prefab has a SalamanderSpine component, use its LaunchAtTarget API so it properly ignores the owner and handles sticking.
+        var spineComp = proj.GetComponent<SalamanderSpine>();
+        if (spineComp != null)
+        {
+          // configure the spine's parameters from the salamander overrides
+          spineComp.launchSpeed = projectileSpeed;
+          // Launch and pass the salamander GameObject as the owner so it won't collide with itself
+          spineComp.LaunchAtTarget(player, this.gameObject);
+        }
+        else
+        {
+          // fallback: simple linear velocity
+          var rbp = proj.GetComponent<Rigidbody2D>();
+          if (rbp != null)
+          {
+            Vector2 dir = (player.position - spawn.position).normalized;
+            rbp.linearVelocity = dir * projectileSpeed;
+          }
+        }
       }
     }
     shotCooldown = timeBetweenShots;

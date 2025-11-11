@@ -214,7 +214,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   timeBetweenBites: 1.2
-  spineProjectilePrefab: {fileID: 3782958444212843831, guid: bc3e400054c204a42bede3e5714f13f7, type: 3}
+  spineProjectilePrefab: {fileID: 3133005959709320538, guid: d58de09b16cbdce4888bdca8c74084ee, type: 3}
   projectileSpawnPoint: {fileID: 3117255781876577742}
   projectileSpeed: 10
   timeBetweenShots: 2
