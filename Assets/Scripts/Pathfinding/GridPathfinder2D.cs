@@ -27,6 +27,10 @@ public class GridPathfinder2D
     private float clearance;
     private Vector2 gridWorldSize;
     private LayerMask obstacleMask;
+    private bool requireGroundSupport = false;
+    private LayerMask groundMask;
+    private float supportRayDistance = 0.4f;
+    private float supportProbeOffset = 0.05f;
 
     private Node[,] grid;
     private float nodeDiameter;
@@ -76,6 +80,14 @@ public class GridPathfinder2D
         cacheTTL = Mathf.Max(0f, ttlSeconds);
     }
 
+    public void SetGroundSupport(bool require, LayerMask groundMask, float rayDistance = 0.4f, float probeOffset = 0.05f)
+    {
+        this.requireGroundSupport = require;
+        this.groundMask = groundMask;
+        this.supportRayDistance = Mathf.Max(0.01f, rayDistance);
+        this.supportProbeOffset = Mathf.Clamp(probeOffset, 0f, 0.5f);
+    }
+
     private void BuildGrid(Vector2 center)
     {
         gridSizeX = Mathf.Max(2, Mathf.RoundToInt(gridWorldSize.x / nodeDiameter));
@@ -119,6 +131,12 @@ public class GridPathfinder2D
                     Vector2 worldPoint = origin + new Vector2(x * nodeDiameter + nodeRadius, y * nodeDiameter + nodeRadius);
                     float r = nodeRadius + clearance;
                     bool walkable = !Physics2D.OverlapCircle(worldPoint, r, obstacleMask);
+                    if (walkable && requireGroundSupport)
+                    {
+                        Vector2 rayOrigin = worldPoint + Vector2.up * supportProbeOffset;
+                        var hit = Physics2D.Raycast(rayOrigin, Vector2.down, supportRayDistance + supportProbeOffset, groundMask);
+                        walkable = hit.collider != null;
+                    }
                     grid[x, y] = new Node(walkable, worldPoint, x, y);
                 }
             }

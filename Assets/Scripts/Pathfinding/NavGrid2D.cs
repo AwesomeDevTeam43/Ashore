@@ -15,6 +15,8 @@ public class NavGrid2D : MonoBehaviour
     public float nodeRadius = 0.25f;
     [Tooltip("Extra clearance added to nodeRadius when checking obstacles")] 
     public float clearance = 0.0f;
+    [Tooltip("When true, draw a denser overlay of grid gizmos for debugging.")]
+    public bool drawDenseGizmos = false;
 
     [Header("Layers")]
     public LayerMask obstacleMask; // Ground | MovingPlatform
@@ -156,8 +158,9 @@ public class NavGrid2D : MonoBehaviour
         if (grid != null)
         {
             float a = gizmoAlpha * 1.5f;
-            for (int x = 0; x < gridX; x++)
-            for (int y = 0; y < gridY; y++)
+            int step = drawDenseGizmos ? 1 : Mathf.Max(1, Mathf.RoundToInt(0.5f / Mathf.Max(0.05f, nodeRadius)));
+            for (int x = 0; x < gridX; x+=step)
+            for (int y = 0; y < gridY; y+=step)
             {
                 var n = grid[x,y];
                 Gizmos.color = n.walkable ? new Color(0,0.8f,0,a) : new Color(0.8f,0,0,a);
