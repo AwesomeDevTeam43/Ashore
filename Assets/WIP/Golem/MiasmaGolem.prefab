@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 948986448698743084}
   - component: {fileID: 720132420092226812}
   - component: {fileID: 2803447172678884119}
+  - component: {fileID: 7203006818411415510}
   m_Layer: 7
   m_Name: MiasmaGolem
   m_TagString: Enemy
@@ -228,3 +229,15 @@ MonoBehaviour:
   slamHitMask:
     serializedVersion: 2
     m_Bits: 8
+--- !u!114 &7203006818411415510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5384982542472265557}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95e62ce075d021a24abd39845ecc4840, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
