@@ -31,7 +31,7 @@ public class Enemy_Salamander : EnemyBase
   [SerializeField] private float timeBetweenShots = 0.6f;
 
   [Header("Retreat Hop")]
-  [Range(0f,1f)] [SerializeField] private float retreatChance = 0.25f; // chance after bite
+  [Range(0f, 1f)][SerializeField] private float retreatChance = 0.25f; // chance after bite
   [SerializeField] private float hopForceX = 4f;
   [SerializeField] private float hopForceY = 5f;
   [SerializeField] private float retreatTargetDistance = 4f; // distance to reach before resume approach
@@ -44,7 +44,7 @@ public class Enemy_Salamander : EnemyBase
 
   [Header("Aggression / Shoot-to-Bite Switch")]
   [SerializeField] private float shootAggroTime = 2.5f; // time continuously shooting before considering forced bite
-  [Range(0f,1f)] [SerializeField] private float shootToBiteChance = 0.6f; // chance to convert shooting into an aggressive rush + bite
+  [Range(0f, 1f)][SerializeField] private float shootToBiteChance = 0.6f; // chance to convert shooting into an aggressive rush + bite
   [SerializeField] private float aggressiveSpeedMultiplier = 2.5f; // speed multiplier when rushing for bite after shooting
   [SerializeField] private float aggressiveLockDuration = 0.35f; // minimum time to stay in Approach when rushing
 
@@ -103,14 +103,14 @@ public class Enemy_Salamander : EnemyBase
     if (shotCooldown > 0f) shotCooldown -= Time.deltaTime;
     if (biteCooldown > 0f) biteCooldown -= Time.deltaTime;
 
-  // countdown retreat timer if active so retreat can't last forever
-  if (retreatTimer > 0f) retreatTimer -= Time.deltaTime;
+    // countdown retreat timer if active so retreat can't last forever
+    if (retreatTimer > 0f) retreatTimer -= Time.deltaTime;
 
     // Use horizontal distance for 2D side-scroller decisions
-    float distX = Mathf.Abs(player.position.x - transform.position.x);
+    float dist = Vector2.Distance(player.position, transform.position);
 
     // Global: if player is too far, return to home
-    if (returnToHomeDistance > 0f && distX > returnToHomeDistance)
+    if (returnToHomeDistance > 0f && dist > returnToHomeDistance)
     {
       state = State.ReturnHome;
       aggressiveRush = false;
@@ -120,13 +120,13 @@ public class Enemy_Salamander : EnemyBase
     switch (state)
     {
       case State.Idle:
-        if (distX <= ShootRange * 1.8f) state = State.Approach;
+        if (dist <= ShootRange * 1.8f) state = State.Approach;
         break;
 
       case State.Approach:
-        if (distX <= BiteRange && biteCooldown <= 0f) state = State.Bite;
-        else if (!aggressiveRush && distX <= ShootRange) state = State.Shoot; // do NOT flip to Shoot if rushing
-        else if (distX > ShootRange * 2.2f) state = State.Idle;
+        if (dist <= BiteRange && biteCooldown <= 0f) state = State.Bite;
+        else if (!aggressiveRush && dist <= ShootRange) state = State.Shoot;
+        else if (dist > ShootRange * 2.2f) state = State.Idle;
         break;
 
       case State.Shoot:
@@ -135,14 +135,14 @@ public class Enemy_Salamander : EnemyBase
           float retreatThreshold = (retreatCloseThresholdOverride > 0f)
             ? retreatCloseThresholdOverride
             : Mathf.Max(BiteRange, ShootRange * 0.25f);
-          if (distX <= retreatThreshold)
+          if (dist <= retreatThreshold)
           {
             DoRetreatHop();
             state = State.Retreat;
             timeInShoot = 0f;
             aggressiveRush = false;
           }
-          else if (distX > ShootRange * 1.3f)
+          else if (dist > ShootRange * 1.3f)
           {
             state = State.Approach;
             timeInShoot = 0f;
@@ -176,7 +176,7 @@ public class Enemy_Salamander : EnemyBase
 
       case State.Retreat:
         // When far enough horizontally or retreat timer expired, go back to approach
-        if (distX >= retreatTargetDistance || retreatTimer <= 0f)
+        if (dist >= retreatTargetDistance || retreatTimer <= 0f)
         {
           state = State.Approach;
         }
@@ -184,7 +184,7 @@ public class Enemy_Salamander : EnemyBase
         {
           // allow an interrupt: if player chases closely while retreating, attempt a bite if off cooldown
           float biteInterruptDist = BiteRange * biteDuringRetreatDistanceFactor;
-          if (distX <= biteInterruptDist && biteCooldown <= 0f)
+          if (dist <= biteInterruptDist && biteCooldown <= 0f)
           {
             state = State.Bite;
           }
@@ -193,7 +193,7 @@ public class Enemy_Salamander : EnemyBase
 
       case State.ReturnHome:
         // If player comes back within detection, resume normal behavior
-        if (distX <= ShootRange * 1.5f)
+        if (dist <= ShootRange * 1.5f)
         {
           state = State.Approach;
         }
@@ -387,8 +387,9 @@ public class Enemy_Salamander : EnemyBase
       var hs = FindHealth(player);
       if (hs != null)
       {
-        float distX = Mathf.Abs(player.position.x - transform.position.x);
-        if (distX <= BiteRange * 1.1f) hs.TakeDamage(typedStats.biteDamage);
+        Vector2 source = bitePoint != null ? (Vector2)bitePoint.position : (Vector2)transform.position;
+        float dist2D = Vector2.Distance(source, player.position);
+        if (dist2D <= BiteRange * 1.1f) hs.TakeDamage(typedStats.biteDamage);
       }
     }
   }
