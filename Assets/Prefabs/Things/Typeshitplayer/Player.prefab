@@ -341,6 +341,9 @@ MonoBehaviour:
   rangeAttack: RangeAttack
   interact: Interact
   inventory: Inventory
+  radialDeadzone: 0.2
+  perAxisDeadzone: 0.2
+  axisSnapBias: 0.3
 --- !u!114 &3217102364212124194
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -551,8 +554,14 @@ MonoBehaviour:
   knockbackForce: 6
   knockbackDuration: 0.3
   meleeEffectPrefab: {fileID: 1388199414278010597, guid: 0d4c2f106a06ce544b9681fb658011f5, type: 3}
-  effectDuration: 0.3
+  effectLifetime: 0.25
   attackOrigin: {fileID: 7345354211100391440}
+  offsetRight: {x: 0.6, y: 0.1}
+  offsetLeft: {x: -0.6, y: 0.1}
+  offsetUp: {x: 0, y: 0.9}
+  offsetDown: {x: 0, y: -0.9}
+  axisThreshold: 0.5
+  currentDir: 0
 --- !u!114 &5141185270747572182
 MonoBehaviour:
   m_ObjectHideFlags: 0
