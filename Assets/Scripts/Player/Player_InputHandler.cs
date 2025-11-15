@@ -114,6 +114,10 @@ public class Player_InputHandler : MonoBehaviour
         {
             InventoryActionTriggered = false;
         }
+    }
+
+    public void LateUpdate()
+    {
         if (InteractActionTriggered)
         {
             InteractActionTriggered = false;

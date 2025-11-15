@@ -1,11 +1,17 @@
 using UnityEngine;
 using UnityEngine.PlayerLoop;
+using UnityEngine.InputSystem;
+using System.Reflection;
 
 public class Heal_Plant : MonoBehaviour
 {
     private GameObject player;
     private Player_InputHandler player_InputHandler;
     private Player_Controller player_Controller;
+
+    // reflection + action hook (we don't modify Player_InputHandler)
+    private InputAction playerInteractAction;
+    private System.Action<InputAction.CallbackContext> interactCallback;
 
     [SerializeField] private Sprite plant_dead;
     private SpriteRenderer spriteRenderer;
@@ -20,8 +26,11 @@ public class Heal_Plant : MonoBehaviour
     {
         player = GameObject.FindGameObjectWithTag("Player");
         spriteRenderer = GetComponent<SpriteRenderer>();
-        player_InputHandler = player.GetComponent<Player_InputHandler>();
-        player_Controller = player.GetComponent<Player_Controller>();
+        if (player != null)
+        {
+            player_InputHandler = player.GetComponent<Player_InputHandler>();
+            player_Controller = player.GetComponent<Player_Controller>();
+        }
     }
 
     private void Update()
@@ -30,16 +39,55 @@ public class Heal_Plant : MonoBehaviour
             return;
     }
 
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (!collision.CompareTag("Player")) return;
+        TrySubscribeInteract(collision.gameObject);
+    }
+
+    void OnTriggerExit2D(Collider2D collision)
+    {
+        if (!collision.CompareTag("Player")) return;
+        TryUnsubscribeInteract();
+    }
+
+    // Keep Stay for fallback keyboard input if reflection fails
     void OnTriggerStay2D(Collider2D collision)
     {
-        if (!collision.CompareTag("Player"))
-            return;
-
-        Debug.Log("collided with player (OnTriggerStay2D)");
-        if (Input.GetKeyDown(KeyCode.E))
+        if (!collision.CompareTag("Player")) return;
+        // if we have no InputAction subscription, allow keyboard fallback
+        if (playerInteractAction == null)
         {
-            DropHeal();
+            if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+                DropHeal();
         }
+    }
+
+    private void TrySubscribeInteract(GameObject playerObj)
+    {
+        TryUnsubscribeInteract();
+        player_InputHandler = playerObj.GetComponent<Player_InputHandler>();
+        if (player_InputHandler == null) return;
+
+        // reflectively get private field "interactAction"
+        var field = typeof(Player_InputHandler).GetField("interactAction", BindingFlags.NonPublic | BindingFlags.Instance);
+        if (field == null) return;
+        var action = field.GetValue(player_InputHandler) as InputAction;
+        if (action == null) return;
+
+        playerInteractAction = action;
+        interactCallback = ctx => { if (ctx.performed) DropHeal(); };
+        playerInteractAction.performed += interactCallback;
+    }
+
+    private void TryUnsubscribeInteract()
+    {
+        if (playerInteractAction != null && interactCallback != null)
+        {
+            playerInteractAction.performed -= interactCallback;
+        }
+        playerInteractAction = null;
+        interactCallback = null;
     }
 
     private void DropHeal()
