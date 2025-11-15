@@ -133,9 +133,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 752dfa1b386ce134bbd50dbaba198260, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stats: {fileID: 11400000, guid: 715748681221ae44b8b019b8b0e44337, type: 2}
+  stats: {fileID: 11400000, guid: 888f8b98b9b3c5f4bbcc5521ba51ffce, type: 2}
   typedStats: {fileID: 0}
   walkBoolName: isWalking
+  attackTriggerName: Attack
+  attackBoolName: isAttacking
+  attackUsesAnimationEvent: 1
+  attackCommitDuration: 0.6
 --- !u!114 &9023469275235641710
 MonoBehaviour:
   m_ObjectHideFlags: 0

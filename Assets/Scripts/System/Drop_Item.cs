@@ -17,7 +17,16 @@ public class Drop_Item : MonoBehaviour
 
     private void Drop(ItemData itemData)
     {
-        if (itemData == null || material_particle == null) return;
+        if (itemData == null)
+        {
+            Debug.LogWarning($"Drop_Item on {name}: itemData not assigned; no item dropped.");
+            return;
+        }
+        if (material_particle == null)
+        {
+            Debug.LogWarning($"Drop_Item on {name}: material_particle prefab not assigned; no item dropped.");
+            return;
+        }
 
         Vector3 randomOffset = new Vector3(
             UnityEngine.Random.Range(-1f, 1f),
@@ -34,6 +43,10 @@ public class Drop_Item : MonoBehaviour
         {
             materialScript.SetItemData(itemData);
         }
+        else
+        {
+            Debug.LogWarning($"Drop_Item on {name}: spawned prefab '{materialParticle.name}' has no Materials component.");
+        }
 
         Rigidbody2D rb = materialParticle.GetComponent<Rigidbody2D>();
         if (rb != null)
@@ -43,6 +56,10 @@ public class Drop_Item : MonoBehaviour
                 UnityEngine.Random.Range(1f, 4f)
             );
             rb.AddForce(randomForce, ForceMode2D.Impulse);
+        }
+        else
+        {
+            Debug.LogWarning($"Drop_Item on {name}: spawned prefab '{materialParticle.name}' missing Rigidbody2D (optional for bounce).");
         }
     }
 }

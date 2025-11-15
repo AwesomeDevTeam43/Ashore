@@ -88,18 +88,18 @@ public class BonfireRestPoint : MonoBehaviour, ISaveable
         var kb = Keyboard.current;
         if (kb != null)
         {
-            if (kb.fKey.wasPressedThisFrame || kb.eKey.wasPressedThisFrame || kb.enterKey.wasPressedThisFrame || kb.spaceKey.wasPressedThisFrame)
+            // Only accept explicit interact keys, avoid UI submit keys (Enter/Space)
+            if (kb.fKey.wasPressedThisFrame || kb.eKey.wasPressedThisFrame)
                 return true;
         }
         var gp = Gamepad.current;
         if (gp != null)
         {
-            if (gp.buttonWest.wasPressedThisFrame || gp.buttonSouth.wasPressedThisFrame)
+            // Proper interact fallback: ButtonEast (e.g., B/Circle)
+            if (gp.buttonEast.wasPressedThisFrame)
                 return true;
         }
-        // Legacy: original project used B at rest points
-        if (kb != null && kb.bKey.wasPressedThisFrame) return true;
-
+        // No UI-submit fallbacks here to avoid action map confusion
         return false;
     }
 
@@ -130,6 +130,8 @@ public class BonfireRestPoint : MonoBehaviour, ISaveable
             // Save game (persists bonfire state and player data)
             var pc = player.GetComponent<Player_Controller>();
             var xp = player.GetComponent<XP_System>();
+
+            Debug.Log($"Bonfire '{name}' activated. Lit={isLit}. Return point set to {rp}. Saving via {(pc != null ? "Player_Controller.SaveGame()" : "SaveSystem.SavePlayer()")}.", this);
             if (pc != null)
             {
                 pc.SaveGame();
