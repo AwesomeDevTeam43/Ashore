@@ -3,14 +3,15 @@ using UnityEngine;
 public class Chest : MonoBehaviour
 {
     private GameObject player;
-    private Player_InputHandler player_InputHandler;
-    private Player_Controller player_Controller;
 
     [Header("Chest Sprites")]
     [SerializeField] private Sprite openSprite;
 
     [Header("Rewards")]
-    [SerializeField] private int xpReward = 1;
+    [SerializeField] private int xpReward = 3;
+    [SerializeField] private int stoneReward = 3;
+    [SerializeField] private int woodReward = 3;
+    [SerializeField] private int ropeReward = 3;
 
     private SpriteRenderer spriteRenderer;
     private XP_System xP_System;
@@ -24,11 +25,7 @@ public class Chest : MonoBehaviour
         player = GameObject.FindGameObjectWithTag("Player");
         spriteRenderer = GetComponent<SpriteRenderer>();
         xP_System = player.GetComponent<XP_System>();
-        player_InputHandler = player.GetComponent<Player_InputHandler>();
-        player_Controller = player.GetComponent<Player_Controller>();
         drop_Materials = GetComponent<Drop_Materials>();
-
-
     }
 
     void Start()
@@ -61,7 +58,7 @@ public class Chest : MonoBehaviour
             isOpen = true;
             spriteRenderer.sprite = openSprite;
             xP_System.DropXP(transform.position, xpReward);
-//            drop_Materials.DropMaterial(1, 2, 3);
+            drop_Materials.DropMaterial(stoneReward, woodReward,ropeReward);
         }
     }
 

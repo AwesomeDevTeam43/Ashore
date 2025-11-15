@@ -16,4 +16,10 @@ public class EnemySpawnPoint : MonoBehaviour
 
 
     [HideInInspector] public bool hasSpawned = false;
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(transform.position, 1);
+    }
 }

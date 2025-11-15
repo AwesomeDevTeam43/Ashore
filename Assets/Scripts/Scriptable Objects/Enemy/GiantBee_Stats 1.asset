@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: GiantBee_Stats 1
   m_EditorClassIdentifier: 
   maxHealth: 5
-  xpOnDeath: 1
+  xpOnDeath: 3
   dropA: 5
   dropB: 4
   dropC: 5
