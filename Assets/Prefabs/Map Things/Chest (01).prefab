@@ -12,8 +12,9 @@ GameObject:
   - component: {fileID: 5012524537559707583}
   - component: {fileID: 3511647002900033405}
   - component: {fileID: -4843128180931224427}
+  - component: {fileID: 4640424422146627041}
   m_Layer: 0
-  m_Name: Chest (2)
+  m_Name: Chest (01)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -77,7 +78,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 20
+  m_SortingOrder: 10
   m_Sprite: {fileID: 7952422664872360696, guid: 5e3f5c1854a4b45468301325129d9a4d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -103,6 +104,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   openSprite: {fileID: 2067646171788204918, guid: c04739fef83ed4346ab06dd314b824e1, type: 3}
   xpReward: 5
+  stoneReward: 3
+  woodReward: 3
+  ropeReward: 3
 --- !u!61 &-4843128180931224427
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -137,7 +141,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.008083463, y: 0.04722105}
+  m_Offset: {x: -0.00391759, y: 0.055048242}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -147,5 +151,21 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.4174286, y: 0.3944421}
+  m_Size: {x: 0.49360964, y: 0.4100965}
   m_EdgeRadius: 0
+--- !u!114 &4640424422146627041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1754115231248754664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e616ffe88f71c145929265635770b0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stone: {fileID: 11400000, guid: c794599bb4cdcca4a8001e4ff1cba7fb, type: 2}
+  wood: {fileID: 11400000, guid: 321063f8e7c67734da1616587ab2def1, type: 2}
+  rope: {fileID: 11400000, guid: 32410df1c793ac94eaf344c30dad367a, type: 2}
+  material_particle: {fileID: 3009273275518452482, guid: 4faa844a12452a64982a14b05e65a988, type: 3}

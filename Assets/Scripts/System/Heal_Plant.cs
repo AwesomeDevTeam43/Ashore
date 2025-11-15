@@ -1,7 +1,7 @@
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 
-[RequireComponent(typeof(GuidComponent))]
-public class Heal_Plant : MonoBehaviour, ISaveable
+public class Heal_Plant : MonoBehaviour
 {
     private GameObject player;
     private Player_InputHandler player_InputHandler;
@@ -10,92 +10,43 @@ public class Heal_Plant : MonoBehaviour, ISaveable
     [SerializeField] private Sprite plant_dead;
     private SpriteRenderer spriteRenderer;
 
+    [SerializeField] private int heal_amount = 3;
     [SerializeField] private GameObject heal_particle;
 
 
     [SerializeField] private bool isDead = false;
-    private bool playerNearby = false;
 
     void Start()
     {
-        // Find player and validate
         player = GameObject.FindGameObjectWithTag("Player");
-        if (player == null)
-        {
-            Debug.LogError($"Heal_Plant on {gameObject.name}: Player not found with tag 'Player'!");
-            enabled = false;
-            return;
-        }
-
-        // Get components and validate
         spriteRenderer = GetComponent<SpriteRenderer>();
-        if (spriteRenderer == null)
-        {
-            Debug.LogError($"Heal_Plant on {gameObject.name}: SpriteRenderer component missing!");
-        }
-
         player_InputHandler = player.GetComponent<Player_InputHandler>();
-        if (player_InputHandler == null)
-        {
-            Debug.LogError($"Heal_Plant on {gameObject.name}: Player_InputHandler component not found on player!");
-            enabled = false;
-            return;
-        }
-
         player_Controller = player.GetComponent<Player_Controller>();
-        if (player_Controller == null)
-        {
-            Debug.LogError($"Heal_Plant on {gameObject.name}: Player_Controller component not found on player!");
-            enabled = false;
-            return;
-        }
-
-        // Validate prefab assignment
-        if (heal_particle == null)
-        {
-            Debug.LogWarning($"Heal_Plant on {gameObject.name}: Heal particle prefab is not assigned!");
-        }
-
-        if (plant_dead == null)
-        {
-            Debug.LogWarning($"Heal_Plant on {gameObject.name}: Plant dead sprite is not assigned!");
-        }
-
-        //Debug.Log($"Heal_Plant on {gameObject.name}: Successfully initialized!");
     }
 
     private void Update()
     {
-        // Add null checks to prevent errors
         if (player == null || player_Controller == null || player_InputHandler == null)
             return;
-
     }
 
     void OnTriggerStay2D(Collider2D collision)
     {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Player"))
+        if (!collision.CompareTag("Player"))
+            return;
+
+        Debug.Log("collided with player (OnTriggerStay2D)");
+        if (Input.GetKeyDown(KeyCode.E))
         {
-            Debug.Log("colidde");
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                DropHeal();
-            }
+            DropHeal();
         }
     }
-
 
     private void DropHeal()
     {
         if (!isDead)
         {
             Debug.Log($"DropHeal called on {gameObject.name}");
-
-            if (heal_particle == null)
-            {
-                Debug.LogWarning($"Heal_Plant on {gameObject.name}: Heal Particle prefab is not assigned!");
-                return;
-            }
 
             Vector3 randomOffset = new Vector3(
                 UnityEngine.Random.Range(-1f, 1f),
@@ -107,7 +58,14 @@ public class Heal_Plant : MonoBehaviour, ISaveable
 
             GameObject healParticle = Instantiate(heal_particle, spawnPosition, Quaternion.identity);
 
+            var healComponent = healParticle.GetComponent<Heal_Particle>();
+            if (healComponent != null)
+            {
+                healComponent.SetHealAmount(heal_amount);
+            }
+
             Rigidbody2D rb = healParticle.GetComponent<Rigidbody2D>();
+
             if (rb != null)
             {
                 Vector2 randomForce = new Vector2(
@@ -122,52 +80,6 @@ public class Heal_Plant : MonoBehaviour, ISaveable
             {
                 spriteRenderer.sprite = plant_dead;
             }
-
-            Debug.Log($"Heal plant {gameObject.name} is now dead");
         }
-    }
-
-    public object CaptureState()
-    {
-        return new PlantSaveData
-        {
-            isUsed = this.isDead
-        };
-    }
-
-    public void RestoreState(object state)
-    {
-        PlantSaveData saveData;
-        // Handle both direct struct instance and JObject (when deserialized generically)
-        if (state is Newtonsoft.Json.Linq.JObject jObj)
-        {
-            saveData = jObj.ToObject<PlantSaveData>();
-        }
-        else
-        {
-            saveData = (PlantSaveData)state;
-        }
-        this.isDead = saveData.isUsed;
-
-        if (isDead)
-        {
-            if (spriteRenderer == null)
-            {
-                spriteRenderer = GetComponent<SpriteRenderer>();
-            }
-            spriteRenderer.sprite = plant_dead;
-        }
-    }
-
-    [System.Serializable]
-    private struct PlantSaveData
-    {
-        public bool isUsed;
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, 1f);
     }
 }

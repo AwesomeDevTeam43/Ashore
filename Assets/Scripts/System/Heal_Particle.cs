@@ -93,4 +93,9 @@ public class Heal_Particle : MonoBehaviour
             }
         }
     }
+
+    public void SetHealAmount(int amount)
+    {
+        healAmount = amount;
+    }
 }

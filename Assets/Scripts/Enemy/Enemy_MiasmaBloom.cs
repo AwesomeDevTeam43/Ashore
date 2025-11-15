@@ -102,6 +102,8 @@ public class Enemy_MiasmaBloom : EnemyBase
                 DoCooldown();
                 break;
         }
+
+        FacePlayer();
     }
 
     private void DoIdle()
@@ -193,7 +195,17 @@ public class Enemy_MiasmaBloom : EnemyBase
         Debug.LogWarning("Enemy_MiasmaBloom: TakeDamage called but Enemy_Health is missing.");
     }
 
-    private void OnDrawGizmosSelected()
+    void FacePlayer()
+    {
+        if (player == null) return;
+        float dir = (player.transform.position.x >= transform.position.x) ? 1f : -1f;
+        Vector3 s = stats.baseScale;
+        s.x = Mathf.Abs(s.x) * dir;
+        transform.localScale = s;
+    }
+
+
+    private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, detectRadius);
@@ -207,11 +219,6 @@ public class Enemy_MiasmaBloom : EnemyBase
             Gizmos.DrawWireSphere(attackTarget, biteRadius);
             Gizmos.DrawLine(transform.position, attackTarget);
         }
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (!Application.isPlaying) return;
 
         if (state == State.Charging || state == State.Attacking)
         {

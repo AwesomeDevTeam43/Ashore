@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b75cf5af7f8f7d4b9c8cb5b0d17cd2d, type: 3}
   m_Name: KeyCard1
   m_EditorClassIdentifier: 
-  itemName: New Item
-  icon: {fileID: 0}
-  description: 
+  itemName: Lab Key Card
+  icon: {fileID: 21300000, guid: 09e31bbe59c1b8247a35495275453ee3, type: 3}
+  description: A card that gives you access to a specific place.
   isUsable: 0
   isCraftable: 0
   craftIngredients: []
   craftResult: {fileID: 0}
-  maxStackSize: 50
+  maxStackSize: 1
   isStackable: 0

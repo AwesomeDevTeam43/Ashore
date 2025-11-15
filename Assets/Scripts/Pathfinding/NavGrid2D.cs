@@ -12,7 +12,7 @@ public class NavGrid2D : MonoBehaviour
 
     [Header("Resolution")]
     [Tooltip("Half of a cell size (world units)")]
-    public float nodeRadius = 0.25f;
+    public float nodeRadius = 0.12f;
     [Tooltip("Extra clearance added to nodeRadius when checking obstacles")] 
     public float clearance = 0.0f;
     [Tooltip("When true, draw a denser overlay of grid gizmos for debugging.")]

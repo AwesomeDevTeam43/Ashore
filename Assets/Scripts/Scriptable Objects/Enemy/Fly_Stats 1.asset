@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Fly_Stats 1
   m_EditorClassIdentifier: 
   maxHealth: 5
-  xpOnDeath: 1
+  xpOnDeath: 3
   dropA: 2
   dropB: 2
   dropC: 3
