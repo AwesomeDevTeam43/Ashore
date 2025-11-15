@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 4475009797984320295}
   - component: {fileID: 4440351661321488067}
   - component: {fileID: 948986448698743084}
+  - component: {fileID: 720132420092226812}
+  - component: {fileID: 2803447172678884119}
   m_Layer: 7
   m_Name: MiasmaGolem
   m_TagString: Enemy
@@ -185,3 +187,44 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1.4461075, y: 1.8094306}
   m_EdgeRadius: 0
+--- !u!114 &720132420092226812
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5384982542472265557}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cacfc9d7f5bd07c41a8a6ee8979339ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 5
+  damageable: 1
+  invincibilityDuration: 0.2
+--- !u!114 &2803447172678884119
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5384982542472265557}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9f690f95e25c1d4c8ea1642b25188fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stats: {fileID: 11400000, guid: b07395be782cb4e4380990c4719674c3, type: 2}
+  typedStats: {fileID: 11400000, guid: b07395be782cb4e4380990c4719674c3, type: 2}
+  walkBool: isWalking
+  attackTrigger: Attack
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 512
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 64
+  hopCooldownTime: 0.3
+  slamHitMask:
+    serializedVersion: 2
+    m_Bits: 8

@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1776530998412778538
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3491847467146088585}
+  m_Layer: 12
+  m_Name: ReturnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3491847467146088585
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1776530998412778538}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.015, y: 0.7, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7613159537970694452}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2149504193949386446
 GameObject:
   m_ObjectHideFlags: 0
@@ -11,6 +42,8 @@ GameObject:
   - component: {fileID: 7613159537970694452}
   - component: {fileID: 5649339675190846772}
   - component: {fileID: 1815691066102553628}
+  - component: {fileID: -7588522893781280132}
+  - component: {fileID: -3568142314728436910}
   m_Layer: 12
   m_Name: RestPointShit
   m_TagString: RestPoint
@@ -30,7 +63,8 @@ Transform:
   m_LocalPosition: {x: 135.88, y: -0.37, z: 0.018419236}
   m_LocalScale: {x: 4, y: 4, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 3491847467146088585}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &5649339675190846772
@@ -77,7 +111,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 2067646171788204918, guid: c04739fef83ed4346ab06dd314b824e1, type: 3}
+  m_Sprite: {fileID: -1913347067976085879, guid: 15d10164ee015c246aa91d9806c535fb, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -125,8 +159,8 @@ BoxCollider2D:
   m_Offset: {x: -0.02576077, y: -0.003220491}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.34, y: 0.32}
+    pivot: {x: 0.5, y: 0.28}
+    oldSize: {x: 0.90625, y: 0.375}
     newSize: {x: 0.34, y: 0.32}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -134,3 +168,34 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.623394, y: 0.48102295}
   m_EdgeRadius: 0
+--- !u!114 &-7588522893781280132
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2149504193949386446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8dfdbbb8ff0f0849a397c0556cc0b42, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteRenderer: {fileID: 5649339675190846772}
+  unlitSprite: {fileID: -1913347067976085879, guid: 15d10164ee015c246aa91d9806c535fb, type: 3}
+  litSprite: {fileID: 8210454418194263521, guid: 39d41c41f7b8fc5448dc8e35509670a6, type: 3}
+  returnPoint: {fileID: 3491847467146088585}
+  enableInteractActivation: 1
+  guidComponent: {fileID: -3568142314728436910}
+--- !u!114 &-3568142314728436910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2149504193949386446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5712449afb6cdea4dba591dad71e995d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 35821bbb-38df-4693-b352-cb11fed5427f

@@ -5,6 +5,8 @@ using UnityEngine;
 public class NavGrid2D : MonoBehaviour
 {
     public static NavGrid2D Instance { get; private set; }
+    // Registry of all grids in the scene to support multi-grid setups
+    public static readonly List<NavGrid2D> All = new List<NavGrid2D>();
 
     [Header("Grid Bounds (world)")]
     public Vector2 origin = new Vector2(-20, -12);
@@ -39,9 +41,15 @@ public class NavGrid2D : MonoBehaviour
 
     void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-        Instance = this;
+        if (Instance == null) Instance = this; // keep first grid as legacy Instance for backward compatibility
+        if (!All.Contains(this)) All.Add(this);
         nodeDiameter = Mathf.Max(0.05f, nodeRadius) * 2f;
+    }
+
+    void OnDestroy()
+    {
+        if (All.Contains(this)) All.Remove(this);
+        if (Instance == this) Instance = All.Count > 0 ? All[0] : null;
     }
 
     void Start()
@@ -64,6 +72,47 @@ public class NavGrid2D : MonoBehaviour
                 grid[x, y] = new Node(walk, wp, x, y);
             }
         }
+    }
+
+    // Multi-grid helpers
+    public Rect GetWorldRect()
+    {
+        // Support negative sizes gracefully
+        Vector2 min = new Vector2(Mathf.Min(origin.x, origin.x + size.x), Mathf.Min(origin.y, origin.y + size.y));
+        Vector2 max = new Vector2(Mathf.Max(origin.x, origin.x + size.x), Mathf.Max(origin.y, origin.y + size.y));
+        return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
+    }
+
+    public bool Contains(Vector2 worldPos)
+    {
+        var r = GetWorldRect();
+        return r.Contains(worldPos);
+    }
+
+    public static NavGrid2D GetGridAt(Vector2 worldPos)
+    {
+        for (int i = 0; i < All.Count; i++)
+        {
+            var g = All[i];
+            if (g != null && g.Contains(worldPos)) return g;
+        }
+        return null;
+    }
+
+    public static NavGrid2D GetNearestGrid(Vector2 worldPos)
+    {
+        float best = float.PositiveInfinity; NavGrid2D bestG = null;
+        for (int i = 0; i < All.Count; i++)
+        {
+            var g = All[i]; if (g == null) continue;
+            var rect = g.GetWorldRect();
+            // Distance 0 if inside; otherwise shortest distance to rect
+            float dx = Mathf.Max(0, rect.xMin - worldPos.x, worldPos.x - rect.xMax);
+            float dy = Mathf.Max(0, rect.yMin - worldPos.y, worldPos.y - rect.yMax);
+            float d = Mathf.Sqrt(dx * dx + dy * dy);
+            if (d < best) { best = d; bestG = g; }
+        }
+        return bestG;
     }
 
     private Node NodeFromWorld(Vector2 world)

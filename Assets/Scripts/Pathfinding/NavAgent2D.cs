@@ -6,6 +6,8 @@ public class NavAgent2D : MonoBehaviour
 {
     [Header("Grid Source")]
     public NavGrid2D grid;
+    [Tooltip("If true, the agent will automatically pick the NavGrid2D that contains its start/target position.")]
+    public bool useDynamicGridSelection = true;
 
     [Header("Agent")]
     [Tooltip("Inflates the grid clearance checks by this radius to keep the agent from clipping into obstacles.")]
@@ -27,27 +29,33 @@ public class NavAgent2D : MonoBehaviour
 
     public List<Vector2> RequestPath(Vector2 start, Vector2 target)
     {
-        if (grid == null) grid = NavGrid2D.Instance;
-        if (grid == null)
+        NavGrid2D targetGrid = grid;
+        if (useDynamicGridSelection || targetGrid == null)
+        {
+            // Prefer grid containing start; then target; else nearest
+            targetGrid = NavGrid2D.GetGridAt(start) ?? NavGrid2D.GetGridAt(target) ?? NavGrid2D.GetNearestGrid(start);
+        }
+
+        if (targetGrid == null)
         {
             Debug.LogWarning("NavAgent2D: No NavGrid2D available.");
             return null;
         }
 
         // Temporarily apply agent radius by adjusting grid clearance
-        float originalClearance = grid.clearance;
-        LayerMask originalMask = grid.obstacleMask;
+        float originalClearance = targetGrid.clearance;
+        LayerMask originalMask = targetGrid.obstacleMask;
         try
         {
-            grid.clearance = Mathf.Max(grid.clearance, agentRadius);
-            if (obstacleMaskOverride.value != 0) grid.obstacleMask = obstacleMaskOverride;
-            lastPath = grid.FindPath(start, target);
+            targetGrid.clearance = Mathf.Max(targetGrid.clearance, agentRadius);
+            if (obstacleMaskOverride.value != 0) targetGrid.obstacleMask = obstacleMaskOverride;
+            lastPath = targetGrid.FindPath(start, target);
         }
         finally
         {
             // restore
-            grid.clearance = originalClearance;
-            grid.obstacleMask = originalMask;
+            targetGrid.clearance = originalClearance;
+            targetGrid.obstacleMask = originalMask;
         }
         return lastPath;
     }
