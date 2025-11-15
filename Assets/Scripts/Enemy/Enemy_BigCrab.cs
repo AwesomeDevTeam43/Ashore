@@ -30,7 +30,7 @@ public class BigCrab : EnemyBase
     typedStats = stats as BigCrab_Stats;
     enemyHealth = GetComponent<Enemy_Health>();
     rb = GetComponent<Rigidbody2D>();
-  animator = GetComponentInChildren<Animator>();
+    animator = GetComponentInChildren<Animator>();
     if (animator != null)
     {
       foreach (var p in animator.parameters)
@@ -332,9 +332,13 @@ public class BigCrab : EnemyBase
   void OnDrawGizmos()
   {
     if (stats == null) return;
+
+    var tStats = typedStats != null ? typedStats : stats as BigCrab_Stats;
+    if (tStats == null) return;
+
     Gizmos.color = Color.yellow;
-    Gizmos.DrawWireSphere(transform.position, typedStats.followPlayerRange);
+    Gizmos.DrawWireSphere(transform.position, tStats.followPlayerRange);
     Gizmos.color = Color.red;
-    Gizmos.DrawWireSphere(transform.position, typedStats.attackRange);
+    Gizmos.DrawWireSphere(transform.position, tStats.attackRange);
   }
 }

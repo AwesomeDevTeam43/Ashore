@@ -1,35 +1,21 @@
 using UnityEngine;
 
-public class Drop_Materials : MonoBehaviour
+public class Drop_Item : MonoBehaviour
 {
-    [SerializeField] private ItemData stone;
-    [SerializeField] private ItemData wood;
-    [SerializeField] private ItemData rope;
+    [SerializeField] private ItemData itemData;
+    [SerializeField] private int amount;
 
     [SerializeField] private GameObject material_particle;
 
-    public void DropMaterial(int woodAmount, int stoneAmount, int ropeAmount)
+    public void DropItem()
     {
-        // Drop wood particles
-        for (int i = 0; i < woodAmount; i++)
+        for (int i = 0; i < amount; i++)
         {
-            DropSingleMaterial(wood);
-        }
-
-        // Drop stone particles
-        for (int i = 0; i < stoneAmount; i++)
-        {
-            DropSingleMaterial(stone);
-        }
-
-        // Drop rope particles
-        for (int i = 0; i < ropeAmount; i++)
-        {
-            DropSingleMaterial(rope);
+            Drop(itemData);
         }
     }
 
-    private void DropSingleMaterial(ItemData itemData)
+    private void Drop(ItemData itemData)
     {
         if (itemData == null || material_particle == null) return;
 
@@ -43,7 +29,6 @@ public class Drop_Materials : MonoBehaviour
 
         GameObject materialParticle = Instantiate(material_particle, spawnPosition, Quaternion.identity);
 
-        // Set the ItemData on the spawned particle
         Materials materialScript = materialParticle.GetComponent<Materials>();
         if (materialScript != null)
         {
@@ -59,15 +44,5 @@ public class Drop_Materials : MonoBehaviour
             );
             rb.AddForce(randomForce, ForceMode2D.Impulse);
         }
-    }
-
-    // Public method to call from other scripts
-    public void DropRandomMaterials()
-    {
-        int woodCount = Random.Range(0, 3);
-        int stoneCount = Random.Range(0, 2);
-        int ropeCount = Random.Range(0, 2);
-
-        DropMaterial(woodCount, stoneCount, ropeCount);
     }
 }

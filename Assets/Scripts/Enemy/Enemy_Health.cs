@@ -11,6 +11,7 @@ public class Enemy_Health : MonoBehaviour
     private HealthSystem healthSystem;
     private XP_System xP_System;
     private Drop_Materials drop_Materials;
+    private Drop_Item drop_Item;
 
     private int xpOnDeath;
     private int dropA;
@@ -21,6 +22,7 @@ public class Enemy_Health : MonoBehaviour
     {
         healthSystem = GetComponent<HealthSystem>();
         drop_Materials = GetComponent<Drop_Materials>();
+        drop_Item = GetComponent<Drop_Item>();
     }
 
     private void Start()
@@ -72,6 +74,11 @@ public class Enemy_Health : MonoBehaviour
             if (drop_Materials != null)
             {
                 drop_Materials.DropMaterial(dropA, dropB, dropC);
+            }
+
+            if (drop_Item != null)
+            {
+                drop_Item.DropItem();
             }
 
             Destroy(gameObject);
