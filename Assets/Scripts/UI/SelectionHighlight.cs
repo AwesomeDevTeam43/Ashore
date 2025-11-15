@@ -48,6 +48,10 @@ public class SelectionHighlight : MonoBehaviour, ISelectHandler, IDeselectHandle
     private void OnDisable()
     {
         UIInputMode.OnChanged -= OnModeChanged;
+        // Reset any lingering state so re-enabling doesn't show stale highlight
+        isSelected = false;
+        isHovered = false;
+        SetActive(false);
     }
 
     private void EnsureOutline()

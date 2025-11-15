@@ -9,6 +9,15 @@ public class EquipmentPage : MonoBehaviour
     [SerializeField] private TextMeshProUGUI nameText;
     [SerializeField] private TextMeshProUGUI descriptionText;
     [SerializeField] private Button disableButton;
+    [Space]
+    [SerializeField] private TextMeshProUGUI mainWeaponText; // Optional: shows current main weapon selection
+    [SerializeField] private Button setMeleeButton;          // Optional: sets main weapon to Melee
+    [SerializeField] private Button setRangedButton;         // Optional: sets main weapon to Ranged
+    [Space]
+    [SerializeField] private Button toggleMainWeaponButton;  // Optional: single toggle button for Melee<->Ranged
+    [SerializeField] private Image mainWeaponIconUI;         // Optional: small icon in the equipment page
+    [SerializeField] private Sprite meleeIcon;
+    [SerializeField] private Sprite rangedIcon;
 
     private Player_Controller player;
 
@@ -21,6 +30,34 @@ public class EquipmentPage : MonoBehaviour
             // Ensure visual highlight on hover/selection
             var hi = disableButton.GetComponent<SelectionHighlight>();
             if (hi == null) disableButton.gameObject.AddComponent<SelectionHighlight>();
+            // Ensure it's a navigable target
+            if (disableButton.GetComponent<UINavTarget>() == null) disableButton.gameObject.AddComponent<UINavTarget>();
+        }
+
+        if (setMeleeButton != null)
+        {
+            setMeleeButton.onClick.RemoveAllListeners();
+            setMeleeButton.onClick.AddListener(() => SetMainWeapon(Player_Controller.MainWeaponType.Melee));
+            var hi = setMeleeButton.GetComponent<SelectionHighlight>();
+            if (hi == null) setMeleeButton.gameObject.AddComponent<SelectionHighlight>();
+            if (setMeleeButton.GetComponent<UINavTarget>() == null) setMeleeButton.gameObject.AddComponent<UINavTarget>();
+        }
+        if (setRangedButton != null)
+        {
+            setRangedButton.onClick.RemoveAllListeners();
+            setRangedButton.onClick.AddListener(() => SetMainWeapon(Player_Controller.MainWeaponType.Ranged));
+            var hi = setRangedButton.GetComponent<SelectionHighlight>();
+            if (hi == null) setRangedButton.gameObject.AddComponent<SelectionHighlight>();
+            if (setRangedButton.GetComponent<UINavTarget>() == null) setRangedButton.gameObject.AddComponent<UINavTarget>();
+        }
+
+        if (toggleMainWeaponButton != null)
+        {
+            toggleMainWeaponButton.onClick.RemoveAllListeners();
+            toggleMainWeaponButton.onClick.AddListener(ToggleMainWeapon);
+            var hi = toggleMainWeaponButton.GetComponent<SelectionHighlight>();
+            if (hi == null) toggleMainWeaponButton.gameObject.AddComponent<SelectionHighlight>();
+            if (toggleMainWeaponButton.GetComponent<UINavTarget>() == null) toggleMainWeaponButton.gameObject.AddComponent<UINavTarget>();
         }
     }
 
@@ -61,6 +98,29 @@ public class EquipmentPage : MonoBehaviour
         {
             SetNone();
         }
+
+        // Update main weapon UI (optional)
+        if (mainWeaponText != null)
+        {
+            mainWeaponText.text = $"Main Weapon: {player.CurrentMainWeapon}";
+        }
+        if (setMeleeButton != null) setMeleeButton.interactable = true;
+        if (setRangedButton != null) setRangedButton.interactable = true;
+        if (toggleMainWeaponButton != null)
+        {
+            var label = toggleMainWeaponButton.GetComponentInChildren<TextMeshProUGUI>();
+            if (label != null)
+            {
+                label.text = player.CurrentMainWeapon == Player_Controller.MainWeaponType.Melee ? "Switch to Ranged" : "Switch to Melee";
+            }
+        }
+        if (mainWeaponIconUI != null)
+        {
+            mainWeaponIconUI.enabled = true;
+            mainWeaponIconUI.sprite = player.CurrentMainWeapon == Player_Controller.MainWeaponType.Melee ? meleeIcon : rangedIcon;
+        }
+
+        RebuildNavScope();
     }
 
     private void SetNone()
@@ -94,5 +154,42 @@ public class EquipmentPage : MonoBehaviour
             }
         }
         Refresh();
+    }
+
+    private void SetMainWeapon(Player_Controller.MainWeaponType type)
+    {
+        if (player == null) return;
+        player.SetMainWeapon(type);
+        Refresh();
+    }
+
+    private void ToggleMainWeapon()
+    {
+        if (player == null) return;
+        var next = player.CurrentMainWeapon == Player_Controller.MainWeaponType.Melee
+            ? Player_Controller.MainWeaponType.Ranged
+            : Player_Controller.MainWeaponType.Melee;
+        player.SetMainWeapon(next);
+        Refresh();
+    }
+
+    // Return top-most selectable button for focus/navigation mapping
+    public GameObject GetFirstSelectable()
+    {
+        if (toggleMainWeaponButton != null && toggleMainWeaponButton.gameObject.activeInHierarchy && toggleMainWeaponButton.interactable)
+            return toggleMainWeaponButton.gameObject;
+        if (setMeleeButton != null && setMeleeButton.gameObject.activeInHierarchy && setMeleeButton.interactable)
+            return setMeleeButton.gameObject;
+        if (setRangedButton != null && setRangedButton.gameObject.activeInHierarchy && setRangedButton.interactable)
+            return setRangedButton.gameObject;
+        if (disableButton != null && disableButton.gameObject.activeInHierarchy && disableButton.interactable)
+            return disableButton.gameObject;
+        return null;
+    }
+
+    private void RebuildNavScope()
+    {
+        var scope = GetComponentInParent<UINavScope>();
+        if (scope != null && scope.isActiveAndEnabled) scope.Rebuild();
     }
 }

@@ -11,6 +11,17 @@ public class Weapon : MonoBehaviour
     public WeaponDirection weaponDirection;
     [SerializeField] private Player_Movement Player_Movement;
     [SerializeField] private Player_InputHandler player_InputHandler;
+    [SerializeField] private Player_Controller playerController;
+
+    private void Awake()
+    {
+        if (playerController == null)
+            playerController = GetComponentInParent<Player_Controller>();
+        if (Player_Movement == null)
+            Player_Movement = GetComponentInParent<Player_Movement>();
+        if (player_InputHandler == null)
+            player_InputHandler = GetComponentInParent<Player_InputHandler>();
+    }
     public Vector2 GetShootDirection()
     {
         switch (weaponDirection)
@@ -49,7 +60,10 @@ public class Weapon : MonoBehaviour
     {
         if (timeBetweenShots <= 0)
         {
-            if (player_InputHandler.RangeAttackTriggered)
+            // Fire only when Attack is pressed AND main weapon mode is Ranged
+            if (player_InputHandler.AttackTriggered &&
+                playerController != null &&
+                playerController.CurrentMainWeapon == Player_Controller.MainWeaponType.Ranged)
             {
                 GameObject newProjectile = Instantiate(projectile, shotPoint.position, Quaternion.identity);
                 Projectile proj = newProjectile.GetComponent<Projectile>();

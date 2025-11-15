@@ -112,6 +112,11 @@ public class InventorySlot : MonoBehaviour
         EquipmentData ed = item as EquipmentData;
         if (ed != null)
         {
+            if (ed.isCraftable)
+            {
+                Debug.Log("Inventory: cannot equip craftable equipment before crafting.");
+                return;
+            }
             if (EquipmentManager.instance != null)
             {
                 EquipmentManager.instance.EquipFromInventory(ed);
@@ -119,6 +124,17 @@ public class InventorySlot : MonoBehaviour
             else
             {
                 Debug.LogWarning("No EquipmentManager instance found to equip item");
+            }
+            return;
+        }
+
+        // Handle consumable / usable items
+        if (item.isUsable)
+        {
+            if (Inventory.instance != null)
+            {
+                Inventory.instance.Remove(item, 1);
+                // TODO: trigger item-specific effects if needed (healing, buffs, etc.)
             }
         }
     }

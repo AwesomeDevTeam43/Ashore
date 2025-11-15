@@ -68,6 +68,19 @@ public class Player_InputHandler : MonoBehaviour
     public event Action<Vector2> On8DirectionChanged;
     private int lastDirIndex = -1;
 
+    [Header("Aim Deadzone Settings")]
+    [Tooltip("Ignore stick magnitude below this value entirely.")]
+    [Range(0f, 1f)]
+    [SerializeField] private float radialDeadzone = 0.2f;
+
+    [Tooltip("Per-axis deadzone. Components below this are treated as 0 to avoid accidental diagonals.")]
+    [Range(0f, 1f)]
+    [SerializeField] private float perAxisDeadzone = 0.2f;
+
+    [Tooltip("How much stronger one axis must be (relative) than the other to snap to a cardinal. 0 = always diagonal when both axes active, 1 = never diagonal.")]
+    [Range(0f, 1f)]
+    [SerializeField] private float axisSnapBias = 0.3f;
+
 
     private void OnEnable()
     {
@@ -133,8 +146,9 @@ public class Player_InputHandler : MonoBehaviour
 
     private void Handle8Directions()
     {
-        Vector2 dir8 = Get8Direction(MovementInput);
-        int dirIndex = Array.IndexOf(directions8, dir8);
+        Vector2 dir8;
+        int dirIndex;
+        Get8DirectionSmart(MovementInput, out dir8, out dirIndex);
 
         if (dirIndex != lastDirIndex)
         {
@@ -143,16 +157,144 @@ public class Player_InputHandler : MonoBehaviour
         }
     }
 
-    private Vector2 Get8Direction(Vector2 input)
+    /// <summary>
+    /// Applies radial and per-axis deadzones plus a cardinal/diagonal bias to produce a stable 8-way direction.
+    /// Returns a vector guaranteed to be one of directions8 (or zero) and its index (-1 if zero).
+    /// </summary>
+    private void Get8DirectionSmart(Vector2 input, out Vector2 dir8, out int dirIndex)
     {
-        if (input == Vector2.zero)
-            return Vector2.zero;
+        dir8 = Vector2.zero;
+        dirIndex = -1;
 
+        // Radial deadzone: ignore very small stick input
+        float mag = input.magnitude;
+        if (mag < radialDeadzone)
+        {
+            return;
+        }
+
+        // Normalize for comparison but keep original signs
+        Vector2 v = input.normalized;
+        float ax = Mathf.Abs(v.x);
+        float ay = Mathf.Abs(v.y);
+
+        // Per-axis deadzone: zero-out tiny components to avoid accidental diagonals
+        float sx = v.x;
+        float sy = v.y;
+        if (ax < perAxisDeadzone) sx = 0f;
+        if (ay < perAxisDeadzone) sy = 0f;
+
+        // If both got zeroed, fall back to dominant axis from original
+        if (Mathf.Approximately(sx, 0f) && Mathf.Approximately(sy, 0f))
+        {
+            if (ax >= ay)
+                sx = Mathf.Sign(v.x);
+            else
+                sy = Mathf.Sign(v.y);
+        }
+
+        // Decide cardinal vs diagonal using relative bias
+        ax = Mathf.Abs(sx);
+        ay = Mathf.Abs(sy);
+        if (ax > 0f && ay > 0f)
+        {
+            // Both axes present: choose diagonal only if axes are similar within bias window
+            float maxA = Mathf.Max(ax, ay);
+            float minA = Mathf.Min(ax, ay);
+            bool similar = minA >= maxA * (1f - axisSnapBias);
+            if (similar)
+            {
+                // Diagonal
+                int diagIndex;
+                if (sx > 0 && sy > 0) diagIndex = 1; // UpRight
+                else if (sx < 0 && sy > 0) diagIndex = 3; // UpLeft
+                else if (sx < 0 && sy < 0) diagIndex = 5; // DownLeft
+                else diagIndex = 7; // DownRight
+                dir8 = directions8[diagIndex];
+                dirIndex = diagIndex;
+                return;
+            }
+            else
+            {
+                // Snap to the dominant axis (cardinal)
+                if (ax > ay)
+                {
+                    dir8 = sx > 0 ? Vector2.right : Vector2.left;
+                    dirIndex = sx > 0 ? 0 : 4;
+                    return;
+                }
+                else
+                {
+                    dir8 = sy > 0 ? Vector2.up : Vector2.down;
+                    dirIndex = sy > 0 ? 2 : 6;
+                    return;
+                }
+            }
+        }
+        else if (ax > 0f || ay > 0f)
+        {
+            // Pure cardinal (one axis)
+            if (ax >= ay)
+            {
+                dir8 = sx >= 0 ? Vector2.right : Vector2.left;
+                dirIndex = sx >= 0 ? 0 : 4;
+                return;
+            }
+            else
+            {
+                dir8 = sy >= 0 ? Vector2.up : Vector2.down;
+                dirIndex = sy >= 0 ? 2 : 6;
+                return;
+            }
+        }
+
+        // Fallback by angle (shouldn't be hit)
         float angle = Mathf.Atan2(input.y, input.x) * Mathf.Rad2Deg;
         if (angle < 0) angle += 360f;
-
         int index = Mathf.RoundToInt(angle / 45f) % 8;
-        return directions8[index];
+        dir8 = directions8[index];
+        dirIndex = index;
+    }
+
+    /// <summary>
+    /// Returns a 4-way (cardinal only) direction with the same deadzone handling
+    /// used for aiming. Outputs Vector2.zero if under radial deadzone.
+    /// </summary>
+    public Vector2 Get4Direction(Vector2 input)
+    {
+        float mag = input.magnitude;
+        if (mag < radialDeadzone)
+            return Vector2.zero;
+
+        Vector2 v = input.normalized;
+        float ax = Mathf.Abs(v.x);
+        float ay = Mathf.Abs(v.y);
+
+        float sx = v.x;
+        float sy = v.y;
+        if (ax < perAxisDeadzone) sx = 0f;
+        if (ay < perAxisDeadzone) sy = 0f;
+
+        // If both got zeroed, fall back to dominant axis from original
+        if (Mathf.Approximately(sx, 0f) && Mathf.Approximately(sy, 0f))
+        {
+            if (ax >= ay)
+                sx = Mathf.Sign(v.x);
+            else
+                sy = Mathf.Sign(v.y);
+        }
+
+        ax = Mathf.Abs(sx);
+        ay = Mathf.Abs(sy);
+        // Prefer vertical on tie to avoid accidental right/left when aiming at perfect diagonals
+        if (ay >= ax)
+        {
+            return sy >= 0 ? Vector2.up : Vector2.down;
+        }
+        else
+        {
+            return sx >= 0 ? Vector2.right : Vector2.left;
+        }
     }
 }
 

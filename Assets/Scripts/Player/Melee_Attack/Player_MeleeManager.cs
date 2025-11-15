@@ -10,10 +10,12 @@ public class Player_MeleeManager : MonoBehaviour
     [SerializeField] private MeleeWeapon meleeWeapon;
 
     private Player_InputHandler inputHandler;
+    private Player_Controller playerController;
 
     private void Awake()
     {
         inputHandler = GetComponent<Player_InputHandler>();
+        playerController = GetComponent<Player_Controller>();
     }
 
     private void Update()
@@ -24,7 +26,10 @@ public class Player_MeleeManager : MonoBehaviour
 
     private void CheckInput()
     {
-        if (inputHandler.AttackTriggered && cooldownTimer <= 0f)
+        // Only allow melee when main weapon selection is Melee
+        bool meleeSelected = playerController == null ||
+                             playerController.CurrentMainWeapon == Player_Controller.MainWeaponType.Melee;
+        if (meleeSelected && inputHandler.AttackTriggered && cooldownTimer <= 0f)
         {
             meleeWeapon.PerformAttack();
             cooldownTimer = cooldownTime;

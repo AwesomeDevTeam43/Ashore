@@ -56,6 +56,15 @@ public class Player_Controller : MonoBehaviour
   [Header("Temporary Inventory")]
   [SerializeField] private Equipment currentEquipment;
   [SerializeField] private GameObject spearPrefab;
+  // Remember the last equipment the player had equipped so we can auto re-equip on pickup
+  [SerializeField] private EquipmentData lastEquippedData;
+  
+  public enum MainWeaponType { Melee, Ranged }
+  [Header("Combat")]
+  [SerializeField] private MainWeaponType currentMainWeapon = MainWeaponType.Melee;
+  public MainWeaponType CurrentMainWeapon => currentMainWeapon;
+  public void SetMainWeapon(MainWeaponType type) { currentMainWeapon = type; }
+
   private int currentAttackPower;
   private float currentMoveSpeed;
   private float currentJumpForce;
@@ -66,6 +75,7 @@ public class Player_Controller : MonoBehaviour
   public int LVL1XpAmount => playerStats != null ? playerStats.Level1XpAmount : 0;
   public int LvlGap => playerStats != null ? playerStats.LevelGap : 0;
   public Equipment CurrentEquipment => currentEquipment;
+  public EquipmentData LastEquippedData => lastEquippedData;
 
   // Called by EquipmentManager (or other systems) to set the player's current equipment
   public void SetCurrentEquipment(Equipment eq)
@@ -74,6 +84,11 @@ public class Player_Controller : MonoBehaviour
     if (currentEquipment != null)
     {
       currentEquipment.isEquipped = true;
+      // Track this as the last equipped item for future auto-equip on pickup
+      if (currentEquipment.equipmentData != null)
+      {
+        lastEquippedData = currentEquipment.equipmentData;
+      }
     }
   }
 
@@ -292,6 +307,9 @@ private void Start()
   }
   
 
+  // Reuse RangeAttack input as the unified "Use Equipment" action.
+  // F toggles equip/unequip as before; using equipment consumes it.
+  private bool rangeUseHoldConsumed = false;
   void useEquipment()
   {
     if (currentEquipment != null)
@@ -305,12 +323,22 @@ private void Start()
         currentEquipment.Equip();
       }
 
-      if (Input.GetKeyDown(KeyCode.N) && currentEquipment.isEquipped)
+      // Use equipment on RangeAttack input press (performed). Process once per hold.
+      if (playerInputHandler != null)
       {
-        currentEquipment.Use();
-        Debug.Log("Used Equipment");
-        currentEquipment.isEquipped = false;
-        currentEquipment = null;
+        if (playerInputHandler.RangeAttackTriggered && !rangeUseHoldConsumed && currentEquipment.isEquipped)
+        {
+          currentEquipment.Use();
+          Debug.Log("Used Equipment (RangeAttack)");
+          currentEquipment.isEquipped = false;
+          currentEquipment = null;
+          rangeUseHoldConsumed = true;
+        }
+        else if (!playerInputHandler.RangeAttackTriggered)
+        {
+          // Reset when input released
+          rangeUseHoldConsumed = false;
+        }
       }
     }
   }
@@ -412,6 +440,23 @@ private void Start()
 
           SaveSystem.RestoreWorldState(data);
 
+          // Restore main weapon selection (default to Melee if missing)
+          if (!string.IsNullOrEmpty(data.mainWeaponType))
+          {
+            if (Enum.TryParse<MainWeaponType>(data.mainWeaponType, out var parsed))
+            {
+              SetMainWeapon(parsed);
+            }
+            else
+            {
+              SetMainWeapon(MainWeaponType.Melee);
+            }
+          }
+          else
+          {
+            SetMainWeapon(MainWeaponType.Melee);
+          }
+
           OnPlayerLoad?.Invoke();
       }
   }
@@ -451,7 +496,7 @@ private void Start()
   }
 
 
-    Equipment equipment = collision.GetComponent<Equipment>();
+  Equipment equipment = collision.GetComponent<Equipment>();
     if (equipment != null && !equipment.isEquipped)
     {
       // If this is a thrown spear that's not ready, ignore the trigger (prevents instant re-pickup after throw)
@@ -469,6 +514,14 @@ private void Start()
         {
           Debug.Log("Picked up item: " + equipment.equipmentData.itemName);
           Destroy(collision.gameObject);
+          // Auto re-equip if this was the last equipped item and we currently have nothing equipped
+          if (currentEquipment == null && lastEquippedData == equipment.equipmentData)
+          {
+            if (EquipmentManager.instance != null)
+            {
+              EquipmentManager.instance.EquipFromInventory(equipment.equipmentData);
+            }
+          }
           return;
         }
         else
@@ -489,9 +542,14 @@ private void Start()
           {
             spearPrefab = equipment.gameObject;
           }
-
-          currentEquipment = spearPrefab.GetComponent<Equipment>();
-          currentEquipment.isEquipped = true;
+          // Only auto-equip the spear if nothing is currently equipped
+          if (currentEquipment == null)
+          {
+            currentEquipment = spearPrefab.GetComponent<Equipment>();
+            currentEquipment.isEquipped = true;
+            if (currentEquipment != null && currentEquipment.equipmentData != null)
+              lastEquippedData = currentEquipment.equipmentData;
+          }
 
           Destroy(collision.gameObject);
         }
@@ -503,8 +561,25 @@ private void Start()
       else if (equipment.hasLanded) // Other equipment
       {
         Debug.Log("Picked up " + equipment.name);
-        currentEquipment = equipment;
-        Destroy(collision.gameObject);
+        // If something is already equipped, try to add to inventory instead of equipping
+        if (currentEquipment != null)
+        {
+          if (equipment.equipmentData != null)
+          {
+            bool added = Inventory.instance.Add(equipment.equipmentData);
+            if (added)
+            {
+              Destroy(collision.gameObject);
+            }
+          }
+        }
+        else
+        {
+          currentEquipment = equipment;
+          currentEquipment.isEquipped = true;
+          if (currentEquipment.equipmentData != null) lastEquippedData = currentEquipment.equipmentData;
+          Destroy(collision.gameObject);
+        }
       }
     }
   }

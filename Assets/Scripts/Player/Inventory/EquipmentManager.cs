@@ -28,6 +28,13 @@ public class EquipmentManager : MonoBehaviour
             return;
         }
 
+        // Disallow equipping craftable equipment directly (must be crafted first)
+        if (data.isCraftable)
+        {
+            Debug.Log("EquipmentManager: cannot equip craftable equipment before crafting: " + data.itemName);
+            return;
+        }
+
         // If playerController not found, try to get it
         if (playerController == null)
         {
@@ -37,6 +44,13 @@ public class EquipmentManager : MonoBehaviour
                 Debug.LogError("EquipmentManager: Player_Controller not found on same GameObject");
                 return;
             }
+        }
+
+        // Do not equip if something is already equipped
+        if (playerController != null && playerController.CurrentEquipment != null)
+        {
+            Debug.Log("EquipmentManager: cannot equip, player already has equipment equipped.");
+            return;
         }
 
         // Instantiate the equipment as a child of the player and keep it inactive (inventory holder)
@@ -61,7 +75,10 @@ public class EquipmentManager : MonoBehaviour
         eq.Equip();
 
         // Remove from inventory
-        Inventory.instance.Remove(data);
+        if (Inventory.instance != null)
+        {
+            Inventory.instance.Remove(data);
+        }
 
         Debug.Log("Equipped from inventory: " + data.itemName);
     }

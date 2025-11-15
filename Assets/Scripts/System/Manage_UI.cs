@@ -9,6 +9,10 @@ public class Manage_UI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _levelText;
     [SerializeField] private Image _hpBar;
     [SerializeField] private Image equipment_1;
+    [Space]
+    [SerializeField] private Image mainWeaponHudIcon; // Small HUD icon for current main weapon (optional)
+    [SerializeField] private Sprite meleeIcon;
+    [SerializeField] private Sprite rangedIcon;
 
     private GameObject player;
     private XP_System xpSystem;
@@ -71,6 +75,15 @@ private void UpdateAllUI()
         else
         {
             equipment_1.enabled = false;
+        }
+
+        // Update current main-weapon HUD icon if provided (null-safe)
+        if (mainWeaponHudIcon != null && player_Controller != null)
+        {
+            mainWeaponHudIcon.enabled = true;
+            mainWeaponHudIcon.sprite = (player_Controller.CurrentMainWeapon == Player_Controller.MainWeaponType.Melee)
+                ? meleeIcon
+                : rangedIcon;
         }
     }
 

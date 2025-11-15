@@ -3,149 +3,155 @@ using UnityEngine;
 
 public class MeleeWeapon : MonoBehaviour
 {
-    [Header("Attack Settings")]
+    // SIMPLE CARDINAL MELEE: Each attack samples raw movement and snaps to nearest axis.
+    // Diagonals collapse to whichever axis has larger magnitude (tie -> vertical).
+
+    [Header("Damage & Range")]
     [SerializeField] private int damage = 20;
     [SerializeField] private float attackRadius = 1f;
     [SerializeField] private LayerMask enemyLayer;
 
-    [Header("Knockback Settings")]
+    [Header("Knockback")]
     [SerializeField] private float knockbackForce = 6f;
     [SerializeField] private float knockbackDuration = 0.3f;
 
-    [Header("Visual Effect")]
-    [SerializeField] private GameObject meleeEffectPrefab;
-    [SerializeField] private float effectDuration = 0.3f;
+    [Header("Effect Prefab")]
+    [SerializeField] private GameObject meleeEffectPrefab; // Must have SpriteRenderer
+    [SerializeField] private float effectLifetime = 0.25f;
     [SerializeField] private Transform attackOrigin;
 
-    private Rigidbody2D rb;
-    private Player_Movement playerMovement;
-    private Player_MeleeManager playerMelee;
-    private Player_Camera playerCamera;
+    [Header("Offsets (Facing Right)")]
+    [SerializeField] private Vector2 offsetRight = new Vector2(0.6f, 0.1f);
+    [SerializeField] private Vector2 offsetLeft = new Vector2(-0.6f, 0.1f);
+    [SerializeField] private Vector2 offsetUp = new Vector2(0f, 0.9f);
+    [SerializeField] private Vector2 offsetDown = new Vector2(0f, -0.2f);
 
-    private Vector2 direction;
+    [Header("Input Thresholds")]
+    [Tooltip("Absolute axis value required to consider that axis active.")]
+    [Range(0f,1f)] [SerializeField] private float axisThreshold = 0.5f;
+
+    private Player_Movement playerMovement;
+    private Player_Camera playerCamera;
+    private Player_InputHandler inputHandler;
     private Animator animator;
 
-    void Start()
+    public enum MeleeDir { Right, Left, Up, Down }
+    [Header("Current Cardinal (debug)")] [SerializeField]
+    private MeleeDir currentDir = MeleeDir.Right;
+
+    private void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
         playerMovement = GetComponentInParent<Player_Movement>();
-        playerMelee = GetComponentInParent<Player_MeleeManager>();
         playerCamera = GetComponentInParent<Player_Camera>();
+        inputHandler = GetComponentInParent<Player_InputHandler>();
         animator = GetComponentInParent<Animator>();
     }
 
     public void PerformAttack()
     {
-        DetermineAttackDirection();
+        // Sample input once per attack and resolve to cardinal.
+        ResolveFromInput();
         Attack_Animation();
     }
 
     public void Attack()
     {
-        SpawnMeleeEffect(direction);
-        DetectAndDamageEnemies();
+        SpawnEffect();
+        DamageEnemies();
     }
 
-    // --- Determinar direção do ataque ---
-    private void DetermineAttackDirection()
+    private void ResolveFromInput()
     {
-        Vector2 inputDir = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-
-        if (inputDir == Vector2.zero)
+        Vector2 raw = inputHandler != null ? inputHandler.MovementInput : new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        bool facingLeft = playerMovement != null && playerMovement.IsFacingLeft;
+        Vector2 dir = CardinalDirectionResolver.Resolve(raw, axisThreshold, facingLeft);
+        // Convert to enum
+        if (dir == Vector2.up) currentDir = MeleeDir.Up;
+        else if (dir == Vector2.down)
         {
-            direction = playerMovement.IsFacingLeft ? Vector2.left : Vector2.right;
+            if (playerMovement != null && playerMovement.IsGrounded())
+            {
+                currentDir = facingLeft ? MeleeDir.Left : MeleeDir.Right; // block downward when grounded
+            }
+            else currentDir = MeleeDir.Down;
         }
-        else
-        {
-            if (Mathf.Abs(inputDir.y) >= Mathf.Abs(inputDir.x))
-                direction = inputDir.y > 0 ? Vector2.up : Vector2.down;
-            else
-                direction = inputDir.x > 0 ? Vector2.right : Vector2.left;
-        }
-
-        if (direction == Vector2.down && playerMovement.IsGrounded())
-            direction = playerMovement.IsFacingLeft ? Vector2.left : Vector2.right;
+        else if (dir == Vector2.left) currentDir = MeleeDir.Left;
+        else currentDir = MeleeDir.Right;
     }
 
-    private void DetectAndDamageEnemies()
+    private void SpawnEffect()
     {
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackOrigin.position, attackRadius, enemyLayer);
-
-        foreach (Collider2D enemy in hitEnemies)
+        if (meleeEffectPrefab == null) return;
+        // Base position: player root (not damage origin) for independence
+        Vector3 worldPos = transform.position + ResolveWorldOffset();
+        GameObject effect = Instantiate(meleeEffectPrefab, worldPos, Quaternion.identity);
+        var sr = effect.GetComponent<SpriteRenderer>();
+        if (sr != null)
         {
-            Enemy_Health enemyHealth = enemy.GetComponent<Enemy_Health>();
-            Rigidbody2D enemyRb = enemy.GetComponent<Rigidbody2D>();
-
-            if (enemyHealth != null)
-                enemyHealth.TakeDamage(damage);
-
-            if (enemyRb != null)
-                StartCoroutine(ApplyKnockback(enemyRb, enemy.transform));
-
-            if (playerCamera != null)
-                playerCamera.StartCameraShake();
+            sr.flipX = currentDir == MeleeDir.Left;
         }
+        float rotZ = ResolveRotationZ();
+        effect.transform.rotation = Quaternion.Euler(0,0,rotZ);
+        Destroy(effect, effectLifetime);
     }
 
-    private IEnumerator ApplyKnockback(Rigidbody2D enemyRb, Transform enemyTransform)
+    private Vector3 ResolveWorldOffset()
+    {
+        return currentDir switch
+        {
+            MeleeDir.Right => (Vector3)offsetRight,
+            MeleeDir.Left  => (Vector3)offsetLeft,
+            MeleeDir.Up    => (Vector3)offsetUp,
+            MeleeDir.Down  => (Vector3)offsetDown,
+            _ => Vector3.zero
+        };
+    }
+
+    private float ResolveRotationZ()
+    {
+        return currentDir switch
+        {
+            MeleeDir.Up => 90f,
+            MeleeDir.Down => -90f,
+            _ => 0f
+        };
+    }
+
+    private void DamageEnemies()
+    {
+        if (attackOrigin == null) return;
+        Collider2D[] hits = Physics2D.OverlapCircleAll(attackOrigin.position, attackRadius, enemyLayer);
+        foreach (var c in hits)
+        {
+            var hp = c.GetComponent<Enemy_Health>();
+            if (hp != null) hp.TakeDamage(damage);
+            var rb = c.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                StartCoroutine(ApplyKnockback(rb, c.transform));
+            }
+        }
+        if (playerCamera != null) playerCamera.StartCameraShake();
+    }
+
+    private IEnumerator ApplyKnockback(Rigidbody2D enemyRb, Transform enemyTf)
     {
         if (enemyRb == null) yield break;
-
-        Vector2 dir = (enemyTransform.position - attackOrigin.position).normalized;
+        Vector2 dir = (enemyTf.position - attackOrigin.position).normalized;
         enemyRb.linearVelocity = Vector2.zero;
         enemyRb.AddForce(dir * knockbackForce, ForceMode2D.Impulse);
-
-        float t = 0f;
-        Vector2 startVel = enemyRb.linearVelocity;
-
+        float t = 0f; Vector2 startVel = enemyRb.linearVelocity;
         while (t < knockbackDuration && enemyRb != null)
         {
             enemyRb.linearVelocity = Vector2.Lerp(startVel, Vector2.zero, t / knockbackDuration);
-            t += Time.deltaTime;
-            yield return null;
+            t += Time.deltaTime; yield return null;
         }
-
-        if (enemyRb != null)
-            enemyRb.linearVelocity = Vector2.zero;
-    }
-
-    private void SpawnMeleeEffect(Vector2 attackDirection)
-    {
-        if (meleeEffectPrefab == null || attackOrigin == null)
-            return;
-
-        GameObject effect = Instantiate(meleeEffectPrefab, attackOrigin.position, Quaternion.identity);
-        effect.transform.SetParent(attackOrigin);
-
-        SpriteRenderer sprite = effect.GetComponent<SpriteRenderer>();
-
-        if (attackDirection == Vector2.right)
-        {
-            effect.transform.localRotation = Quaternion.identity;
-            if (sprite != null) sprite.flipX = false;
-        }
-        else if (attackDirection == Vector2.left)
-        {
-            effect.transform.localRotation = Quaternion.identity;
-            if (sprite != null) sprite.flipX = true;
-        }
-        else if (attackDirection == Vector2.up)
-        {
-            float angle = playerMovement.IsFacingLeft ? -90 : 90;
-            effect.transform.localRotation = Quaternion.Euler(0, 0, angle);
-        }
-        else if (attackDirection == Vector2.down)
-        {
-            float angle = playerMovement.IsFacingLeft ? 90 : -90;
-            effect.transform.localRotation = Quaternion.Euler(0, 0, angle);
-        }
-
-        Destroy(effect, effectDuration);
+        if (enemyRb != null) enemyRb.linearVelocity = Vector2.zero;
     }
 
     private void Attack_Animation()
     {
-        animator.SetTrigger("Meele Attack");
+        if (animator != null) animator.SetTrigger("Meele Attack");
     }
 
     private void OnDrawGizmos()

@@ -24,6 +24,7 @@ public class PlayerData
 
     // Equipment
     public string equippedItemName;
+    public string mainWeaponType; // "Melee" or "Ranged" (enum name)
 
     // Parameterless constructor for JSON deserialization
     public PlayerData() { }
@@ -73,6 +74,9 @@ public class PlayerData
             equippedItemName = null;
             equippedResourceName = null;
         }
+
+        // Main weapon type (persist player's selected combat mode)
+        mainWeaponType = player.CurrentMainWeapon.ToString();
     }
 
     // Preferred key for equipment resource lookup

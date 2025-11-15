@@ -41,8 +41,10 @@ public class MapPage : MonoBehaviour
     [Header("Controls")]
     [Tooltip("World-units per second at orthographicSize = base; scales with zoom.")]
     [SerializeField] private float panSpeed = 30f;
-    [Tooltip("Zoom levels: 1x (fit) and 2x (zoomed). Toggle with Interact (Space/Enter or Gamepad South).")]
-    [SerializeField] private bool enableZoomToggle = true;
+    [Tooltip("Enable old toggle zoom mode (Space/Enter or Gamepad South). Disable to use continuous axis-based zoom.")]
+    [SerializeField] private bool enableZoomToggle = false;
+    [Tooltip("Enable continuous hold-based zoom using mouse wheel, keys, or gamepad triggers/stick.")]
+    [SerializeField] private bool enableAxisZoom = true;
 
     private Camera mapCamera;
     private RenderTexture rt;
@@ -51,14 +53,26 @@ public class MapPage : MonoBehaviour
     private Vector3 currentCenter; // camera center in world space
     private float baseOrthoSize;   // computed to fit bounds
     [Header("Zoom")]
-    [Tooltip("When zoomed, show this fraction of the full-map height. 0.25 = 25% of map height (strong zoom).")]
+    [Tooltip("When toggle zoom is used, show this fraction of the full-map height. 0.25 = 25% of map height (strong zoom).")]
     [Range(0.05f, 0.9f)]
     [SerializeField] private float zoomedCoverageFraction = 0.25f;
-    private bool isZoomed = false;
+    [Tooltip("Minimum coverage fraction for axis-zoom (lower = more zoom in). 0.1 means max zoom shows 10% of map height.")]
+    [Range(0.05f, 1f)]
+    [SerializeField] private float axisZoomMinCoverageFraction = 0.15f;
+    [Tooltip("Maximum coverage fraction for axis-zoom (1 = full map).")]
+    [Range(0.1f, 1f)]
+    [SerializeField] private float axisZoomMaxCoverageFraction = 1f;
+    [Tooltip("Speed at which the coverage fraction changes per second when holding zoom.")]
+    [SerializeField] private float axisZoomSpeed = 1.5f;
+    [Tooltip("Mouse wheel sensitivity scaling for axis-zoom.")]
+    [SerializeField] private float mouseWheelZoomScale = 0.15f;
+    private bool isZoomed = false; // legacy toggle path
+    private float zoomFraction = 1f; // 1 = full map, lower = zoom in
     // Persist last map view across menu close/reopen (per play session)
     private static bool s_HasState = false;
     private static Vector3 s_SavedCenter;
     private static bool s_SavedIsZoomed;
+    private static float s_SavedZoomFraction = 1f;
 
     private void Awake()
     {
@@ -108,7 +122,11 @@ public class MapPage : MonoBehaviour
         {
             isZoomed = s_SavedIsZoomed;
             currentCenter = s_SavedCenter;
-            mapCamera.orthographicSize = baseOrthoSize * (isZoomed ? Mathf.Clamp01(zoomedCoverageFraction) : 1f);
+            zoomFraction = Mathf.Clamp(s_SavedZoomFraction, axisZoomMinCoverageFraction, axisZoomMaxCoverageFraction);
+            if (enableAxisZoom)
+                mapCamera.orthographicSize = baseOrthoSize * zoomFraction;
+            else
+                mapCamera.orthographicSize = baseOrthoSize * (isZoomed ? Mathf.Clamp01(zoomedCoverageFraction) : 1f);
             ApplyCameraTransform();
         }
 
@@ -291,7 +309,7 @@ public class MapPage : MonoBehaviour
         float aspect = rt != null ? (rt.width / (float)rt.height) : 1f;
     float orthoSize = Mathf.Max(sizeY, sizeX / Mathf.Max(0.0001f, aspect));
     baseOrthoSize = Mathf.Max(1f, orthoSize);
-    mapCamera.orthographicSize = baseOrthoSize * (isZoomed ? Mathf.Clamp01(zoomedCoverageFraction) : 1f);
+    mapCamera.orthographicSize = baseOrthoSize * (enableAxisZoom ? zoomFraction : (isZoomed ? Mathf.Clamp01(zoomedCoverageFraction) : 1f));
     }
 
     private void UpdatePlayerDot()
@@ -354,7 +372,44 @@ public class MapPage : MonoBehaviour
                 currentCenter += new Vector3(delta.x, 0f, delta.y);
         }
 
-        if (enableZoomToggle)
+        if (enableAxisZoom)
+        {
+            float input = 0f;
+            // Mouse wheel
+            var mouse = Mouse.current;
+            if (mouse != null)
+            {
+                var scroll = mouse.scroll.ReadValue().y; // typically positive up
+                input += scroll * mouseWheelZoomScale; // not scaled by dt; scroll is event-like
+            }
+            // Keyboard keys: E/+ = zoom in, Q/- = zoom out
+            if (kb != null)
+            {
+                if (kb.eKey.isPressed || kb.equalsKey.isPressed || kb.numpadPlusKey.isPressed) input += 1f;
+                if (kb.qKey.isPressed || kb.minusKey.isPressed || kb.numpadMinusKey.isPressed) input -= 1f;
+            }
+            // Gamepad: RT zoom in, LT zoom out; also dpad up/down (optional)
+            if (gp != null)
+            {
+                input += gp.rightTrigger.ReadValue();
+                input -= gp.leftTrigger.ReadValue();
+                input += gp.dpad.up.isPressed ? 0.5f : 0f;
+                input -= gp.dpad.down.isPressed ? 0.5f : 0f;
+                // Right stick vertical can also control zoom a bit
+                input += gp.rightStick.ReadValue().y * 0.5f;
+            }
+
+            if (Mathf.Abs(input) > 0.0001f)
+            {
+                // Convert input to coverage fraction change (lower fraction = more zoom in)
+                float delta = input * axisZoomSpeed * dt;
+                // Mouse wheel already large; minor cap to avoid huge jumps per frame
+                delta = Mathf.Clamp(delta, -0.5f, 0.5f);
+                zoomFraction = Mathf.Clamp(zoomFraction - delta, axisZoomMinCoverageFraction, axisZoomMaxCoverageFraction);
+                mapCamera.orthographicSize = baseOrthoSize * zoomFraction;
+            }
+        }
+        else if (enableZoomToggle)
         {
             bool toggle = false;
             if (kb != null)
@@ -437,6 +492,7 @@ public class MapPage : MonoBehaviour
         // Save last camera center and zoom flag
         s_SavedCenter = currentCenter;
         s_SavedIsZoomed = isZoomed;
+        s_SavedZoomFraction = zoomFraction;
         s_HasState = true;
     }
 }
