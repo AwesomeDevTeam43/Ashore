@@ -240,14 +240,14 @@ MonoBehaviour:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 50, y: 50, z: 50}
   player: {fileID: 0}
-  panSpeed: 30
+  panSpeed: 1000
   enableZoomToggle: 1
   enableAxisZoom: 1
   zoomedCoverageFraction: 0.25
-  axisZoomMinCoverageFraction: 0.15
+  axisZoomMinCoverageFraction: 0.05
   axisZoomMaxCoverageFraction: 1
-  axisZoomSpeed: 1.5
-  mouseWheelZoomScale: 0.15
+  axisZoomSpeed: 2.5
+  mouseWheelZoomScale: 1.5
 --- !u!1 &971286101789166470
 GameObject:
   m_ObjectHideFlags: 0

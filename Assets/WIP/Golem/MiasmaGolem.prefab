@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 4475009797984320295}
   - component: {fileID: 4440351661321488067}
   - component: {fileID: 948986448698743084}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: MiasmaGolem
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

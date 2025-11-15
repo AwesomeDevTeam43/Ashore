@@ -39,7 +39,7 @@ public class MapPage : MonoBehaviour
     [SerializeField] private Transform player; // If null, will find by tag "Player"
 
     [Header("Controls")]
-    [Tooltip("World-units per second at orthographicSize = base; scales with zoom.")]
+    [Tooltip("World-units per second at orthographicSize = base; scales with zoom for constant on-screen speed.")]
     [SerializeField] private float panSpeed = 30f;
     [Tooltip("Enable old toggle zoom mode (Space/Enter or Gamepad South). Disable to use continuous axis-based zoom.")]
     [SerializeField] private bool enableZoomToggle = false;
@@ -362,8 +362,9 @@ public class MapPage : MonoBehaviour
 
         if (move.sqrMagnitude > 0.0001f)
         {
-            // Scale pan speed by current zoom to keep feel consistent
-            float speed = panSpeed * (baseOrthoSize / Mathf.Max(0.0001f, mapCamera.orthographicSize));
+            // Scale pan speed by current zoom to keep on-screen speed roughly constant
+            // World-units per second proportional to orthographicSize
+            float speed = panSpeed * (Mathf.Max(0.0001f, mapCamera.orthographicSize) / Mathf.Max(0.0001f, baseOrthoSize));
             Vector2 delta = move * speed * dt;
 
             if (mapPlane == Plane.XY)
@@ -441,6 +442,43 @@ public class MapPage : MonoBehaviour
                         else
                             currentCenter = new Vector3(p.x, currentCenter.y, p.z);
                     }
+                }
+            }
+        }
+
+        // Interact-to-recenter when zoomed in (works for both zoom modes)
+        bool isZoomedInNow = enableAxisZoom ? (zoomFraction < 0.999f) : isZoomed;
+        if (isZoomedInNow)
+        {
+            bool interactPressed = false;
+            if (kb != null)
+            {
+                // Common interact keys: F (typical), E (project uses sometimes), Enter/Space as fallbacks
+                interactPressed |= kb.fKey.wasPressedThisFrame
+                                   || kb.eKey.wasPressedThisFrame
+                                   || kb.enterKey.wasPressedThisFrame
+                                   || kb.spaceKey.wasPressedThisFrame;
+            }
+            if (gp != null)
+            {
+                // Common interact buttons: West (X) and South (A/Cross) as fallback
+                interactPressed |= gp.buttonWest.wasPressedThisFrame || gp.buttonSouth.wasPressedThisFrame;
+            }
+
+            if (interactPressed)
+            {
+                if (player == null)
+                {
+                    var pgo = GameObject.FindGameObjectWithTag("Player");
+                    if (pgo != null) player = pgo.transform;
+                }
+                if (player != null)
+                {
+                    var p = player.position;
+                    if (mapPlane == Plane.XY)
+                        currentCenter = new Vector3(p.x, p.y, currentCenter.z);
+                    else
+                        currentCenter = new Vector3(p.x, currentCenter.y, p.z);
                 }
             }
         }
