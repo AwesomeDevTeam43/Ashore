@@ -64,6 +64,13 @@ public class Enemy_Health : MonoBehaviour
         StartCoroutine(TurnOffHit());
     }
 
+    public void SetDamageable(bool value)
+    {
+        damageable = value;
+    }
+
+    public bool IsDamageable => damageable;
+
     private void OnEnemyHealthChanged(int currentHealth, int maxHealth)
     {
         if (currentHealth <= 0)

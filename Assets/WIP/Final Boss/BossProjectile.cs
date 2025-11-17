@@ -1,0 +1,124 @@
+using UnityEngine;
+
+[RequireComponent(typeof(Rigidbody2D))]
+public class BossProjectile : MonoBehaviour
+{
+	public int damage = 1;
+	public float speed = 6f;
+	public float lifeTime = 6f;
+
+	[Header("Homing")]
+	public bool homing = true;
+	public float stopFollowDistance;
+	public float rotationSpeed = 720f; // degrees per second
+	public float rotationOffset = 0f; // tweak if sprite forward is not +X
+
+	private Rigidbody2D rb;
+	private GameObject player;
+
+	private float currentSpeed = 0f;
+	private bool following = false;
+
+	private void Awake()
+	{
+		rb = GetComponent<Rigidbody2D>();
+		player = GameObject.FindGameObjectWithTag("Player");
+	}
+
+	private void Start()
+	{
+		Destroy(gameObject, lifeTime);
+	}
+
+	public void Initialize(Vector2 direction, float stopDistance, float speedMultiplier = 1f, int damageAmount = 1)
+	{
+		damage = damageAmount;
+		currentSpeed = speed * speedMultiplier;
+		following = homing;
+		stopFollowDistance = stopDistance;
+
+		if (rb == null)
+			rb = GetComponent<Rigidbody2D>();
+
+		if (rb == null)
+		{
+			rb = gameObject.AddComponent<Rigidbody2D>();
+			rb.gravityScale = 0f;
+			rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+		}
+
+		rb.gravityScale = 0f;
+		rb.linearVelocity = direction.normalized * currentSpeed;
+		// initial facing
+		float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg + rotationOffset;
+		transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+	}
+
+	private void FixedUpdate()
+	{
+		if (!following) return;
+		if (player == null) return;
+
+		// Use the player's Collider2D center if available so homing aims to the collider center
+		Vector2 playerPos;
+		var playerCol = player.GetComponent<Collider2D>();
+		if (playerCol != null)
+			playerPos = playerCol.bounds.center;
+		else
+			playerPos = player.transform.position;
+
+		float dist = Vector2.Distance(transform.position, playerPos);
+		if (dist <= stopFollowDistance)
+		{
+			following = false; // stop homing, keep last velocity/direction
+			return;
+		}
+
+		Vector2 toPlayer = (playerPos - (Vector2)transform.position);
+		float targetAngle = Mathf.Atan2(toPlayer.y, toPlayer.x) * Mathf.Rad2Deg + rotationOffset;
+		float currentAngle = transform.eulerAngles.z;
+		float delta = Mathf.DeltaAngle(currentAngle, targetAngle);
+		float maxStep = rotationSpeed * Time.fixedDeltaTime;
+		float newAngle = currentAngle + Mathf.Clamp(delta, -maxStep, maxStep);
+		transform.rotation = Quaternion.AngleAxis(newAngle, Vector3.forward);
+
+		if (rb != null)
+		{
+			rb.linearVelocity = transform.right * currentSpeed;
+		}
+	}
+
+
+	private void OnCollisionEnter2D(Collision2D collision)
+	{
+		handleCollision(collision.gameObject);
+	}
+
+	private void OnTriggerEnter2D(Collider2D other)
+	{
+		handleCollision(other.gameObject);
+	}
+
+	private void handleCollision(GameObject other)
+	{
+		if (other == null) return;
+
+		if (other.CompareTag("Player"))
+		{
+			var hs = other.GetComponent<HealthSystem>();
+			if (hs != null)
+			{
+				hs.TakeDamage(damage, gameObject);
+			}
+
+			Destroy(gameObject);
+			return;
+		}
+
+		int layer = other.layer;
+		if (layer == LayerMask.NameToLayer("Default") || layer == LayerMask.NameToLayer("Ground"))
+		{
+			Destroy(gameObject);
+		}
+	}
+}
