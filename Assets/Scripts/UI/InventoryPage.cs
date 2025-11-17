@@ -46,6 +46,7 @@ public class InventoryPage : MonoBehaviour
     private void OnEnable()
     {
         EnsureInitialized();
+        HideLegacyInvPanels();
         if (inventory != null)
         {
             inventory.onItemChangedCallback += Refresh;
@@ -58,6 +59,22 @@ public class InventoryPage : MonoBehaviour
         if (inventory != null)
         {
             inventory.onItemChangedCallback -= Refresh;
+        }
+    }
+
+    // Some legacy prefabs include a background panel named "inv" behind slots.
+    // Hide any such child to avoid a doubled background illusion.
+    private void HideLegacyInvPanels()
+    {
+        // Look for direct or nested children named "inv" (case-insensitive)
+        var tfs = GetComponentsInChildren<RectTransform>(true);
+        foreach (var tf in tfs)
+        {
+            if (tf == null) continue;
+            if (string.Equals(tf.gameObject.name, "inv", System.StringComparison.OrdinalIgnoreCase))
+            {
+                tf.gameObject.SetActive(false);
+            }
         }
     }
 

@@ -24,13 +24,19 @@ public class InventoryContextMenuNavigator : MonoBehaviour
     {
         BuildItemListIfNeeded();
         FocusFirst();
-        // Ensure an EventSystem exists
+        // Ensure an EventSystem exists (prefer existing persistent one)
         if (EventSystem.current == null)
         {
             var es = FindFirstObjectByType<EventSystem>();
             if (es == null)
             {
-                var go = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+                var go = new GameObject("EventSystem", typeof(EventSystem)
+#if ENABLE_INPUT_SYSTEM
+                    , typeof(UnityEngine.InputSystem.UI.InputSystemUIInputModule)
+#else
+                    , typeof(StandaloneInputModule)
+#endif
+                );
                 DontDestroyOnLoad(go);
             }
         }

@@ -171,6 +171,8 @@ public class Lab_Door : MonoBehaviour
     {
         if (_fadeImage == null) return;
         var c = _fadeImage.color; c.a = Mathf.Clamp01(a); _fadeImage.color = c;
+        // Only block input while visible; release when fully transparent
+        _fadeImage.raycastTarget = c.a > 0.001f;
     }
 
     private System.Collections.IEnumerator FadeTo(float target, float duration)

@@ -4,6 +4,7 @@ using System;
 
 public class Player_Controller : MonoBehaviour
 {
+  public static event System.Action<Equipment> OnEquipmentUsed;
   public static event Action OnPlayerLoad;
   private XP_System xP_System;
   private Player_Health playerHealth;
@@ -271,6 +272,14 @@ private void Start()
           animator.SetBool(isJumpingParam, false);
         }
   landingTriggered = false;
+        // Ensure JumpStart trigger can't remain latched while on ground
+        if (hasJumpStartTrigger)
+        {
+          animator.ResetTrigger(jumpStartTrigger);
+          // Also clear any lingering jump state if physics reports grounded
+          if (hasJumped && grounded)
+            hasJumped = false;
+        }
       }
 
       prevGrounded = grounded;
@@ -328,10 +337,12 @@ private void Start()
       {
         if (playerInputHandler.RangeAttackTriggered && !rangeUseHoldConsumed && currentEquipment.isEquipped)
         {
-          currentEquipment.Use();
+          var used = currentEquipment;
+          used.Use();
           Debug.Log("Used Equipment (RangeAttack)");
-          currentEquipment.isEquipped = false;
-          currentEquipment = null;
+          OnEquipmentUsed?.Invoke(used);
+          used.isEquipped = false;
+          if (used == currentEquipment) currentEquipment = null;
           rangeUseHoldConsumed = true;
         }
         else if (!playerInputHandler.RangeAttackTriggered)

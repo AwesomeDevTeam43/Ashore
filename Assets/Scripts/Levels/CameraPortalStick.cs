@@ -1,5 +1,6 @@
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Unity.Cinemachine;
 
 // Keeps the camera from fully following the player into a LevelPortal by temporarily
@@ -7,6 +8,7 @@ using Unity.Cinemachine;
 // Works with Cinemachine 3 (Unity.Cinemachine) and a CinemachineCamera.
 public class CameraPortalStick : MonoBehaviour
 {
+  public static CameraPortalStick Instance; // singleton for persistence/dedup
   [Header("References")]
   [SerializeField] private CinemachineCamera cinemachineCamera;
   [SerializeField] private string playerTag = "Player";
@@ -29,11 +31,59 @@ public class CameraPortalStick : MonoBehaviour
       cinemachineCamera = GetComponent<CinemachineCamera>();
   }
 
+  private void Awake()
+  {
+    // Dedupe: keep first instance only
+    if (Instance != null && Instance != this)
+    {
+      Destroy(gameObject);
+      return;
+    }
+    Instance = this;
+    DontDestroyOnLoad(gameObject);
+    SceneManager.sceneLoaded += OnSceneLoaded;
+  }
+
   private void Start()
   {
     if (cinemachineCamera == null)
       cinemachineCamera = GetComponent<CinemachineCamera>();
     _originalFollow = cinemachineCamera != null ? cinemachineCamera.Follow : null;
+  }
+
+  private void OnDestroy()
+  {
+    if (Instance == this)
+    {
+      SceneManager.sceneLoaded -= OnSceneLoaded;
+      Instance = null;
+    }
+  }
+
+  private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+  {
+    // Force rebind of player and original follow target after scene change
+    _player = null;
+    if (cinemachineCamera == null)
+      cinemachineCamera = GetComponent<CinemachineCamera>();
+    // If the previous follow target was destroyed, clear and reacquire
+    if (_originalFollow == null || _originalFollow.gameObject == null)
+    {
+      _originalFollow = cinemachineCamera != null ? cinemachineCamera.Follow : null;
+      if (_originalFollow == null)
+      {
+        // Try to assign player as follow if nothing set
+        var playerGo = GameObject.FindGameObjectWithTag(playerTag);
+        if (playerGo != null)
+        {
+          _originalFollow = playerGo.transform;
+          if (cinemachineCamera != null)
+            cinemachineCamera.Follow = _originalFollow;
+        }
+      }
+    }
+    // Release sticky state across scenes; camera will re-stick if in area
+    ReleaseSticky();
   }
 
   private void Update()

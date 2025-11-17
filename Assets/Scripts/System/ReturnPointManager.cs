@@ -8,8 +8,15 @@ public class ReturnPointManager : MonoBehaviour
 
   void Awake()
   {
+    if (Instance != null && Instance != this)
+    {
+      Destroy(gameObject);
+      return;
+    }
     Instance = this;
-    returnPoint = transform.position;
+    DontDestroyOnLoad(gameObject);
+    if (returnPoint == default)
+      returnPoint = transform.position;
   }
 
   void OnDestroy()
@@ -27,10 +34,7 @@ public class ReturnPointManager : MonoBehaviour
   public static void SetReturnPoint(Vector3 position)
   {
     if (Instance == null) return;
-    if (Instance.activeTrigger != null)
-    {
-      Instance.returnPoint = position;
-    }
+    Instance.returnPoint = position;
   }
 
   public static void StopTracking(DynamicReturnPoint trigger)

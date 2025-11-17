@@ -11,6 +11,7 @@ public class TutorialUseEquipmentStep : TutorialStep
     public bool onlyUseRangeAttack = true;
 
     private Player_Controller player;
+    private bool usedEventReceived = false;
 
     private void Reset()
     {
@@ -33,18 +34,25 @@ public class TutorialUseEquipmentStep : TutorialStep
             var pgo = GameObject.FindGameObjectWithTag("Player");
             if (pgo != null) player = pgo.GetComponent<Player_Controller>();
         }
+        // Subscribe to actual equipment use events
+        Player_Controller.OnEquipmentUsed += OnEquipmentUsed;
     }
 
     public override bool IsComplete()
     {
-        // Must have equipment if required
         if (player == null) return false;
+
+        // If we already received the validated use event, finish regardless of current equipment (it may have been consumed/cleared).
+        if (usedEventReceived) return true;
+
+        // Fallback path: require currently equipped item to match requirement, then detect input trigger edge.
         var eq = player.CurrentEquipment;
         if (eq == null || eq.equipmentData == null) return false;
         if (requiredEquipment != null && eq.equipmentData != requiredEquipment) return false;
 
-        // Detect the specific 'ranged attack' input this frame
-        return WasRangeAttackTriggered(player);
+        if (onlyUseRangeAttack)
+            return WasRangeAttackTriggered(player);
+        return false;
     }
 
     private bool WasRangeAttackTriggered(Component playerComponent)
@@ -53,5 +61,18 @@ public class TutorialUseEquipmentStep : TutorialStep
         var ih = playerComponent.GetComponent<Player_InputHandler>();
         if (ih == null) return false;
         return ih.RangeAttackTriggered;
+    }
+
+    private void OnEquipmentUsed(Equipment eq)
+    {
+        if (eq == null || eq.equipmentData == null) return;
+        if (requiredEquipment != null && eq.equipmentData != requiredEquipment) return;
+        usedEventReceived = true;
+    }
+
+    public override void End()
+    {
+        Player_Controller.OnEquipmentUsed -= OnEquipmentUsed;
+        base.End();
     }
 }

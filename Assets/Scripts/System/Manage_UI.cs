@@ -29,12 +29,27 @@ public class Manage_UI : MonoBehaviour
         xpSystem = player.GetComponent<XP_System>();
         healthSystem = player.GetComponent<HealthSystem>();
 
-        xpSystem.OnCollectXP += UpdateXPBar;
-        xpSystem.OnLevelUp += UpdateLevel;
+        if (xpSystem != null)
+        {
+            xpSystem.OnCollectXP += UpdateXPBar;
+            xpSystem.OnLevelUp += UpdateLevel;
+        }
 
-        healthSystem.OnHealthChanged += UpdateHPBar;
+        if (healthSystem != null)
+        {
+            healthSystem.OnHealthChanged += UpdateHPBar;
+        }
 
-        UpdateXPBar(0);
+        // Initial sync to current player state
+        if (xpSystem != null)
+        {
+            UpdateLevel(xpSystem.CurrentLevel);
+            UpdateXPBar(0);
+        }
+        if (healthSystem != null)
+        {
+            UpdateHPBar(healthSystem.CurrentHealth, healthSystem.MaxHealth);
+        }
     }
 
 private void OnEnable()
@@ -45,6 +60,16 @@ private void OnEnable()
 private void OnDisable()
 {
     Player_Controller.OnPlayerLoad -= UpdateAllUI;
+    // Unsubscribe to avoid stale callbacks after scene changes
+    if (xpSystem != null)
+    {
+        xpSystem.OnCollectXP -= UpdateXPBar;
+        xpSystem.OnLevelUp -= UpdateLevel;
+    }
+    if (healthSystem != null)
+    {
+        healthSystem.OnHealthChanged -= UpdateHPBar;
+    }
 }
 
 private void UpdateAllUI()
@@ -89,6 +114,7 @@ private void UpdateAllUI()
 
     private void UpdateXPBar(int xpAmount)
     {
+        if (_xpBar == null || xpSystem == null) return;
         float currentXp = xpSystem.CurrentXp;
         float maxXp = xpSystem.MaxXpPerLevel;
 
@@ -104,12 +130,14 @@ private void UpdateAllUI()
 
     private void UpdateLevel(int newLevel)
     {
-        _levelText.text = $"{newLevel}";
+        if (_levelText != null)
+            _levelText.text = $"{newLevel}";
         UpdateXPBar(0);
     }
 
     private void UpdateHPBar(int health, int maxHealth)
     {
+        if (_hpBar == null) return;
         float currentHP = (float)health;
         float maxHP = (float)maxHealth;
 
@@ -123,5 +151,48 @@ private void UpdateAllUI()
         }
 
         Debug.Log($"HP Bar updated: {currentHP}/{maxHP} = {_hpBar.fillAmount}");
+    }
+
+    // For persistent HUD: allow external trigger to rebind and refresh after scene load
+    public void RebindAndRefresh()
+    {
+        // Re-acquire references and resubscribe if needed
+        player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null) return;
+
+        // Unsubscribe old
+        if (xpSystem != null)
+        {
+            xpSystem.OnCollectXP -= UpdateXPBar;
+            xpSystem.OnLevelUp -= UpdateLevel;
+        }
+        if (healthSystem != null)
+        {
+            healthSystem.OnHealthChanged -= UpdateHPBar;
+        }
+
+        player_Controller = player.GetComponent<Player_Controller>();
+        xpSystem = player.GetComponent<XP_System>();
+        healthSystem = player.GetComponent<HealthSystem>();
+
+        if (xpSystem != null)
+        {
+            xpSystem.OnCollectXP += UpdateXPBar;
+            xpSystem.OnLevelUp += UpdateLevel;
+        }
+        if (healthSystem != null)
+        {
+            healthSystem.OnHealthChanged += UpdateHPBar;
+        }
+
+        if (xpSystem != null)
+        {
+            UpdateLevel(xpSystem.CurrentLevel);
+            UpdateXPBar(0);
+        }
+        if (healthSystem != null)
+        {
+            UpdateHPBar(healthSystem.CurrentHealth, healthSystem.MaxHealth);
+        }
     }
 }
