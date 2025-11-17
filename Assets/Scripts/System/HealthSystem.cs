@@ -27,10 +27,21 @@ public class HealthSystem : MonoBehaviour
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
     }
 
-    public void TakeDamage(int damage, GameObject damageSource = null)
+    // Optional minAllowedHealth: if provided, the resulting health after applying damage
+    // will not be reduced below that value. This allows callers to clamp damage so
+    // the target stops at defined thresholds. Default behavior (no clamp) remains unchanged.
+    public void TakeDamage(int damage, GameObject damageSource = null, int minAllowedHealth = int.MinValue)
     {
-        _currentHealth = Mathf.Max(0, _currentHealth - damage);
-        Debug.Log($"Damage taken: {damage} by {gameObject.name}. Current health: {_currentHealth}/{_maxHealth}");
+        int old = _currentHealth;
+        int candidate = _currentHealth - damage;
+        if (minAllowedHealth != int.MinValue)
+        {
+            candidate = Mathf.Max(minAllowedHealth, candidate);
+        }
+        _currentHealth = Mathf.Clamp(candidate, 0, _maxHealth);
+
+        int actualDamage = old - _currentHealth;
+        Debug.Log($"Damage taken: {actualDamage} by {gameObject.name}. Current health: {_currentHealth}/{_maxHealth}");
 
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
         OnDamageTaken?.Invoke(damageSource);

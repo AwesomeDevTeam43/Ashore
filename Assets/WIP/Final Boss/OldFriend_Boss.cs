@@ -38,6 +38,29 @@ public class OldFriend_Boss : EnemyBase
     private readonly float[] thresholds = new float[] { 0.75f, 0.5f, 0.25f };
     private bool[] thresholdTriggered;
 
+    // Returns a minimum allowed health (clamp) for incoming damage so that damage
+    // doesn't reduce health below the next configured threshold. Returns null if
+    // no clamping should be applied.
+    public int? GetHealthClampForIncomingDamage(int incomingDamage)
+    {
+        if (healthSystem == null) return null;
+        int current = healthSystem.CurrentHealth;
+        int max = healthSystem.MaxHealth;
+        int candidate = current - incomingDamage;
+
+        for (int i = 0; i < thresholds.Length; i++)
+        {
+            int thresholdHp = Mathf.RoundToInt(max * thresholds[i]);
+            if (current > thresholdHp && candidate < thresholdHp)
+            {
+                // Clamp to this threshold so the hit cannot skip below it.
+                return thresholdHp;
+            }
+        }
+
+        return null;
+    }
+
     private void Start()
     {
         enemyHealth = GetComponent<Enemy_Health>();

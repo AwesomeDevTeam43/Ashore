@@ -59,8 +59,24 @@ public class Enemy_Health : MonoBehaviour
     {
         if (!damageable || hit || healthSystem == null || healthSystem.CurrentHealth <= 0) return;
 
+        // Optionally compute a minimum allowed health (clamp) for special enemies (e.g., boss thresholds).
+        int? minAllowed = null;
+        var boss = GetComponent<OldFriend_Boss>();
+        if (boss != null)
+        {
+            minAllowed = boss.GetHealthClampForIncomingDamage(damage);
+        }
+
         hit = true;
-        healthSystem.TakeDamage(damage);
+        if (minAllowed.HasValue)
+        {
+            healthSystem.TakeDamage(damage, null, minAllowed.Value);
+        }
+        else
+        {
+            healthSystem.TakeDamage(damage);
+        }
+
         StartCoroutine(TurnOffHit());
     }
 
