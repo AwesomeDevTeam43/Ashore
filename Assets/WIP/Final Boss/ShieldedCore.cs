@@ -48,7 +48,7 @@ public class ShieldedCore : MonoBehaviour
 		if (isProtectedState == isProtected) return;
 		isProtectedState = isProtected;
 
-		// update visuals: green when protected, restore when not
+		// update visuals: keep original color when protected, show red when unprotected
 		if (spriteRenderers != null)
 		{
 			for (int i = 0; i < spriteRenderers.Length; i++)
@@ -58,12 +58,15 @@ public class ShieldedCore : MonoBehaviour
 
 				if (isProtected)
 				{
-					sr.color = Color.green;
+					// restore original color if we cached it, otherwise leave as-is
+					if (originalColors != null && i < originalColors.Length)
+						sr.color = originalColors[i];
+					else
+						sr.color = Color.white;
 				}
 				else
 				{
-					if (originalColors != null && i < originalColors.Length)
-						sr.color = originalColors[i];
+					sr.color = Color.red;
 				}
 			}
 		}

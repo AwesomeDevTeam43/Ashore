@@ -13,9 +13,11 @@ GameObject:
   - component: {fileID: 1002972647985913728}
   - component: {fileID: 8223459146638020964}
   - component: {fileID: 4964495413504280623}
-  m_Layer: 0
+  - component: {fileID: -8821672858679007560}
+  - component: {fileID: -6818383162963397919}
+  m_Layer: 7
   m_Name: boss_projectile_0
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -79,7 +81,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 23
-  m_Sprite: {fileID: 4542770201938071083, guid: bd6205297579dcc4ea59376f95b5fe0b, type: 3}
+  m_Sprite: {fileID: -4709053399188337572, guid: 7d0f77e356df7354c93512466b8d11e5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -174,7 +176,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 0.84375, y: 0.25}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -182,3 +184,30 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.7892151, y: 0.19631958}
   m_EdgeRadius: 0
+--- !u!114 &-8821672858679007560
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3141687366189240326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95e62ce075d021a24abd39845ecc4840, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-6818383162963397919
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3141687366189240326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cacfc9d7f5bd07c41a8a6ee8979339ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 1
+  damageable: 1
+  invincibilityDuration: 0.2

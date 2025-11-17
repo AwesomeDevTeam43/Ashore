@@ -42,9 +42,18 @@ public class OldFriend_Boss : EnemyBase
     [SerializeField] private float followLerpSpeed = 5f;
     [Header("Contact")]
     [Tooltip("Damage dealt to the player when they collide with the boss body (collision or non-activation trigger)")]
-    [SerializeField] private int contactDamage = 2;
+    [SerializeField] private int contactDamage = 1;
+    [Header("Animation")]
+    [Tooltip("Name of the Animator bool parameter that represents Idle state")]
+    [SerializeField] private string animIdleParam = "Idle";
+    [Tooltip("Name of the Animator bool parameter that represents Injured state")]
+    [SerializeField] private string animInjuredParam = "Injured";
 
-    private int currentStage = 1; // 1..4
+    // cached animator hashes
+    private int animIdleHash;
+    private int animInjuredHash;
+
+    private int currentStage = 1;
     private bool spawnToggle = false;
     private bool shootDouble = false;
 
@@ -84,6 +93,15 @@ public class OldFriend_Boss : EnemyBase
         enemyHealth = GetComponent<Enemy_Health>();
         healthSystem = GetComponent<HealthSystem>();
         animator = GetComponentInChildren<Animator>();
+
+        // cache animator parameter hashes
+        if (animator != null)
+        {
+            animIdleHash = Animator.StringToHash(animIdleParam);
+            animInjuredHash = Animator.StringToHash(animInjuredParam);
+            animator.SetBool(animIdleHash, true);
+            animator.SetBool(animInjuredHash, false);
+        }
 
         // Immediately unparent to avoid inheriting any parent's physics motion
         if (transform.parent != null)
@@ -231,6 +249,12 @@ public class OldFriend_Boss : EnemyBase
     {
         if (player == null) return;
 
+        // Keep animator in sync: Idle when not injured; Injured when stopped
+        if (animator != null)
+        {
+            animator.SetBool(animIdleHash, !isStopped);
+            animator.SetBool(animInjuredHash, isStopped);
+        }
         if (!isStopped)
         {
             // Vertical floating
@@ -323,19 +347,16 @@ public class OldFriend_Boss : EnemyBase
 
         try
         {
-            // change sprite color(s) to green to indicate injuredF
-            if (spriteRenderers != null)
-            {
-                for (int i = 0; i < spriteRenderers.Length; i++)
-                {
-                    if (spriteRenderers[i] != null)
-                        spriteRenderers[i].color = Color.green;
-                }
-            }
-
             // make boss temporarily invulnerable
             if (enemyHealth != null)
                 enemyHealth.SetDamageable(false);
+
+            // update animator: set Injured true
+            if (animator != null)
+            {
+                animator.SetBool(animInjuredHash, true);
+                animator.SetBool(animIdleHash, false);
+            }
 
             // unprotect all cores so player can damage them
             // refresh cores at injured phase in case they were created or parented after Start
@@ -468,6 +489,13 @@ public class OldFriend_Boss : EnemyBase
 
 		// ensure boss resumes
 		isStopped = false;
+
+        // update animator: no longer injured
+        if (animator != null)
+        {
+            animator.SetBool(animInjuredHash, false);
+            animator.SetBool(animIdleHash, true);
+        }
 	}
 
     private void OnDestroy()
