@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class TutorialLoadSceneStep : TutorialStep
@@ -12,7 +13,11 @@ public class TutorialLoadSceneStep : TutorialStep
     [Tooltip("Loading message text.")]
     public string loadingText = "Loading...";
 
+    [Tooltip("Delay (realtime seconds) before triggering the scene load so players can read the instructions.")]
+    public float delayBeforeLoad = 1f;
+
     private bool _complete;
+    private Coroutine _loadRoutine;
 
     public override void Begin(TutorialManager mgr)
     {
@@ -24,16 +29,44 @@ public class TutorialLoadSceneStep : TutorialStep
             _complete = true;
             return;
         }
-        // Use global overlay so this is reusable outside portals
-        var overlay = GlobalLoadingOverlay.Instance;
-        overlay.LoadSceneAsync(this, sceneName, Mathf.Max(0f, minShowSeconds), loadingText);
-        // Mark step complete right away; scene load takes over flow
-        _complete = true;
+        if (_loadRoutine != null)
+        {
+            StopCoroutine(_loadRoutine);
+        }
+        _complete = false;
+        _loadRoutine = StartCoroutine(LoadSceneAfterDelay());
     }
 
     public override bool IsComplete()
     {
-        // This step completes immediately upon Begin(); manager will advance
+        // Remain active until the load coroutine fires to preserve instructions/freeze.
         return _complete;
+    }
+
+    private IEnumerator LoadSceneAfterDelay()
+    {
+        if (delayBeforeLoad > 0f)
+        {
+            yield return new WaitForSecondsRealtime(delayBeforeLoad);
+        }
+
+        var overlay = GlobalLoadingOverlay.Instance;
+        if (overlay == null)
+        {
+            Debug.LogError("TutorialLoadSceneStep: GlobalLoadingOverlay instance missing; cannot load scene.");
+            yield break;
+        }
+        overlay.LoadSceneAsync(this, sceneName, Mathf.Max(0f, minShowSeconds), loadingText);
+        _complete = true;
+    }
+
+    private void OnDisable()
+    {
+        if (_loadRoutine != null)
+        {
+            StopCoroutine(_loadRoutine);
+            _loadRoutine = null;
+        }
+        _complete = false;
     }
 }

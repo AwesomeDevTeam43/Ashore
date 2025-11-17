@@ -9,6 +9,8 @@ public class TutorialManager : MonoBehaviour
     [Header("UI Overlay")]
     public TutorialOverlay overlayPrefab;
     private TutorialOverlay overlayInstance;
+    [Header("Bindings")]
+    [SerializeField] private InputBindingDisplayResolver bindingResolver;
 
     [Header("Player")]
     public GameObject player;
@@ -16,6 +18,7 @@ public class TutorialManager : MonoBehaviour
     private int currentIndex = -1;
     private Coroutine freezeRoutine;
     private float prevTimeScale = 1f;
+    private string currentInstructionRaw = string.Empty;
 
     [Header("Overlay Dim Settings")]
     [Tooltip("Default dim alpha when a step requests dimming.")]
@@ -27,6 +30,7 @@ public class TutorialManager : MonoBehaviour
 
     private void Awake()
     {
+        ResolveBindingResolver();
         if (player == null)
         {
             var p = GameObject.FindGameObjectWithTag("Player");
@@ -51,7 +55,13 @@ public class TutorialManager : MonoBehaviour
 
     private void OnEnable()
     {
+        SubscribeBindingResolver();
         Advance();
+    }
+
+    private void OnDisable()
+    {
+        UnsubscribeBindingResolver();
     }
 
     private void Update()
@@ -88,6 +98,7 @@ public class TutorialManager : MonoBehaviour
             // Done. Hide overlay and enable player.
             overlayInstance?.SetDim(false);
             overlayInstance?.SetMessage("");
+            currentInstructionRaw = string.Empty;
             SetPlayerMovementEnabled(true);
             CancelFreezeIfAny();
             enabled = false;
@@ -100,11 +111,92 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    private void ResolveBindingResolver()
+    {
+        if (bindingResolver == null)
+        {
+            bindingResolver = InputBindingDisplayResolver.Instance;
+        }
+        if (bindingResolver == null)
+        {
+            bindingResolver = FindFirstObjectByType<InputBindingDisplayResolver>(FindObjectsInactive.Include);
+        }
+    }
+
+    private void SubscribeBindingResolver()
+    {
+        ResolveBindingResolver();
+        if (bindingResolver != null)
+        {
+            bindingResolver.OnBindingsChanged += HandleBindingsChanged;
+        }
+    }
+
+    private void UnsubscribeBindingResolver()
+    {
+        if (bindingResolver != null)
+        {
+            bindingResolver.OnBindingsChanged -= HandleBindingsChanged;
+        }
+    }
+
+    private void HandleBindingsChanged()
+    {
+        RefreshOverlayInstruction();
+    }
+
+    public void ApplyInstructionText(string rawText)
+    {
+        currentInstructionRaw = rawText ?? string.Empty;
+        RefreshOverlayInstruction();
+    }
+
+    private void RefreshOverlayInstruction()
+    {
+        if (overlayInstance == null) return;
+        string msg = currentInstructionRaw ?? string.Empty;
+        if (bindingResolver != null)
+        {
+            msg = bindingResolver.FormatText(msg);
+        }
+        overlayInstance.SetMessage(msg);
+    }
+
     public void SetPlayerMovementEnabled(bool enabledState)
     {
         if (player == null) return;
         var pm = player.GetComponent<Player_Movement>();
         if (pm != null) pm.enabled = enabledState;
+
+        var rb2D = player.GetComponent<Rigidbody2D>();
+        if (rb2D != null)
+        {
+            if (enabledState)
+            {
+                rb2D.WakeUp();
+            }
+            else
+            {
+                rb2D.linearVelocity = Vector2.zero;
+                rb2D.angularVelocity = 0f;
+                rb2D.Sleep();
+            }
+        }
+
+        var rb3D = player.GetComponent<Rigidbody>();
+        if (rb3D != null)
+        {
+            if (enabledState)
+            {
+                rb3D.WakeUp();
+            }
+            else
+            {
+                rb3D.linearVelocity = Vector3.zero;
+                rb3D.angularVelocity = Vector3.zero;
+                rb3D.Sleep();
+            }
+        }
     }
 
     // Freeze/unfreeze game time with unscaled timer
@@ -119,10 +211,7 @@ public class TutorialManager : MonoBehaviour
         prevTimeScale = Time.timeScale;
         Time.timeScale = 0f;
         yield return new UnityEngine.WaitForSecondsRealtime(Mathf.Max(0f, seconds));
-        if (Mathf.Approximately(Time.timeScale, 0f))
-        {
-            Time.timeScale = prevTimeScale;
-        }
+        RestoreTimeScaleIfAllowed();
         freezeRoutine = null;
     }
 
@@ -134,10 +223,7 @@ public class TutorialManager : MonoBehaviour
             freezeRoutine = null;
         }
         // Ensure timescale restored if left frozen
-        if (Mathf.Approximately(Time.timeScale, 0f))
-        {
-            Time.timeScale = prevTimeScale == 0f ? 1f : prevTimeScale;
-        }
+        RestoreTimeScaleIfAllowed();
     }
 
     // Freeze game until player interacts or moves after a short realtime cooldown
@@ -160,10 +246,7 @@ public class TutorialManager : MonoBehaviour
             yield return null; // next frame (realtime)
         }
 
-        if (Mathf.Approximately(Time.timeScale, 0f))
-        {
-            Time.timeScale = prevTimeScale;
-        }
+        RestoreTimeScaleIfAllowed();
         freezeRoutine = null;
     }
 
@@ -193,6 +276,14 @@ public class TutorialManager : MonoBehaviour
             if (gp.dpad.up.isPressed || gp.dpad.left.isPressed || gp.dpad.down.isPressed || gp.dpad.right.isPressed) return true;
         }
         return false;
+    }
+
+    private void RestoreTimeScaleIfAllowed(bool respectInventoryPause = true)
+    {
+        if (!Mathf.Approximately(Time.timeScale, 0f)) return;
+        if (respectInventoryPause && IsInventoryOpen()) return;
+        if (Mathf.Approximately(prevTimeScale, 0f)) return;
+        Time.timeScale = prevTimeScale;
     }
 
     private bool IsInventoryOpen()

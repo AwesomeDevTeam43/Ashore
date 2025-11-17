@@ -18,6 +18,10 @@ public class Player_InputHandler : MonoBehaviour
     [SerializeField] private string rangeAttack = "RangeAttack";
     [SerializeField] private string interact = "Interact";
     [SerializeField] private string inventory = "Inventory";
+    [Header("Control Scheme Detection")]
+    [SerializeField] private string keyboardMouseSchemeName = "Keyboard&Mouse";
+    [SerializeField] private string gamepadSchemeName = "Gamepad";
+    [SerializeField] private string defaultSchemeName = "Keyboard&Mouse";
 
     private InputAction movementAction;
     private InputAction lookAction;
@@ -34,9 +38,12 @@ public class Player_InputHandler : MonoBehaviour
     public bool RangeAttackTriggered { get; private set; }
     public bool InteractActionTriggered { get; private set; }
     public bool InventoryActionTriggered { get; private set; }
+    public InputActionAsset ControlsAsset => playerControls;
+    public string CurrentControlScheme => string.IsNullOrEmpty(currentControlScheme) ? defaultSchemeName : currentControlScheme;
 
     // Public event to signal inventory open/close action instantly (avoids polling races)
     public event Action OnInventoryPressed;
+    public event Action<string> OnControlSchemeChanged;
 
     // Expose methods to enable/disable the entire player action map when UI is open
     public void DisablePlayerActions()
@@ -81,15 +88,21 @@ public class Player_InputHandler : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float axisSnapBias = 0.3f;
 
+    private string currentControlScheme;
+
 
     private void OnEnable()
     {
         playerControls.FindActionMap(actionMapName).Enable();
+        currentControlScheme = defaultSchemeName;
+        UIInputMode.OnSchemeChanged += HandleUISchemeChanged;
+        HandleUISchemeChanged(UIInputMode.CurrentScheme);
     }
 
     private void OnDisable()
     {
         playerControls.FindActionMap(actionMapName).Disable();
+        UIInputMode.OnSchemeChanged -= HandleUISchemeChanged;
     }
 
     private void Awake()
@@ -126,25 +139,25 @@ public class Player_InputHandler : MonoBehaviour
 
     private void MakeInputEvents()
     {
-        movementAction.performed += inputInfo => MovementInput = inputInfo.ReadValue<Vector2>();
+        movementAction.performed += inputInfo => { MovementInput = inputInfo.ReadValue<Vector2>(); UpdateControlScheme(inputInfo); };
         movementAction.canceled += inputInfo => MovementInput = Vector2.zero;
 
-        lookAction.performed += inputInfo => LookInput = inputInfo.ReadValue<Vector2>();
+        lookAction.performed += inputInfo => { LookInput = inputInfo.ReadValue<Vector2>(); UpdateControlScheme(inputInfo); };
         lookAction.canceled += inputInfo => LookInput = Vector2.zero;
 
-        jumpAction.performed += inputInfo => JumpTriggered = true;
+        jumpAction.performed += inputInfo => { JumpTriggered = true; UpdateControlScheme(inputInfo); };
         jumpAction.canceled += inputInfo => JumpTriggered = false;
 
-        attackAction.performed += inputInfo => AttackTriggered = true;
+        attackAction.performed += inputInfo => { AttackTriggered = true; UpdateControlScheme(inputInfo); };
         attackAction.canceled += inputInfo => AttackTriggered = false;
 
-        rangeAttackAction.performed += inputInfo => RangeAttackTriggered = true;
+        rangeAttackAction.performed += inputInfo => { RangeAttackTriggered = true; UpdateControlScheme(inputInfo); };
         rangeAttackAction.canceled += inputInfo => RangeAttackTriggered = false;
 
-        interactAction.performed += inputInfo => InteractActionTriggered = true;
+        interactAction.performed += inputInfo => { InteractActionTriggered = true; UpdateControlScheme(inputInfo); };
         interactAction.canceled += inputInfo => InteractActionTriggered = false;
 
-        inventoryAction.performed += inputInfo => { InventoryActionTriggered = true; OnInventoryPressed?.Invoke(); };
+        inventoryAction.performed += inputInfo => { InventoryActionTriggered = true; OnInventoryPressed?.Invoke(); UpdateControlScheme(inputInfo); };
         inventoryAction.canceled += inputInfo => InventoryActionTriggered = false;
     }
 
@@ -258,6 +271,96 @@ public class Player_InputHandler : MonoBehaviour
         int index = Mathf.RoundToInt(angle / 45f) % 8;
         dir8 = directions8[index];
         dirIndex = index;
+    }
+
+    private void UpdateControlScheme(InputAction.CallbackContext ctx)
+    {
+        var device = TryGetDeviceFromContext(ctx);
+        if (device == null)
+        {
+            return;
+        }
+
+        string newScheme = DetermineSchemeForDevice(device);
+        ApplyControlScheme(newScheme);
+    }
+
+    private InputDevice TryGetDeviceFromContext(InputAction.CallbackContext ctx)
+    {
+        if (ctx.action == null)
+        {
+            return null;
+        }
+        InputControl control = null;
+        try
+        {
+            control = ctx.control;
+        }
+        catch (IndexOutOfRangeException)
+        {
+            control = null;
+        }
+
+        if (control != null)
+        {
+            return control.device;
+        }
+
+        if (ctx.action.activeControl != null)
+        {
+            return ctx.action.activeControl.device;
+        }
+
+        return null;
+    }
+
+    private void HandleUISchemeChanged(UIInputMode.Scheme scheme)
+    {
+        string targetScheme = scheme == UIInputMode.Scheme.Gamepad ? gamepadSchemeName : keyboardMouseSchemeName;
+        ApplyControlScheme(targetScheme);
+    }
+
+    private void ApplyControlScheme(string newScheme)
+    {
+        if (string.IsNullOrEmpty(newScheme))
+        {
+            newScheme = defaultSchemeName;
+        }
+
+        if (string.Equals(newScheme, currentControlScheme, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        currentControlScheme = newScheme;
+        OnControlSchemeChanged?.Invoke(currentControlScheme);
+    }
+
+    private string DetermineSchemeForDevice(InputDevice device)
+    {
+        if (device == null) return defaultSchemeName;
+        if (playerControls != null)
+        {
+            foreach (var scheme in playerControls.controlSchemes)
+            {
+                if (scheme.SupportsDevice(device))
+                {
+                    return scheme.name;
+                }
+            }
+        }
+
+        if (device is Gamepad)
+        {
+            return gamepadSchemeName;
+        }
+
+        if (device is Keyboard || device is Mouse)
+        {
+            return keyboardMouseSchemeName;
+        }
+
+        return defaultSchemeName;
     }
 
     /// <summary>

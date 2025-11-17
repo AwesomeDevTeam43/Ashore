@@ -22,7 +22,6 @@ public class Lab_Door : MonoBehaviour
     [Header("Visuals")]
     [SerializeField] private bool useFade = true;
     [SerializeField] private float fadeOutDuration = 0.2f;
-    [SerializeField] private float fadeHoldDuration = 0f;
     [SerializeField] private float fadeInDuration = 0.2f;
     [SerializeField] private bool snapCinemachineOnTeleport = true;
 

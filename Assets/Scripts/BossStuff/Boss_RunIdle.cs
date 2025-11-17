@@ -5,7 +5,6 @@ public class Boss_RunIdle : StateMachineBehaviour
 {
     Transform player;
     Rigidbody2D rb;
-    [SerializeField] float speed = 3f;
     [SerializeField] float attackRange = 2f;
     Boss boss;
     // Track whether we've already triggered a special action (Combo/Laser) during this state entry

@@ -14,13 +14,8 @@ public class Player_Movement : MonoBehaviour
     public Transform GroundCheck => groundCheck;
     // expose combined ground layers so other systems (animator, etc.) can raycast using the same mask
     public LayerMask CombinedGroundLayers => combinedGroundLayers;
-    [SerializeField] private float downwardAttackBounce = 10f;
     [SerializeField] private float coyoteTime = 0.15f;
     private float coyoteTimer = 0f;
-
-    [SerializeField] private float acceleration = 5f;
-    [SerializeField] private float deceleration = 5f;
-    private float velocityXSmoothing;
 
     private Player_Controller player_Controller;
 
@@ -68,7 +63,7 @@ public class Player_Movement : MonoBehaviour
             lastPlatformPosition = currentPlatformPos;
         }
 
-        float targetX = player_InputHandler.MovementInput.x * moveSpeed + platformMovement.x / Time.fixedDeltaTime;
+        float targetX = player_InputHandler.MovementInput.x * moveSpeed + (Time.fixedDeltaTime > 0f ? platformMovement.x / Time.fixedDeltaTime : 0f);
         rb.linearVelocity = new Vector2(targetX, rb.linearVelocity.y);
     }
 

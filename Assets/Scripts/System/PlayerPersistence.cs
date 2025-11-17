@@ -20,6 +20,14 @@ public class PlayerPersistence : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    private void OnDestroy()
+    {
+        if (instance == this)
+        {
+            instance = null;
+        }
+    }
+
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -33,6 +41,18 @@ public class PlayerPersistence : MonoBehaviour
     public static void SetNextSpawn(string spawnId)
     {
         nextSpawnId = spawnId;
+    }
+
+    public static void DestroyPersistentPlayer()
+    {
+        if (instance == null) return;
+
+        var go = instance.gameObject;
+        instance = null;
+        if (go != null)
+        {
+            Object.Destroy(go);
+        }
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
