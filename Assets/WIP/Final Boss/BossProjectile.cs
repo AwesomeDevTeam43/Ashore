@@ -88,6 +88,40 @@ public class BossProjectile : MonoBehaviour
 		}
 	}
 
+	private void OnDrawGizmos()
+	{
+		// Stop-follow/homing distance
+		if (stopFollowDistance > 0f)
+		{
+			Gizmos.color = new Color(1f, 0.4f, 0.0f, 0.7f);
+			Gizmos.DrawWireSphere(transform.position, stopFollowDistance);
+		}
+
+		// Velocity vector
+		Vector3 vel = Vector3.zero;
+		if (rb != null)
+			vel = (Vector3)rb.linearVelocity;
+		else
+			vel = transform.right * currentSpeed;
+		Gizmos.color = Color.cyan;
+		Gizmos.DrawLine(transform.position, transform.position + vel * 0.1f);
+		Gizmos.DrawSphere(transform.position + vel * 0.1f, 0.03f);
+
+		// Target line if homing toward the player
+		if (following && player != null)
+		{
+			Gizmos.color = Color.magenta;
+			Vector3 tgtPos;
+			var playerCol = player.GetComponent<Collider2D>();
+			if (playerCol != null)
+				tgtPos = playerCol.bounds.center;
+			else
+				tgtPos = player.transform.position;
+			Gizmos.DrawLine(transform.position, tgtPos);
+			Gizmos.DrawSphere(tgtPos, 0.04f);
+		}
+	}
+
 
 	private void OnCollisionEnter2D(Collision2D collision)
 	{
