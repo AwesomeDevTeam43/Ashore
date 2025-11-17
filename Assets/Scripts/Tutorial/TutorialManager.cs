@@ -288,7 +288,16 @@ public class TutorialManager : MonoBehaviour
 
     private bool IsInventoryOpen()
     {
-        // Consider inventory open if any InventoryPage is active in hierarchy
+        var menus = FindObjectsByType<MenuController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var menu in menus)
+        {
+            if (menu != null && menu.isActiveAndEnabled && menu.IsMenuOpen)
+            {
+                return true;
+            }
+        }
+
+        // Fallback: consider inventory open if any InventoryPage is active in hierarchy
         var pages = FindObjectsByType<InventoryPage>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (var p in pages)
         {
