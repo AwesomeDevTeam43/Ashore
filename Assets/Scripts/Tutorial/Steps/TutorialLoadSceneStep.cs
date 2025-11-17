@@ -58,6 +58,7 @@ public class TutorialLoadSceneStep : TutorialStep
             yield return new WaitForSecondsRealtime(delayBeforeLoad);
         }
 
+        GameState.Instance?.ClearAll();
         var overlay = GlobalLoadingOverlay.Instance;
         if (overlay == null)
         {
