@@ -84,10 +84,30 @@ public class InventoryContextMenuNavigator : MonoBehaviour
                 FocusFirst();
             }
         }
+        // Keep currentIndex in sync with the actual EventSystem selection
+        SyncIndexFromEventSystem();
         if (menuItems.Count == 0) return;
 
         HandleMoveInputs();
         HandleSubmitCancel();
+    }
+
+    private void SyncIndexFromEventSystem()
+    {
+        var es = EventSystem.current;
+        if (es == null) return;
+        var sel = es.currentSelectedGameObject;
+        if (sel == null) return;
+        for (int i = 0; i < menuItems.Count; i++)
+        {
+            var it = menuItems[i];
+            if (it == null) continue;
+            if (it.gameObject == sel)
+            {
+                currentIndex = i;
+                return;
+            }
+        }
     }
 
     private void HandleMoveInputs()
@@ -117,6 +137,27 @@ public class InventoryContextMenuNavigator : MonoBehaviour
     private void MoveSelection(int delta)
     {
         if (menuItems.Count == 0) return;
+        // If currentIndex is invalid or stale, derive from current EventSystem selection
+        if (currentIndex < 0 || currentIndex >= menuItems.Count)
+        {
+            var es = EventSystem.current;
+            if (es != null)
+            {
+                var sel = es.currentSelectedGameObject;
+                int idx = -1;
+                for (int i = 0; i < menuItems.Count; i++)
+                {
+                    var it = menuItems[i];
+                    if (it != null && it.gameObject == sel) { idx = i; break; }
+                }
+                currentIndex = (idx >= 0) ? idx : 0;
+            }
+            else
+            {
+                currentIndex = 0;
+            }
+        }
+
         int newIndex = currentIndex + delta;
         if (wrapNavigation)
         {
