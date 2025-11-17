@@ -64,7 +64,7 @@ public class TutorialLoadSceneStep : TutorialStep
             Debug.LogError("TutorialLoadSceneStep: GlobalLoadingOverlay instance missing; cannot load scene.");
             yield break;
         }
-        overlay.LoadSceneAsync(this, sceneName, Mathf.Max(0f, minShowSeconds), loadingText);
+        overlay.LoadSceneAsync(overlay, sceneName, Mathf.Max(0f, minShowSeconds), loadingText);
         _complete = true;
     }
 
