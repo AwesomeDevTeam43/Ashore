@@ -16,6 +16,9 @@ public class TutorialLoadSceneStep : TutorialStep
     [Tooltip("Delay (realtime seconds) before triggering the scene load so players can read the instructions.")]
     public float delayBeforeLoad = 1f;
 
+    [Tooltip("Optional spawn point ID for the destination scene (SceneSpawnPoint or portal ID).")]
+    public string spawnPointId;
+
     private bool _complete;
     private Coroutine _loadRoutine;
 
@@ -29,6 +32,11 @@ public class TutorialLoadSceneStep : TutorialStep
             _complete = true;
             return;
         }
+        if (!string.IsNullOrEmpty(spawnPointId))
+        {
+            PlayerPersistence.SetNextSpawn(spawnPointId);
+        }
+
         if (_loadRoutine != null)
         {
             StopCoroutine(_loadRoutine);

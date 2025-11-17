@@ -59,21 +59,38 @@ public class PlayerPersistence : MonoBehaviour
     {
         // Remove duplicates spawned by the new scene (keep this instance)
         var players = GameObject.FindGameObjectsWithTag("Player");
+        Vector3? replacementPosition = null;
+        Quaternion replacementRotation = Quaternion.identity;
+        Vector3 replacementScale = Vector3.one;
         foreach (var p in players)
         {
             if (p == null) continue;
             if (p == this.gameObject) continue;
+            if (!replacementPosition.HasValue)
+            {
+                replacementPosition = p.transform.position;
+                replacementRotation = p.transform.rotation;
+                replacementScale = p.transform.localScale;
+            }
             Destroy(p);
         }
 
         // Warp to spawn point if specified
+        bool warped = false;
         if (!string.IsNullOrEmpty(nextSpawnId))
         {
             // Priority 1: PortalAnchor (use existing portal's configured exit/position)
-            bool warped = TryWarpToPortalAnchor(nextSpawnId);
+            warped = TryWarpToPortalAnchor(nextSpawnId);
             // Priority 2: SceneSpawnPoint (generic spawn marker)
             if (!warped) warped = TryWarpToSceneSpawnPoint(nextSpawnId);
             nextSpawnId = null; // consume
+        }
+
+        if (!warped && replacementPosition.HasValue)
+        {
+            WarpTo(replacementPosition.Value);
+            transform.rotation = replacementRotation;
+            transform.localScale = replacementScale;
         }
     }
 

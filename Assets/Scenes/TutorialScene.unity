@@ -272,6 +272,60 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 069913e83c240f74388e8866928faf71, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &29931017
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 29931018}
+  - component: {fileID: 29931019}
+  m_Layer: 0
+  m_Name: pickupstone (2)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &29931018
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 29931017}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1002230204}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &29931019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 29931017}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d455c9e9f2f09d43ae03b00fa216860, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  instructionText: 
+  highlightTarget: {fileID: 0}
+  freezePlayerMovement: 0
+  dimScreen: 0
+  requiresInventoryFocus: 0
+  freezeGameSeconds: 0
+  freezeUntilPlayerInput: 0
+  inputUnfreezeCooldown: 0.25
+  item: {fileID: 11400000, guid: 32410df1c793ac94eaf344c30dad367a, type: 2}
+  quantity: 3
 --- !u!1 &41075968
 GameObject:
   m_ObjectHideFlags: 0
@@ -1727,6 +1781,60 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &217709883
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 217709884}
+  - component: {fileID: 217709885}
+  m_Layer: 0
+  m_Name: pickupstone (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &217709884
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 217709883}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1002230204}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &217709885
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 217709883}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d455c9e9f2f09d43ae03b00fa216860, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  instructionText: 
+  highlightTarget: {fileID: 0}
+  freezePlayerMovement: 0
+  dimScreen: 0
+  requiresInventoryFocus: 0
+  freezeGameSeconds: 0
+  freezeUntilPlayerInput: 0
+  inputUnfreezeCooldown: 0.25
+  item: {fileID: 11400000, guid: c794599bb4cdcca4a8001e4ff1cba7fb, type: 2}
+  quantity: 3
 --- !u!1 &227286130
 GameObject:
   m_ObjectHideFlags: 0
@@ -8464,6 +8572,8 @@ Transform:
   - {fileID: 149929542}
   - {fileID: 1623704149}
   - {fileID: 233366680}
+  - {fileID: 217709884}
+  - {fileID: 29931018}
   - {fileID: 1651208272}
   - {fileID: 1467562808}
   - {fileID: 1926268258}
