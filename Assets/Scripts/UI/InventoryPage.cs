@@ -395,9 +395,9 @@ public class InventoryPage : MonoBehaviour
                     if (item != null)
                     {
                         Vector2 screenPos;
-                        if (UIInputMode.CurrentScheme == UIInputMode.Scheme.Gamepad)
+                        if (UIInputMode.Current != UIInputMode.Mode.Pointer)
                         {
-                            // Open at the slot position, not the (hidden) mouse
+                            // Non-pointer navigation (keyboard/gamepad): anchor menu to the slot center
                             var rt = slot.GetComponent<RectTransform>();
                             Camera cam = null;
                             var c = slot.GetComponentInParent<Canvas>();
@@ -406,7 +406,7 @@ public class InventoryPage : MonoBehaviour
                         }
                         else
                         {
-                            // Mouse/keyboard: open at mouse position
+                            // Pointer (mouse) mode: use actual mouse position for context menu
                             screenPos = UnityEngine.InputSystem.Mouse.current != null ? (Vector2)UnityEngine.InputSystem.Mouse.current.position.ReadValue() : Vector2.zero;
                             if (screenPos == Vector2.zero)
                             {

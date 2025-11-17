@@ -23,6 +23,10 @@ public class InventoryContextMenu : MonoBehaviour
 
     private ItemData currentItem;
     private InventorySlot currentSlot;
+    private System.Collections.Generic.List<Selectable> _disabledOutsideSelectables = new System.Collections.Generic.List<Selectable>();
+    private GameObject _prevSelected;
+    private System.Collections.Generic.List<UINavScope> _suspendedScopes = new System.Collections.Generic.List<UINavScope>();
+    private System.Collections.Generic.List<InventoryContextMenuNavigator> _disabledNavigators = new System.Collections.Generic.List<InventoryContextMenuNavigator>();
     // Track last shown menu so other systems (e.g., MenuController) can close it first on Cancel
     private static InventoryContextMenu s_LastShown;
     private static float s_BlockOpenUntilTime = 0f;
@@ -192,7 +196,17 @@ public class InventoryContextMenu : MonoBehaviour
     menuRoot.gameObject.SetActive(true);
     s_LastShown = this;
 
-    // Focus first active button (primary preferred)
+    // Trap focus BEFORE choosing selection so EventSystem doesn't clear selection due to disabled previous object
+    TrapFocus();
+    ConfigureNavigation();
+    SuspendNavScopes();
+    SuspendMenuNavigators();
+
+    // Ensure buttons are interactable
+    if (primaryBtn != null) primaryBtn.interactable = true;
+    if (dropBtn != null) dropBtn.interactable = true;
+
+    // Focus first active button (primary preferred) AFTER trap
     var first = (primaryBtn != null && primaryBtn.gameObject.activeSelf) ? primaryBtn : dropBtn;
     if (first != null) EventSystem.current?.SetSelectedGameObject(first.gameObject);
     }
@@ -211,6 +225,9 @@ public class InventoryContextMenu : MonoBehaviour
         onClose = null;
         currentItem = null; currentSlot = null;
         if (s_LastShown == this) s_LastShown = null;
+        RestoreFocus();
+        RestoreNavScopes();
+        RestoreMenuNavigators();
     }
 
     private void DoUse()
@@ -303,15 +320,73 @@ public class InventoryContextMenu : MonoBehaviour
             {
                 Hide();
             }
+            // We intentionally do NOT auto close on outside clicks to enforce focus trap.
 
-            // Mouse click outside item/menu -> close
-            var mouse = UnityEngine.InputSystem.Mouse.current;
-            if (mouse != null && (mouse.leftButton.wasPressedThisFrame || mouse.rightButton.wasPressedThisFrame))
+            // Manual directional nav fallback to guarantee Up/Down between menu buttons
+            HandleManualDirectionalNav();
+
+            // Guard: if selection was lost (e.g., due to device scheme change), reselect a menu button
+            if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject == null)
             {
-                if (!PointerHitsItemOrMenu(mouse.position.ReadValue()))
-                {
-                    Hide();
-                }
+                var first = (primaryBtn != null && primaryBtn.gameObject.activeSelf) ? primaryBtn : dropBtn;
+                if (first != null) EventSystem.current.SetSelectedGameObject(first.gameObject);
+            }
+        }
+    }
+
+    private void HandleManualDirectionalNav()
+    {
+        var es = EventSystem.current; if (es == null) return;
+
+        bool up = false, down = false;
+        var kb = UnityEngine.InputSystem.Keyboard.current;
+        if (kb != null)
+        {
+            up |= kb.upArrowKey.wasPressedThisFrame || kb.wKey.wasPressedThisFrame;
+            down |= kb.downArrowKey.wasPressedThisFrame || kb.sKey.wasPressedThisFrame;
+        }
+        var gp = UnityEngine.InputSystem.Gamepad.current;
+        if (gp != null)
+        {
+            up |= gp.dpad.up.wasPressedThisFrame || gp.leftStick.up.wasPressedThisFrame;
+            down |= gp.dpad.down.wasPressedThisFrame || gp.leftStick.down.wasPressedThisFrame;
+        }
+
+        if (!up && !down) return;
+
+        var cur = es.currentSelectedGameObject;
+        var curBtn = cur != null ? cur.GetComponent<Button>() : null;
+        if (curBtn == null)
+        {
+            // If selection is not on a button, force it to primary
+            if (primaryBtn != null) { es.SetSelectedGameObject(primaryBtn.gameObject); }
+            return;
+        }
+
+        if (down)
+        {
+            if (curBtn == primaryBtn && dropBtn != null)
+            {
+                es.SetSelectedGameObject(dropBtn.gameObject);
+                return;
+            }
+            if (curBtn == dropBtn && primaryBtn != null)
+            {
+                es.SetSelectedGameObject(primaryBtn.gameObject); // wrap
+                return;
+            }
+        }
+        else if (up)
+        {
+            if (curBtn == dropBtn && primaryBtn != null)
+            {
+                es.SetSelectedGameObject(primaryBtn.gameObject);
+                return;
+            }
+            if (curBtn == primaryBtn && dropBtn != null)
+            {
+                es.SetSelectedGameObject(dropBtn.gameObject); // wrap reverse
+                return;
             }
         }
     }
@@ -353,5 +428,128 @@ public class InventoryContextMenu : MonoBehaviour
         if (tmp == null) return;
         tmp.text = text;
         tmp.alignment = TextAlignmentOptions.Center;
+    }
+
+    private void TrapFocus()
+    {
+        _prevSelected = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
+        _disabledOutsideSelectables.Clear();
+        var all = GameObject.FindObjectsByType<Selectable>(FindObjectsSortMode.None);
+        foreach (var sel in all)
+        {
+            if (sel == null) continue;
+            if (menuRoot != null && sel.transform.IsChildOf(menuRoot)) continue; // keep menu buttons active
+            if (!sel.interactable) continue; // already disabled elsewhere
+            sel.interactable = false;
+            _disabledOutsideSelectables.Add(sel);
+        }
+    }
+
+    private void RestoreFocus()
+    {
+        foreach (var sel in _disabledOutsideSelectables)
+        {
+            if (sel != null) sel.interactable = true;
+        }
+        _disabledOutsideSelectables.Clear();
+        // Restore previous selection if still valid and we're in pointer mode; controller mode already restores slot
+        if (UIInputMode.Current == UIInputMode.Mode.Pointer && _prevSelected != null && EventSystem.current != null)
+        {
+            EventSystem.current.SetSelectedGameObject(_prevSelected);
+        }
+        _prevSelected = null;
+    }
+
+    private void ConfigureNavigation()
+    {
+        // Explicit vertical navigation between primary and drop buttons
+        if (primaryBtn != null && dropBtn != null)
+        {
+            var navPrimary = primaryBtn.navigation;
+            navPrimary.mode = Navigation.Mode.Explicit;
+            navPrimary.selectOnDown = dropBtn;
+            navPrimary.selectOnUp = dropBtn; // wrap
+            primaryBtn.navigation = navPrimary;
+
+            var navDrop = dropBtn.navigation;
+            navDrop.mode = Navigation.Mode.Explicit;
+            navDrop.selectOnUp = primaryBtn;
+            navDrop.selectOnDown = primaryBtn; // wrap
+            dropBtn.navigation = navDrop;
+        }
+        // Add highlight + nav target components if missing
+        AddHighlightAndMarker(primaryBtn);
+        AddHighlightAndMarker(dropBtn);
+    }
+
+    private void AddHighlightAndMarker(Button btn)
+    {
+        if (btn == null) return;
+        if (btn.GetComponent<SelectionHighlight>() == null)
+        {
+            btn.gameObject.AddComponent<SelectionHighlight>();
+        }
+        if (btn.GetComponent<UINavTarget>() == null)
+        {
+            btn.gameObject.AddComponent<UINavTarget>();
+        }
+        // Improve visibility via colorBlock tweaks
+        var cb = btn.colors;
+        cb.normalColor = new Color(1f,1f,1f,0.15f);
+        cb.highlightedColor = new Color(1f,0.85f,0.3f,0.55f);
+        cb.selectedColor = new Color(1f,0.75f,0.2f,0.55f);
+        cb.pressedColor = new Color(1f,0.6f,0.1f,0.6f);
+        cb.disabledColor = new Color(1f,1f,1f,0.05f);
+        btn.colors = cb;
+    }
+
+    private void SuspendNavScopes()
+    {
+        _suspendedScopes.Clear();
+        // Find active scopes in ancestors (inventory page) and disable them so they don't override selection
+        var scopes = GameObject.FindObjectsByType<UINavScope>(FindObjectsSortMode.None);
+        foreach (var sc in scopes)
+        {
+            if (sc == null) continue;
+            if (!sc.isActiveAndEnabled) continue;
+            // Disable only if menuRoot is not under that scope (to avoid breaking slot nav inside menu)
+            if (menuRoot != null && !menuRoot.IsChildOf(sc.transform))
+            {
+                sc.enabled = false;
+                _suspendedScopes.Add(sc);
+            }
+        }
+    }
+
+    private void RestoreNavScopes()
+    {
+        foreach (var sc in _suspendedScopes)
+        {
+            if (sc != null) sc.enabled = true;
+        }
+        _suspendedScopes.Clear();
+    }
+
+    private void SuspendMenuNavigators()
+    {
+        _disabledNavigators.Clear();
+        // Disable any InventoryContextMenuNavigator to avoid double-handling of inputs
+        var navs = GameObject.FindObjectsByType<InventoryContextMenuNavigator>(FindObjectsSortMode.None);
+        foreach (var n in navs)
+        {
+            if (n == null) continue;
+            if (!n.isActiveAndEnabled) continue;
+            n.enabled = false;
+            _disabledNavigators.Add(n);
+        }
+    }
+
+    private void RestoreMenuNavigators()
+    {
+        foreach (var n in _disabledNavigators)
+        {
+            if (n != null) n.enabled = true;
+        }
+        _disabledNavigators.Clear();
     }
 }

@@ -1,0 +1,116 @@
+using UnityEngine;
+
+public class DroppingsProjectile : MonoBehaviour
+{
+    [SerializeField] private float fallSpeed = 8f;
+    [SerializeField] private float gravityAcceleration = 0f; // set >0 to simulate acceleration
+    [SerializeField] private float lifetime = 6f;
+    [SerializeField] private int damageAmount = 1;
+    [SerializeField] private bool destroyOnGround = true;
+    [SerializeField] private LayerMask groundMask;
+    [SerializeField] private float groundCheckRadius = 0.12f;
+
+    [Header("Puddle Spawn")]
+    [SerializeField] private bool spawnPuddleOnGround = true;
+    [SerializeField] private GameObject miasmaPuddlePrefab;
+    [SerializeField] private Vector2 puddleSpawnOffset = Vector2.zero;
+
+    private float _lifeTimer;
+    private float _verticalVelocity;
+
+    private void Awake()
+    {
+        _verticalVelocity = -fallSpeed;
+    }
+
+    private void Update()
+    {
+        // Simple custom gravity (optional)
+        if (gravityAcceleration > 0f)
+        {
+            _verticalVelocity -= gravityAcceleration * Time.deltaTime;
+        }
+        transform.Translate(Vector3.up * _verticalVelocity * Time.deltaTime, Space.World);
+
+        _lifeTimer += Time.deltaTime;
+        if (_lifeTimer >= lifetime)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        if (destroyOnGround)
+        {
+            var hit = Physics2D.OverlapCircle(transform.position, groundCheckRadius, groundMask);
+            if (hit)
+            {
+                HandleGroundImpact();
+            }
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (TryApplyDamage(other))
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private bool TryApplyDamage(Collider2D other)
+    {
+        // Prefer custom damage receivers (player/enemies that opt-in)
+        var receiver = other.GetComponentInParent<IDamageReceiver>();
+        if (receiver != null)
+        {
+            receiver.ReceiveDamage(damageAmount);
+            return true;
+        }
+
+        // Directly drive the shared HealthSystem if present
+        var hs = other.GetComponentInParent<HealthSystem>();
+        if (hs != null)
+        {
+            hs.TakeDamage(damageAmount, gameObject);
+            return true;
+        }
+
+        // As a fallback, search for any MonoBehaviour exposing TakeDamage(int)
+        var behaviours = other.GetComponentsInParent<MonoBehaviour>();
+        foreach (var mb in behaviours)
+        {
+            if (mb == null) continue;
+            var method = mb.GetType().GetMethod("TakeDamage", new[] { typeof(int) });
+            if (method != null)
+            {
+                method.Invoke(mb, new object[] { damageAmount });
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void HandleGroundImpact()
+    {
+        if (spawnPuddleOnGround && miasmaPuddlePrefab != null)
+        {
+            var pos = transform.position + (Vector3)puddleSpawnOffset;
+            Instantiate(miasmaPuddlePrefab, pos, Quaternion.identity);
+        }
+        Destroy(gameObject);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (!destroyOnGround) return;
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, groundCheckRadius);
+    }
+}
+
+// Simple interface you can implement on the player or health component.
+public interface IDamageReceiver
+{
+    void ReceiveDamage(int amount);
+}
