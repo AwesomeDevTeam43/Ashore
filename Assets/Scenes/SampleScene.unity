@@ -15104,7 +15104,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48a3d2396a3ae2e43b2f75f9db104d7e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnId: spawnentry
+  spawnId: spawnplayer
 --- !u!4 &1124735603
 Transform:
   m_ObjectHideFlags: 0
