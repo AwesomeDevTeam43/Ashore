@@ -34,7 +34,6 @@ public class ShieldedCore : MonoBehaviour
 			}
 		}
 			// ensure core starts protected by default
-			Debug.Log($"{name}: ShieldedCore.Awake - initialized (coreMaxHealth={coreMaxHealth})");
 			SetProtected(true);
 		}
 
@@ -46,7 +45,6 @@ public class ShieldedCore : MonoBehaviour
 			enemyHealth.SetDamageable(!isProtected);
 		}
 
-		Debug.Log($"{name}: SetProtected called -> isProtected={isProtected} (was={isProtectedState})");
 		if (isProtectedState == isProtected) return;
 		isProtectedState = isProtected;
 
@@ -73,7 +71,6 @@ public class ShieldedCore : MonoBehaviour
 
 	private void OnDestroy()
 	{
-		Debug.Log($"{name}: ShieldedCore.OnDestroy - invoking OnCoreDestroyed");
 		OnCoreDestroyed?.Invoke(this);
 	}
 }

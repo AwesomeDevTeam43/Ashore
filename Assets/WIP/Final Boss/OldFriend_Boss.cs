@@ -12,6 +12,7 @@ public class OldFriend_Boss : EnemyBase
     [Header("References")]
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private Transform projectileSpawn;
+    [SerializeField] private Transform projectileSpawnSecondary; // second firing point
 
     [Header("Timing")]
     [SerializeField] private float injuredStopDuration = 10f;
@@ -29,6 +30,14 @@ public class OldFriend_Boss : EnemyBase
     private float shootTimer = 0f;
     private float currentShootInterval = 2f;
     private float projectileStopFollow = 5f;
+
+    [Header("Stage Settings")]
+    [SerializeField] private float stage2CooldownMultiplier = 0.85f;
+    [SerializeField] private float stage4CooldownMultiplier = 0.7f;
+
+    private int currentStage = 1; // 1..4
+    private bool spawnToggle = false;
+    private bool shootDouble = false;
 
     private bool isStopped = false;
     private bool coreDestroyedDuringPhase = false;
@@ -71,10 +80,6 @@ public class OldFriend_Boss : EnemyBase
         if (transform.parent != null)
         {
             var parentRb = transform.parent.GetComponent<Rigidbody2D>();
-            if (parentRb != null)
-            {
-                Debug.LogWarning($"{name}: Detaching from parent '{transform.parent.name}' because it has a Rigidbody2D (BodyType={parentRb.bodyType}).");
-            }
             transform.SetParent(null);
         }
 
@@ -90,7 +95,6 @@ public class OldFriend_Boss : EnemyBase
             fixedCount++;
         }
         rb = GetComponent<Rigidbody2D>();
-        Debug.Log($"{name}: Enforced {fixedCount} Rigidbody2D(s) to kinematic/no-gravity on spawn.");
 
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
 
@@ -109,6 +113,10 @@ public class OldFriend_Boss : EnemyBase
         thresholdTriggered = new bool[thresholds.Length];
 
         currentShootInterval = TypedStats != null ? TypedStats.baseFireInterval : 2f;
+        // ensure stage defaults
+        currentStage = 1;
+        spawnToggle = false;
+        shootDouble = false;
 
         // cache sprite renderers and their original colors
         spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);
@@ -136,11 +144,6 @@ public class OldFriend_Boss : EnemyBase
         }
     }
 
-    /// <summary>
-    /// (Re)discover ShieldedCore instances for this boss.
-    /// If <paramref name="allowSceneFallback"/> is true the method will search the scene
-    /// for nearby cores when none are found as children. This method is safe to call multiple times.
-    /// </summary>
     private void RefreshCores(bool allowSceneFallback)
     {
         // unsubscribe previous handlers
@@ -159,7 +162,6 @@ public class OldFriend_Boss : EnemyBase
         if (found != null && found.Length > 0)
         {
             cores = found;
-            Debug.Log($"{name}: RefreshCores - found {cores.Length} ShieldedCore(s) as children.");
             for (int i = 0; i < cores.Length; i++)
             {
                 var c = cores[i];
@@ -173,7 +175,6 @@ public class OldFriend_Boss : EnemyBase
         if (!allowSceneFallback) 
         {
             cores = new ShieldedCore[0];
-            Debug.LogWarning($"{name}: RefreshCores - no ShieldedCore children found and sceneFallback disabled.");
             return;
         }
 
@@ -203,7 +204,6 @@ public class OldFriend_Boss : EnemyBase
         if (picked.Count > 0)
         {
             cores = picked.ToArray();
-            Debug.Log($"{name}: RefreshCores - fallback found {cores.Length} ShieldedCore(s) for boss.");
             for (int i = 0; i < cores.Length; i++)
             {
                 var c = cores[i];
@@ -215,7 +215,6 @@ public class OldFriend_Boss : EnemyBase
         else
         {
             cores = new ShieldedCore[0];
-            Debug.LogWarning($"{name}: RefreshCores - fallback search did not find any ShieldedCore instances.");
         }
     }
 
@@ -223,7 +222,6 @@ public class OldFriend_Boss : EnemyBase
     {
         if (player == null) return;
 
-        // movement: simple floating unless stopped
         if (!isStopped)
         {
             float y = Mathf.Sin(Time.time * (TypedStats != null ? TypedStats.floatSpeed : 1f)) * (TypedStats != null ? TypedStats.floatAmplitude : 0.5f);
@@ -231,8 +229,6 @@ public class OldFriend_Boss : EnemyBase
             transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * 2f);
         }
 
-        // shooting
-        // don't shoot while stopped (injured) — pause the shoot timer while injured
         if (isStopped) return;
 
         shootTimer += Time.deltaTime;
@@ -247,18 +243,44 @@ public class OldFriend_Boss : EnemyBase
     {
         if (projectilePrefab == null || player == null) return;
 
-        Transform spawn = projectileSpawn != null ? projectileSpawn : transform;
-        Debug.Log($"{name}: Shooting projectile from {spawn.position} towards player at {player.position}");
-        GameObject go = Instantiate(projectilePrefab, spawn.position, Quaternion.identity);
-        var proj = go.GetComponent<BossProjectile>();
-        if (proj != null)
+        // Choose spawn behavior based on current stage
+        Transform spawnA = projectileSpawn != null ? projectileSpawn : transform;
+        Transform spawnB = projectileSpawnSecondary != null ? projectileSpawnSecondary : projectileSpawn;
+
+        if (currentStage == 3 && shootDouble)
         {
-            Vector2 dir = (player.position - spawn.position);
-            float speedMult = 1f;
-            proj.Initialize(dir, projectileStopFollow, speedMult, TypedStats != null ? TypedStats.projectileDamage : 1);
-            proj.speed = TypedStats != null ? TypedStats.projectileSpeed : proj.speed;
+            // spawn two projectiles at once (from both points)
+            Debug.Log($"{name}: Stage 3 double-shot from {spawnA.position} and {spawnB.position} towards player at {player.position}");
+            SpawnProjectileAt(spawnA);
+            if (spawnB != null && spawnB != spawnA)
+                SpawnProjectileAt(spawnB);
+            return;
         }
+
+        // stage 1 (and others unless double) alternate between spawn points
+        Transform chosen = spawnA;
+        if (spawnB != null && spawnB != spawnA)
+        {
+            chosen = spawnToggle ? spawnB : spawnA;
+            spawnToggle = !spawnToggle;
+        }
+
+        Debug.Log($"{name}: Shooting projectile from {chosen.position} towards player at {player.position} (stage={currentStage})");
+        SpawnProjectileAt(chosen);
     }
+
+	private void SpawnProjectileAt(Transform spawn)
+	{
+		GameObject go = Instantiate(projectilePrefab, spawn.position, Quaternion.identity);
+		var proj = go.GetComponent<BossProjectile>();
+		if (proj != null)
+		{
+			Vector2 dir = (player.position - spawn.position);
+			float speedMult = 1f;
+			proj.Initialize(dir, projectileStopFollow, speedMult, TypedStats != null ? TypedStats.projectileDamage : 1);
+			proj.speed = TypedStats != null ? TypedStats.projectileSpeed : proj.speed;
+		}
+	}
 
     private void OnHealthChanged(int currentHealth, int maxHealth)
     {
@@ -354,6 +376,40 @@ public class OldFriend_Boss : EnemyBase
             Debug.Log($"{name}: InjuredPhase finishing; running cleanup.");
             ExitInjuredPhaseCleanup();
             injuredCoroutine = null;
+
+            // advance stage after injured phase finishes
+            int newStage = Mathf.Clamp(stageIndex + 2, 1, 4);
+            ApplyStageSettings(newStage);
+        }
+    }
+
+    private void ApplyStageSettings(int stage)
+    {
+        if (stage == currentStage) return;
+        currentStage = stage;
+        Debug.Log($"{name}: Applying stage settings -> stage {stage}");
+        switch (stage)
+        {
+            case 1:
+                // default: alternate between spawn points
+                spawnToggle = false;
+                shootDouble = false;
+                break;
+            case 2:
+                // reduce cooldown moderately
+                currentShootInterval *= stage2CooldownMultiplier;
+                shootDouble = false;
+                break;
+            case 3:
+                // shoot two projectiles at once
+                shootDouble = true;
+                break;
+            case 4:
+                // decrease cooldown more
+                currentShootInterval *= stage4CooldownMultiplier;
+                // stage 4: faster and double-shot as well
+                shootDouble = true;
+                break;
         }
     }
 
