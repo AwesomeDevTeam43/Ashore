@@ -35,6 +35,15 @@ public class OldFriend_Boss : EnemyBase
     [SerializeField] private float stage2CooldownMultiplier = 0.85f;
     [SerializeField] private float stage4CooldownMultiplier = 0.7f;
 
+    [Header("Movement")]
+    [Tooltip("Horizontal follow responsiveness (larger = snappier follow on X axis)")]
+    [SerializeField] private float followSpeed = 3f;
+    [Tooltip("Position smoothing when applying target X/Y (larger = faster interpolation)")]
+    [SerializeField] private float followLerpSpeed = 5f;
+    [Header("Contact")]
+    [Tooltip("Damage dealt to the player when they collide with the boss body (collision or non-activation trigger)")]
+    [SerializeField] private int contactDamage = 2;
+
     private int currentStage = 1; // 1..4
     private bool spawnToggle = false;
     private bool shootDouble = false;
@@ -224,9 +233,15 @@ public class OldFriend_Boss : EnemyBase
 
         if (!isStopped)
         {
+            // Vertical floating
             float y = Mathf.Sin(Time.time * (TypedStats != null ? TypedStats.floatSpeed : 1f)) * (TypedStats != null ? TypedStats.floatAmplitude : 0.5f);
-            Vector3 targetPos = new Vector3(transform.position.x, transform.parent != null ? transform.parent.position.y + y : transform.position.y + y, transform.position.z);
-            transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * 2f);
+            float baseY = (transform.parent != null ? transform.parent.position.y : transform.position.y) + y;
+
+            // Follow player only on X axis (smooth)
+            float desiredX = Mathf.Lerp(transform.position.x, player.position.x, followSpeed * Time.deltaTime);
+
+            Vector3 targetPos = new Vector3(desiredX, baseY, transform.position.z);
+            transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * followLerpSpeed);
         }
 
         if (isStopped) return;
@@ -464,6 +479,35 @@ public class OldFriend_Boss : EnemyBase
         {
             if (c != null)
                 c.OnCoreDestroyed -= HandleCoreDestroyed;
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision == null || collision.collider == null) return;
+        var other = collision.collider;
+        if (!other.CompareTag("Player")) return;
+
+        var hs = other.GetComponentInParent<HealthSystem>();
+        if (hs != null)
+        {
+            Debug.Log($"{name}: Player collided with boss body — applying {contactDamage} damage.");
+            hs.TakeDamage(contactDamage, gameObject);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other == null) return;
+        if (!other.CompareTag("Player")) return;
+
+        // Apply contact damage for boss triggers (there is no activationArea configured in this build)
+
+        var hsTrig = other.GetComponentInParent<HealthSystem>();
+        if (hsTrig != null)
+        {
+            Debug.Log($"{name}: Player touched boss trigger — applying {contactDamage} damage.");
+            hsTrig.TakeDamage(contactDamage, gameObject);
         }
     }
 }
