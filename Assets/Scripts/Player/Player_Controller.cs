@@ -21,16 +21,12 @@ public class Player_Controller : MonoBehaviour
   [SerializeField] private string isRunningParam = "IsRunning";
   [Tooltip("Bool parameter to indicate jumping/airborne state (optional).")]
   [SerializeField] private string isJumpingParam = "isJumping";
-  [Tooltip("Vertical distance (in units) at which we consider the player about to land and should play landing frames.")]
-  [SerializeField] private float landingDetectDistance = 0.6f;
   [Tooltip("Float parameter name to pass vertical velocity to the Animator (optional).")]
   [SerializeField] private string yVelParam = "YVel";
   [Tooltip("Trigger parameter name to play landing animation (optional).")]
   [SerializeField] private string landTrigger = "Land";
   [Tooltip("Trigger parameter name to play jump start animation (optional).")]
   [SerializeField] private string jumpStartTrigger = "JumpStart";
-  [Tooltip("Speed threshold above which we consider the player running.")]
-  [SerializeField] private float runThreshold = 0.1f;
   private bool hasSpeedParam = false;
   private bool hasIsRunningParam = false;
   private bool hasIsJumpingParam = false;
@@ -199,7 +195,7 @@ private void Start()
 
       if (hasSpeedParam)
         animator.SetFloat(speedParam, speed);
-    if (hasIsRunningParam)
+      if (hasIsRunningParam)
     {
       // Prefer input-driven running/walking intent if a Player_InputHandler is available.
       bool hasMovementInput = false;

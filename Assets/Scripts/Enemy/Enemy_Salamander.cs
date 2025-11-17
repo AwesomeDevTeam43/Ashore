@@ -31,7 +31,6 @@ public class Enemy_Salamander : EnemyBase
   [SerializeField] private float timeBetweenShots = 0.6f;
 
   [Header("Retreat Hop")]
-  [Range(0f, 1f)][SerializeField] private float retreatChance = 0.25f; // chance after bite
   [SerializeField] private float hopForceX = 4f;
   [SerializeField] private float hopForceY = 5f;
   [SerializeField] private float retreatTargetDistance = 4f; // distance to reach before resume approach
@@ -343,13 +342,10 @@ public class Enemy_Salamander : EnemyBase
     }
     biteCooldown = timeBetweenBites;
     ApplyBiteDamage();
-    // Always retreat once after a bite attempt before resuming the pattern
     DoRetreatHop();
     state = State.Retreat;
     timeInShoot = 0f; // reset shoot tracking after a bite
     aggressiveRush = false; // rush finished
-
-    // reset retreat timer was already set in DoRetreatHop; ensure it's not negative
     if (retreatTimer < 0f) retreatTimer = 0f;
   }
 

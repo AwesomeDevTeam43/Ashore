@@ -29,7 +29,7 @@ public abstract class TutorialStep : MonoBehaviour
     {
         manager = mgr;
         if (dimScreen) manager.Overlay?.SetDim(true);
-        manager.Overlay?.SetMessage(instructionText);
+        manager.ApplyInstructionText(instructionText);
         manager.Overlay?.SetHighlight(highlightTarget);
         if (freezePlayerMovement) manager.SetPlayerMovementEnabled(false);
         if (freezeGameSeconds > 0f) manager.FreezeGameForSeconds(freezeGameSeconds);
@@ -41,7 +41,7 @@ public abstract class TutorialStep : MonoBehaviour
     public virtual void End()
     {
         manager.Overlay?.SetHighlight(null);
-        manager.Overlay?.SetMessage("");
+        manager.ApplyInstructionText(string.Empty);
         manager.Overlay?.SetDim(false);
         if (freezePlayerMovement) manager.SetPlayerMovementEnabled(true);
     }

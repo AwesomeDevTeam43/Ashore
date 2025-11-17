@@ -115,6 +115,7 @@ public class Player_Health : MonoBehaviour
         if (currentHealth <= 0)
         {
             IsAlive = false;
+            PlayerPersistence.DestroyPersistentPlayer();
             SceneManager.LoadScene("MainMenu");
         }
 

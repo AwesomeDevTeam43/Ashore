@@ -51,6 +51,8 @@ public class MenuController : MonoBehaviour
     private InputAction cachedUILeftTab;
     private InputAction cachedUIRightTab;
 
+    public bool IsMenuOpen => menuRoot != null && menuRoot.activeSelf;
+
     private void Awake()
     {
         es = EventSystem.current;
