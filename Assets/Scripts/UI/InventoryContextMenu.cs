@@ -333,7 +333,16 @@ public class InventoryContextMenu : MonoBehaviour
             {
                 Hide();
             }
-            // We intentionally do NOT auto close on outside clicks to enforce focus trap.
+            var mouse = UnityEngine.InputSystem.Mouse.current;
+            if (mouse != null && mouse.leftButton.wasPressedThisFrame)
+            {
+                Vector2 screenPos = mouse.position.ReadValue();
+                if (!PointerHitsItemOrMenu(screenPos))
+                {
+                    Hide();
+                    return;
+                }
+            }
 
             // Manual directional nav fallback to guarantee Up/Down between menu buttons
             HandleManualDirectionalNav();
