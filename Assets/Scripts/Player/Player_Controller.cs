@@ -89,6 +89,34 @@ public class Player_Controller : MonoBehaviour
     }
   }
 
+  public void ResetProgressToFreshStart()
+  {
+    // Clear any equipped objects so the new run starts unequipped
+    if (currentEquipment != null)
+    {
+      Destroy(currentEquipment.gameObject);
+      currentEquipment = null;
+    }
+    lastEquippedData = null;
+    rangeUseHoldConsumed = false;
+
+    if (xP_System != null)
+    {
+      xP_System.Initialize(LVL1XpAmount, LvlGap);
+    }
+
+    UpdateStats(1);
+
+    if (playerHealth != null)
+    {
+      playerHealth.UpdateHealthStat(1);
+      if (playerStats != null)
+      {
+        playerHealth.SetHealth(playerStats.GetHealth(1));
+      }
+    }
+  }
+
   private void OnEnable()
   {
     if (playerStats != null)

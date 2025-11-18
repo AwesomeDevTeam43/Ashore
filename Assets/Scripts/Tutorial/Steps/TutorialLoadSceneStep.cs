@@ -58,6 +58,7 @@ public class TutorialLoadSceneStep : TutorialStep
             yield return new WaitForSecondsRealtime(delayBeforeLoad);
         }
 
+        ResetPlayerStateForMainGame();
         GameState.Instance?.ClearAll();
         var overlay = GlobalLoadingOverlay.Instance;
         if (overlay == null)
@@ -67,6 +68,19 @@ public class TutorialLoadSceneStep : TutorialStep
         }
         overlay.LoadSceneAsync(overlay, sceneName, Mathf.Max(0f, minShowSeconds), loadingText);
         _complete = true;
+    }
+
+    private void ResetPlayerStateForMainGame()
+    {
+        Inventory.instance?.Clear();
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null) return;
+
+        var controller = player.GetComponent<Player_Controller>();
+        if (controller != null)
+        {
+            controller.ResetProgressToFreshStart();
+        }
     }
 
     private void OnDisable()
