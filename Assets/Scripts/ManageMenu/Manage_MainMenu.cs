@@ -73,15 +73,20 @@ public class Manage_MainMenu : MonoBehaviour
 
     private void EnsureMenuCamera()
     {
-        var cam = Camera.main;
-        if (cam == null)
+        var existingCameras = FindObjectsByType<Camera>(FindObjectsSortMode.None);
+        foreach (var existing in existingCameras)
         {
-            var camGO = new GameObject("MainMenuCamera", typeof(Camera), typeof(AudioListener));
-            cam = camGO.GetComponent<Camera>();
-            cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = Color.black;
-            camGO.tag = "MainCamera";
+            if (existing != null)
+            {
+                Destroy(existing.gameObject);
+            }
         }
+
+        var camGO = new GameObject("MainMenuCamera", typeof(Camera), typeof(AudioListener));
+        var cam = camGO.GetComponent<Camera>();
+        cam.clearFlags = CameraClearFlags.SolidColor;
+        cam.backgroundColor = Color.black;
+        camGO.tag = "MainCamera";
         cam.enabled = true;
 
         var canvases = GetComponentsInChildren<Canvas>(true);
