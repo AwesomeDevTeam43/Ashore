@@ -36,17 +36,16 @@ public class OldFriend_Boss : EnemyBase
     [SerializeField] private float stage4CooldownMultiplier = 0.7f;
 
     [Header("Movement")]
-    [Tooltip("Horizontal follow responsiveness (larger = snappier follow on X axis)")]
     [SerializeField] private float followSpeed = 3f;
-    [Tooltip("Position smoothing when applying target X/Y (larger = faster interpolation)")]
     [SerializeField] private float followLerpSpeed = 5f;
+
+    [Header("Activation")]
+    [SerializeField] private bool bossActive = false;
+
     [Header("Contact")]
-    [Tooltip("Damage dealt to the player when they collide with the boss body (collision or non-activation trigger)")]
     [SerializeField] private int contactDamage = 1;
     [Header("Animation")]
-    [Tooltip("Name of the Animator bool parameter that represents Idle state")]
     [SerializeField] private string animIdleParam = "Idle";
-    [Tooltip("Name of the Animator bool parameter that represents Injured state")]
     [SerializeField] private string animInjuredParam = "Injured";
 
     // cached animator hashes
@@ -64,6 +63,12 @@ public class OldFriend_Boss : EnemyBase
 
     private readonly float[] thresholds = new float[] { 0.75f, 0.5f, 0.25f };
     private bool[] thresholdTriggered;
+
+    public bool BossActive
+    {
+        get => bossActive;
+        set => SetBossActive(value);
+    }
 
     // Returns a minimum allowed health (clamp) for incoming damage so that damage
     // doesn't reduce health below the next configured threshold. Returns null if
@@ -156,6 +161,8 @@ public class OldFriend_Boss : EnemyBase
                     originalColors[i] = spriteRenderers[i].color;
             }
         }
+
+        ApplyBossActivationState();
     }
 
     private void FixedUpdate()
@@ -247,6 +254,12 @@ public class OldFriend_Boss : EnemyBase
 
     private void Update()
     {
+        if (!bossActive)
+        {
+            ApplyBossActivationState();
+            return;
+        }
+
         if (player == null) return;
 
         // Keep animator in sync: Idle when not injured; Injured when stopped
@@ -280,6 +293,7 @@ public class OldFriend_Boss : EnemyBase
 
     private void ShootAtPlayer()
     {
+        if (!bossActive) return;
         if (projectilePrefab == null || player == null) return;
 
         // Choose spawn behavior based on current stage
@@ -310,6 +324,7 @@ public class OldFriend_Boss : EnemyBase
 
 	private void SpawnProjectileAt(Transform spawn)
 	{
+        if (!bossActive) return;
 		GameObject go = Instantiate(projectilePrefab, spawn.position, Quaternion.identity);
 		var proj = go.GetComponent<BossProjectile>();
 		if (proj != null)
@@ -323,6 +338,7 @@ public class OldFriend_Boss : EnemyBase
 
     private void OnHealthChanged(int currentHealth, int maxHealth)
     {
+        if (!bossActive) return;
         float pct = (float)currentHealth / maxHealth;
 
         for (int i = 0; i < thresholds.Length; i++)
@@ -451,6 +467,7 @@ public class OldFriend_Boss : EnemyBase
 
     private void HandleCoreDestroyed(ShieldedCore core)
     {
+        if (!bossActive) return;
         // signal the injured phase that a core was destroyed
         coreDestroyedDuringPhase = true;
         Debug.Log($"{name}: Core destroyed -> {core.name}. Ending injured phase now.");
@@ -512,6 +529,7 @@ public class OldFriend_Boss : EnemyBase
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        if (!bossActive) return;
         if (collision == null || collision.collider == null) return;
         var other = collision.collider;
         if (!other.CompareTag("Player")) return;
@@ -526,6 +544,7 @@ public class OldFriend_Boss : EnemyBase
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        if (!bossActive) return;
         if (other == null) return;
         if (!other.CompareTag("Player")) return;
 
@@ -536,6 +555,34 @@ public class OldFriend_Boss : EnemyBase
         {
             Debug.Log($"{name}: Player touched boss trigger — applying {contactDamage} damage.");
             hsTrig.TakeDamage(contactDamage, gameObject);
+        }
+    }
+
+    public void SetBossActive(bool active)
+    {
+        if (bossActive == active) return;
+        bossActive = active;
+        ApplyBossActivationState();
+    }
+
+    private void ApplyBossActivationState()
+    {
+        if (!bossActive)
+        {
+            shootTimer = 0f;
+        }
+
+        if (animator != null)
+        {
+            bool showInjured = bossActive && isStopped;
+            animator.SetBool(animInjuredHash, showInjured);
+            animator.SetBool(animIdleHash, !showInjured);
+
+            if (!bossActive)
+            {
+                animator.SetBool(animIdleHash, true);
+                animator.SetBool(animInjuredHash, false);
+            }
         }
     }
 }
