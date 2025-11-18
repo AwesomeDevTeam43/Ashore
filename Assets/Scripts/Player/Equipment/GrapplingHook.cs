@@ -6,6 +6,8 @@ public class GrapplingHook : Equipment
     [SerializeField] private GameObject grappleProjectilePrefab;
     [SerializeField] private float throwForce = 12f;
     [SerializeField] private float pickupDelay = 0.5f;
+    [SerializeField, Tooltip("Maximum number of grappling hook projectiles/anchors allowed at once.")]
+    private int maxSimultaneousHooks = 3;
     private Collider2D physicsCollider;
     private Collider2D triggerCollider;
     private bool canBePickedUp = false;
@@ -36,6 +38,13 @@ public class GrapplingHook : Equipment
         if (throwpoint == null || player == null || grappleProjectilePrefab == null)
         {
             Debug.LogWarning("GrapplingHook: missing throwpoint/player/prefab");
+            return;
+        }
+
+        int limit = Mathf.Max(1, maxSimultaneousHooks);
+        if (GrappleInstanceRegistry.ActiveTotal >= limit)
+        {
+            Debug.Log("GrapplingHook: active hook limit reached.");
             return;
         }
 

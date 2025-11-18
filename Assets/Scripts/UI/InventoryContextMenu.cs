@@ -288,8 +288,11 @@ public class InventoryContextMenu : MonoBehaviour
             if (ing == null || ing.material == null) continue;
             inv.Remove(ing.material, Mathf.Max(1, ing.amount));
         }
-        // Consume the selected item itself (acts like a blueprint/placeholder)
-        inv.Remove(currentItem, 1);
+        // Optionally consume the selected item itself (acts like a blueprint/placeholder)
+        if (currentItem.consumeOnCraft)
+        {
+            inv.Remove(currentItem, 1);
+        }
         // Add result
         ItemData result = currentItem.craftResult != null ? currentItem.craftResult : currentItem;
         inv.Add(result, 1);
@@ -330,7 +333,16 @@ public class InventoryContextMenu : MonoBehaviour
             {
                 Hide();
             }
-            // We intentionally do NOT auto close on outside clicks to enforce focus trap.
+            var mouse = UnityEngine.InputSystem.Mouse.current;
+            if (mouse != null && mouse.leftButton.wasPressedThisFrame)
+            {
+                Vector2 screenPos = mouse.position.ReadValue();
+                if (!PointerHitsItemOrMenu(screenPos))
+                {
+                    Hide();
+                    return;
+                }
+            }
 
             // Manual directional nav fallback to guarantee Up/Down between menu buttons
             HandleManualDirectionalNav();
@@ -365,13 +377,31 @@ public class InventoryContextMenu : MonoBehaviour
         if (!up && !down) return;
 
         var cur = es.currentSelectedGameObject;
-        var curBtn = cur != null ? cur.GetComponent<Button>() : null;
+        Button curBtn = null;
+        if (cur != null)
+        {
+            curBtn = cur.GetComponent<Button>();
+            if (curBtn == null)
+            {
+                curBtn = cur.GetComponentInParent<Button>();
+            }
+        }
+
         if (curBtn == null)
         {
-            // If selection is not on a button, force it to primary
-            if (primaryBtn != null) { es.SetSelectedGameObject(primaryBtn.gameObject); }
-            return;
+            if (primaryBtn != null)
+            {
+                es.SetSelectedGameObject(primaryBtn.gameObject);
+                curBtn = primaryBtn;
+            }
+            else if (dropBtn != null)
+            {
+                es.SetSelectedGameObject(dropBtn.gameObject);
+                curBtn = dropBtn;
+            }
         }
+
+        if (curBtn == null) return;
 
         if (down)
         {

@@ -219,6 +219,7 @@ public class InventoryPage : MonoBehaviour
         {
             var slot = slots[i];
             if (slot == null) continue;
+            var capturedSlot = slot;
 
             // Ensure the slot root has an Image to act as a targetGraphic/background
             Image rootImg = slot.GetComponent<Image>();
@@ -263,7 +264,7 @@ public class InventoryPage : MonoBehaviour
             {
                 var esys = EventSystem.current;
                 // Always treat as selection on left-click
-                slot.Select();
+                capturedSlot.Select();
             });
 
             // Wire right-click to open context menu
@@ -278,10 +279,10 @@ public class InventoryPage : MonoBehaviour
                 var ped = data as UnityEngine.EventSystems.PointerEventData;
                 if (ped != null && ped.button == UnityEngine.EventSystems.PointerEventData.InputButton.Right)
                 {
-                    var item = slot.GetItem();
+                    var item = capturedSlot.GetItem();
                     if (item == null) return;
                     Vector2 screenPos = ped.position;
-                    OpenContextMenu(slot, item, screenPos);
+                    OpenContextMenu(capturedSlot, item, screenPos);
                 }
             });
             et.triggers.Add(entry);

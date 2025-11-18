@@ -6,6 +6,7 @@ public class GrappleProjectile : MonoBehaviour
     [SerializeField] private LayerMask attachableLayers;
     [SerializeField] private float lifeTime = 6f;
     [SerializeField] private float anchorSpawnOffset = 0.06f; // push anchor slightly away from surface to avoid being inside geometry
+    private bool registeredWithTracker = false;
 
     private void Start()
     {
@@ -17,6 +18,21 @@ public class GrappleProjectile : MonoBehaviour
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
         Debug.LogFormat("GrappleProjectile.Start: layer={0}, attachableLayers={1}, hasCollider={2}, colliderIsTrigger={3}, hasRigidbody={4}",
             LayerMask.LayerToName(gameObject.layer), attachableLayers.value, col != null, col != null ? col.isTrigger.ToString() : "n/a", rb != null);
+    }
+
+    private void OnEnable()
+    {
+        GrappleInstanceRegistry.RegisterProjectile();
+        registeredWithTracker = true;
+    }
+
+    private void OnDestroy()
+    {
+        if (registeredWithTracker)
+        {
+            GrappleInstanceRegistry.UnregisterProjectile();
+            registeredWithTracker = false;
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

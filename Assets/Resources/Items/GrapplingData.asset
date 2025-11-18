@@ -19,6 +19,7 @@ MonoBehaviour:
   isCraftable: 0
   craftIngredients: []
   craftResult: {fileID: 0}
-  maxStackSize: 1
-  isStackable: 0
+  consumeOnCraft: 1
+  maxStackSize: 15
+  isStackable: 1
   equipmentPrefab: {fileID: 2511649203567988147, guid: 6ff72a742784f9945a3ac9be03f96fb6, type: 3}
