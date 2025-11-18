@@ -61,6 +61,16 @@ public class InventoryContextMenu : MonoBehaviour
         Hide();
     }
 
+    private void OnDisable()
+    {
+        ForceRestoreState();
+    }
+
+    private void OnDestroy()
+    {
+        ForceRestoreState();
+    }
+
     private void EnsureMenuBuilt()
     {
         if (menuRoot != null)
@@ -551,5 +561,17 @@ public class InventoryContextMenu : MonoBehaviour
             if (n != null) n.enabled = true;
         }
         _disabledNavigators.Clear();
+    }
+
+    private void ForceRestoreState()
+    {
+        // When the menu root is disabled/destroyed (e.g., scene transition), ensure we undo any focus/nav overrides
+        RestoreFocus();
+        RestoreNavScopes();
+        RestoreMenuNavigators();
+        currentSlot = null;
+        currentItem = null;
+        if (s_LastShown == this) s_LastShown = null;
+        if (menuRoot != null) menuRoot.gameObject.SetActive(false);
     }
 }

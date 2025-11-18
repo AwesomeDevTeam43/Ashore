@@ -7,7 +7,7 @@ public class MeleeWeapon : MonoBehaviour
     // Diagonals collapse to whichever axis has larger magnitude (tie -> vertical).
 
     [Header("Damage & Range")]
-    [SerializeField] private int damage = 20;
+    [SerializeField] private int defaultDamage = 20;
     [SerializeField] private float attackRadius = 1f;
     [SerializeField] private LayerMask enemyLayer;
 
@@ -34,6 +34,7 @@ public class MeleeWeapon : MonoBehaviour
     private Player_Camera playerCamera;
     private Player_InputHandler inputHandler;
     private Animator animator;
+    private Player_Controller playerController;
 
     public enum MeleeDir { Right, Left, Up, Down }
     [Header("Current Cardinal (debug)")] [SerializeField]
@@ -45,6 +46,7 @@ public class MeleeWeapon : MonoBehaviour
         playerCamera = GetComponentInParent<Player_Camera>();
         inputHandler = GetComponentInParent<Player_InputHandler>();
         animator = GetComponentInParent<Animator>();
+        playerController = GetComponentInParent<Player_Controller>();
     }
 
     public void PerformAttack()
@@ -124,7 +126,10 @@ public class MeleeWeapon : MonoBehaviour
         foreach (var c in hits)
         {
             var hp = c.GetComponent<Enemy_Health>();
-            if (hp != null) hp.TakeDamage(damage);
+            if (hp != null)
+            {
+                hp.TakeDamage(GetCurrentDamage());
+            }
             var rb = c.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
@@ -152,6 +157,11 @@ public class MeleeWeapon : MonoBehaviour
     private void Attack_Animation()
     {
         if (animator != null) animator.SetTrigger("Meele Attack");
+    }
+
+    private int GetCurrentDamage()
+    {
+        return playerController != null ? playerController.AttackPower : defaultDamage;
     }
 
     private void OnDrawGizmos()
