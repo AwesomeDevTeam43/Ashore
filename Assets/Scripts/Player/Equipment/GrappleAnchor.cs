@@ -28,6 +28,13 @@ public class GrappleAnchor : MonoBehaviour
     // gravity handling while attached
     private float originalPlayerGravity = 1f;
     private bool gravityModified = false;
+    private bool registeredWithTracker = false;
+
+    private void OnEnable()
+    {
+        GrappleInstanceRegistry.RegisterAnchor();
+        registeredWithTracker = true;
+    }
 
     private void Start()
     {
@@ -192,6 +199,11 @@ public class GrappleAnchor : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (registeredWithTracker)
+        {
+            GrappleInstanceRegistry.UnregisterAnchor();
+            registeredWithTracker = false;
+        }
         // Restore player gravity if we modified it so the player doesn't remain flying
         if (gravityModified && playerRb != null)
         {
