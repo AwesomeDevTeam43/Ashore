@@ -10,8 +10,6 @@ public class LevelTransitionManager : MonoBehaviour
   public static LevelTransitionManager Instance { get; private set; }
   public static float LastTeleportTime { get; private set; }
 
-  private readonly Dictionary<string, GameState.PersistedEntry> capturedState = new();
-
   [Header("Visuals")]
   [SerializeField] private bool useFade = true;
   [SerializeField] private float fadeOutDuration = 0.2f;
@@ -125,7 +123,6 @@ public class LevelTransitionManager : MonoBehaviour
     _isTransitioning = true;
 
     GameState.Instance?.CaptureAll();
-    capturedState = GameState.Instance?.ClonePersistedState();
 
     var targetScene = string.IsNullOrEmpty(from.targetScene) ? SceneManager.GetActiveScene().name : from.targetScene;
     var targetPortalId = string.IsNullOrEmpty(from.targetPortalId) ? from.portalId : from.targetPortalId;
@@ -179,7 +176,7 @@ public class LevelTransitionManager : MonoBehaviour
     }
 
     // Restore states now that scene objects exist
-    GameState.Instance?.RestoreFrom(capturedState);
+    GameState.Instance?.RestoreAll();
 
     // Place player (use destination portal's own spawnOffset)
     TeleportInScene(_pendingTargetScene, _pendingTargetPortalId);
