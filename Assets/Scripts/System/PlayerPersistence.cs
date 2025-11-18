@@ -61,7 +61,6 @@ public class PlayerPersistence : MonoBehaviour
         var players = GameObject.FindGameObjectsWithTag("Player");
         Vector3? replacementPosition = null;
         Quaternion replacementRotation = Quaternion.identity;
-        Vector3 replacementScale = Vector3.one;
         foreach (var p in players)
         {
             if (p == null) continue;
@@ -70,7 +69,6 @@ public class PlayerPersistence : MonoBehaviour
             {
                 replacementPosition = p.transform.position;
                 replacementRotation = p.transform.rotation;
-                replacementScale = p.transform.localScale;
             }
             Destroy(p);
         }
@@ -90,7 +88,6 @@ public class PlayerPersistence : MonoBehaviour
         {
             WarpTo(replacementPosition.Value);
             transform.rotation = replacementRotation;
-            transform.localScale = replacementScale;
         }
     }
 

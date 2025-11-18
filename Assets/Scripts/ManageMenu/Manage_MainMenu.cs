@@ -4,20 +4,27 @@ using UnityEngine.SceneManagement;
 
 public class Manage_MainMenu : MonoBehaviour
 {
-    [SerializeField] private Button startButton;
+    [SerializeField] private Button loadGameButton;
+    [SerializeField] private Button newGameButton;
     [SerializeField] private Button quitButton;
     [SerializeField] private string gameSceneName = "GameScene";
     [SerializeField] private string mainMenuScene = "MainMenu";
+    [SerializeField] private string tutorialSceneName = "TutorialScene";
+    [SerializeField] private Vector3 tutorialSpawnPosition = Vector3.zero;
+    [SerializeField] private Transform tutorialSpawnOverride;
+    [SerializeField] private PlayerStats defaultPlayerStats;
 
     void Start()
     {
-        if (startButton != null)
-            startButton.onClick.AddListener(OnStartClicked);
+        if (loadGameButton != null)
+            loadGameButton.onClick.AddListener(OnLoadClicked);
+        if (newGameButton != null)
+            newGameButton.onClick.AddListener(OnNewGameClicked);
         if (quitButton != null)
             quitButton.onClick.AddListener(OnQuitClicked);
     }
 
-    private void OnStartClicked()
+    private void OnLoadClicked()
     {
         string savedScene = SaveSystem.GetSavedSceneName();
         if (!string.IsNullOrEmpty(savedScene))
@@ -31,6 +38,18 @@ public class Manage_MainMenu : MonoBehaviour
             GameFlowState.LoadGameOnStart = false;
             SceneManager.LoadScene(gameSceneName);
         }
+    }
+
+    private void OnNewGameClicked()
+    {
+        Vector3 spawnPos = tutorialSpawnPosition;
+        if (tutorialSpawnOverride != null)
+        {
+            spawnPos = tutorialSpawnOverride.position;
+        }
+        SaveSystem.CreateNewGameSave(defaultPlayerStats, tutorialSceneName, spawnPos);
+        GameFlowState.LoadGameOnStart = true;
+        SceneManager.LoadScene(string.IsNullOrEmpty(tutorialSceneName) ? gameSceneName : tutorialSceneName);
     }
 
     public void GoBackToMenu()

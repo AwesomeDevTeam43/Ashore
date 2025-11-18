@@ -12,7 +12,7 @@ public class OldFriend_Boss : EnemyBase
     [Header("References")]
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private Transform projectileSpawn;
-    [SerializeField] private Transform projectileSpawnSecondary; // second firing point
+    [SerializeField] private Transform projectileSpawnSecondary;
 
     [Header("Timing")]
     [SerializeField] private float injuredStopDuration = 10f;
@@ -48,7 +48,6 @@ public class OldFriend_Boss : EnemyBase
     [SerializeField] private string animIdleParam = "Idle";
     [SerializeField] private string animInjuredParam = "Injured";
 
-    // cached animator hashes
     private int animIdleHash;
     private int animInjuredHash;
 
@@ -70,9 +69,6 @@ public class OldFriend_Boss : EnemyBase
         set => SetBossActive(value);
     }
 
-    // Returns a minimum allowed health (clamp) for incoming damage so that damage
-    // doesn't reduce health below the next configured threshold. Returns null if
-    // no clamping should be applied.
     public int? GetHealthClampForIncomingDamage(int incomingDamage)
     {
         if (healthSystem == null) return null;
@@ -85,7 +81,6 @@ public class OldFriend_Boss : EnemyBase
             int thresholdHp = Mathf.RoundToInt(max * thresholds[i]);
             if (current > thresholdHp && candidate < thresholdHp)
             {
-                // Clamp to this threshold so the hit cannot skip below it.
                 return thresholdHp;
             }
         }
@@ -99,7 +94,6 @@ public class OldFriend_Boss : EnemyBase
         healthSystem = GetComponent<HealthSystem>();
         animator = GetComponentInChildren<Animator>();
 
-        // cache animator parameter hashes
         if (animator != null)
         {
             animIdleHash = Animator.StringToHash(animIdleParam);
@@ -108,14 +102,12 @@ public class OldFriend_Boss : EnemyBase
             animator.SetBool(animInjuredHash, false);
         }
 
-        // Immediately unparent to avoid inheriting any parent's physics motion
         if (transform.parent != null)
         {
             var parentRb = transform.parent.GetComponent<Rigidbody2D>();
             transform.SetParent(null);
         }
 
-        // configure all Rigidbody2D on this object and children to avoid falling due to gravity
         var rbs = GetComponentsInChildren<Rigidbody2D>(true);
         int fixedCount = 0;
         foreach (var r in rbs)
@@ -130,7 +122,6 @@ public class OldFriend_Boss : EnemyBase
 
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
 
-        // initialize health via existing Enemy_Health as before
         if (enemyHealth != null && TypedStats != null)
         {
             enemyHealth.Initialize(TypedStats.maxHealth, TypedStats.xpOnDeath, TypedStats.dropA, TypedStats.dropB, TypedStats.dropC);
@@ -139,18 +130,15 @@ public class OldFriend_Boss : EnemyBase
         if (healthSystem != null)
             healthSystem.OnHealthChanged += OnHealthChanged;
 
-        // populate cores (children first, then optional scene fallback)
         RefreshCores(true);
 
         thresholdTriggered = new bool[thresholds.Length];
 
         currentShootInterval = TypedStats != null ? TypedStats.baseFireInterval : 2f;
-        // ensure stage defaults
         currentStage = 1;
         spawnToggle = false;
         shootDouble = false;
 
-        // cache sprite renderers and their original colors
         spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);
         if (spriteRenderers != null && spriteRenderers.Length > 0)
         {
@@ -180,7 +168,6 @@ public class OldFriend_Boss : EnemyBase
 
     private void RefreshCores(bool allowSceneFallback)
     {
-        // unsubscribe previous handlers
         if (cores != null)
         {
             for (int i = 0; i < cores.Length; i++)
@@ -191,7 +178,6 @@ public class OldFriend_Boss : EnemyBase
             }
         }
 
-        // try children first
         var found = GetComponentsInChildren<ShieldedCore>(true);
         if (found != null && found.Length > 0)
         {
@@ -212,18 +198,15 @@ public class OldFriend_Boss : EnemyBase
             return;
         }
 
-        // Scene fallback: search all ShieldedCore instances (including inactive)
         var all = UnityEngine.Resources.FindObjectsOfTypeAll<ShieldedCore>();
         var picked = new System.Collections.Generic.List<ShieldedCore>();
 
-        // Prefer cores that are parented under this boss
         foreach (var s in all)
         {
             if (s == null) continue;
             if (s.transform.IsChildOf(transform)) picked.Add(s);
         }
 
-        // If none are children, fall back to nearest cores by distance (within 20 units)
         if (picked.Count == 0)
         {
             float maxDist = 20f;
@@ -262,7 +245,6 @@ public class OldFriend_Boss : EnemyBase
 
         if (player == null) return;
 
-        // Keep animator in sync: Idle when not injured; Injured when stopped
         if (animator != null)
         {
             animator.SetBool(animIdleHash, !isStopped);
@@ -270,11 +252,9 @@ public class OldFriend_Boss : EnemyBase
         }
         if (!isStopped)
         {
-            // Vertical floating
             float y = Mathf.Sin(Time.time * (TypedStats != null ? TypedStats.floatSpeed : 1f)) * (TypedStats != null ? TypedStats.floatAmplitude : 0.5f);
             float baseY = (transform.parent != null ? transform.parent.position.y : transform.position.y) + y;
 
-            // Follow player only on X axis (smooth)
             float desiredX = Mathf.Lerp(transform.position.x, player.position.x, followSpeed * Time.deltaTime);
 
             Vector3 targetPos = new Vector3(desiredX, baseY, transform.position.z);
@@ -296,13 +276,11 @@ public class OldFriend_Boss : EnemyBase
         if (!bossActive) return;
         if (projectilePrefab == null || player == null) return;
 
-        // Choose spawn behavior based on current stage
         Transform spawnA = projectileSpawn != null ? projectileSpawn : transform;
         Transform spawnB = projectileSpawnSecondary != null ? projectileSpawnSecondary : projectileSpawn;
 
         if (currentStage == 3 && shootDouble)
         {
-            // spawn two projectiles at once (from both points)
             Debug.Log($"{name}: Stage 3 double-shot from {spawnA.position} and {spawnB.position} towards player at {player.position}");
             SpawnProjectileAt(spawnA);
             if (spawnB != null && spawnB != spawnA)
@@ -310,7 +288,6 @@ public class OldFriend_Boss : EnemyBase
             return;
         }
 
-        // stage 1 (and others unless double) alternate between spawn points
         Transform chosen = spawnA;
         if (spawnB != null && spawnB != spawnA)
         {
@@ -355,7 +332,6 @@ public class OldFriend_Boss : EnemyBase
     private IEnumerator InjuredPhase(int stageIndex)
     {
         isStopped = true;
-        // reset shoot timer so the boss doesn't immediately fire when recovering
         shootTimer = 0f;
         coreDestroyedDuringPhase = false;
         injuredPhaseEnded = false;
@@ -363,19 +339,15 @@ public class OldFriend_Boss : EnemyBase
 
         try
         {
-            // make boss temporarily invulnerable
             if (enemyHealth != null)
                 enemyHealth.SetDamageable(false);
 
-            // update animator: set Injured true
             if (animator != null)
             {
                 animator.SetBool(animInjuredHash, true);
                 animator.SetBool(animIdleHash, false);
             }
 
-            // unprotect all cores so player can damage them
-            // refresh cores at injured phase in case they were created or parented after Start
             RefreshCores(true);
             Debug.Log($"{name}: InjuredPhase - cores count={(cores!=null?cores.Length:0)}");
             if (cores != null)
@@ -402,7 +374,6 @@ public class OldFriend_Boss : EnemyBase
 
             if (!coreDestroyedDuringPhase)
             {
-                // player failed to destroy a core: heal by one stage (25% of max)
                 if (healthSystem != null)
                 {
                     int healAmount = Mathf.RoundToInt(healthSystem.MaxHealth * 0.25f);
@@ -411,25 +382,21 @@ public class OldFriend_Boss : EnemyBase
                 }
             }
 
-            // protect remaining cores again
             foreach (var c in cores)
             {
                 if (c != null)
                     c.SetProtected(true);
             }
 
-            // boss becomes damageable again and resumes
             if (enemyHealth != null)
                 enemyHealth.SetDamageable(true);
         }
         finally
         {
-            // central cleanup (idempotent)
             Debug.Log($"{name}: InjuredPhase finishing; running cleanup.");
             ExitInjuredPhaseCleanup();
             injuredCoroutine = null;
 
-            // advance stage after injured phase finishes
             int newStage = Mathf.Clamp(stageIndex + 2, 1, 4);
             ApplyStageSettings(newStage);
         }
@@ -443,17 +410,14 @@ public class OldFriend_Boss : EnemyBase
         switch (stage)
         {
             case 1:
-                // default: alternate between spawn points
                 spawnToggle = false;
                 shootDouble = false;
                 break;
             case 2:
-                // reduce cooldown moderately
                 currentShootInterval *= stage2CooldownMultiplier;
                 shootDouble = false;
                 break;
             case 3:
-                // shoot two projectiles at once
                 shootDouble = true;
                 break;
             case 4:
@@ -468,33 +432,27 @@ public class OldFriend_Boss : EnemyBase
     private void HandleCoreDestroyed(ShieldedCore core)
     {
         if (!bossActive) return;
-        // signal the injured phase that a core was destroyed
         coreDestroyedDuringPhase = true;
         Debug.Log($"{name}: Core destroyed -> {core.name}. Ending injured phase now.");
-        // perform immediate, idempotent cleanup so boss returns to normal now
         ExitInjuredPhaseCleanup();
 
-        // increase fire rate (shoot faster) when a core is destroyed
         currentShootInterval *= 0.85f;
     }
 
 	private void ExitInjuredPhaseCleanup()
 	{
-		if (injuredPhaseEnded) return; // already cleaned up
+		if (injuredPhaseEnded) return;
 		injuredPhaseEnded = true;
 
-		// protect other remaining cores again
 		foreach (var c in cores)
 		{
 			if (c != null)
 				c.SetProtected(true);
 		}
 
-		// boss becomes damageable again so player can damage boss
 		if (enemyHealth != null)
 			enemyHealth.SetDamageable(true);
 
-		// restore sprite colors immediately
 		if (spriteRenderers != null && originalColors != null)
 		{
 			for (int i = 0; i < spriteRenderers.Length && i < originalColors.Length; i++)
@@ -504,10 +462,8 @@ public class OldFriend_Boss : EnemyBase
 			}
 		}
 
-		// ensure boss resumes
 		isStopped = false;
 
-        // update animator: no longer injured
         if (animator != null)
         {
             animator.SetBool(animInjuredHash, false);
@@ -547,8 +503,6 @@ public class OldFriend_Boss : EnemyBase
         if (!bossActive) return;
         if (other == null) return;
         if (!other.CompareTag("Player")) return;
-
-        // Apply contact damage for boss triggers (there is no activationArea configured in this build)
 
         var hsTrig = other.GetComponentInParent<HealthSystem>();
         if (hsTrig != null)
