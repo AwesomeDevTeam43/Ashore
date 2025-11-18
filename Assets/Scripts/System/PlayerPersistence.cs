@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.Cinemachine;
+using UnityEngine.InputSystem;
 
 // Attach this to the Player root object to persist it across scenes
 // and spawn it at a named SceneSpawnPoint when loading a new scene.
@@ -89,6 +90,8 @@ public class PlayerPersistence : MonoBehaviour
             WarpTo(replacementPosition.Value);
             transform.rotation = replacementRotation;
         }
+
+        EnsureInputActive();
     }
 
     private bool TryWarpToPortalAnchor(string spawnId)
@@ -142,5 +145,47 @@ public class PlayerPersistence : MonoBehaviour
             }
         }
         if (brain != null) brain.enabled = true;
+    }
+
+    private void EnsureInputActive()
+    {
+        var handler = GetComponent<Player_InputHandler>();
+        if (handler != null)
+        {
+            handler.EnablePlayerActions();
+        }
+
+        var playerInput = GetComponent<PlayerInput>();
+        if (playerInput == null) return;
+
+        try
+        {
+            if (!playerInput.enabled)
+            {
+                playerInput.enabled = true;
+            }
+
+            if (playerInput.actions != null && !playerInput.actions.enabled)
+            {
+                playerInput.actions.Enable();
+            }
+
+            string defaultMap = playerInput.defaultActionMap;
+            if (string.IsNullOrEmpty(defaultMap))
+            {
+                defaultMap = "Player";
+            }
+
+            if (!string.IsNullOrEmpty(defaultMap))
+            {
+                playerInput.SwitchCurrentActionMap(defaultMap);
+            }
+
+            playerInput.ActivateInput();
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"PlayerPersistence: Failed to reactivate PlayerInput after scene load: {ex.Message}");
+        }
     }
 }
