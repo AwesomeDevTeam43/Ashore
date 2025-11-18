@@ -14,6 +14,11 @@ public class Manage_MainMenu : MonoBehaviour
     [SerializeField] private Transform tutorialSpawnOverride;
     [SerializeField] private PlayerStats defaultPlayerStats;
 
+    private void Awake()
+    {
+        EnsureMenuCamera();
+    }
+
     void Start()
     {
         if (loadGameButton != null)
@@ -64,5 +69,28 @@ public class Manage_MainMenu : MonoBehaviour
         #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
         #endif
+    }
+
+    private void EnsureMenuCamera()
+    {
+        var cam = Camera.main;
+        if (cam == null)
+        {
+            var camGO = new GameObject("MainMenuCamera", typeof(Camera), typeof(AudioListener));
+            cam = camGO.GetComponent<Camera>();
+            cam.clearFlags = CameraClearFlags.SolidColor;
+            cam.backgroundColor = Color.black;
+            camGO.tag = "MainCamera";
+        }
+        cam.enabled = true;
+
+        var canvases = GetComponentsInChildren<Canvas>(true);
+        foreach (var c in canvases)
+        {
+            if (c.renderMode == RenderMode.ScreenSpaceCamera && c.worldCamera == null)
+            {
+                c.worldCamera = cam;
+            }
+        }
     }
 }

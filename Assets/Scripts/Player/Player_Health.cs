@@ -118,7 +118,14 @@ public class Player_Health : MonoBehaviour
             if (processingDeath) return;
             processingDeath = true;
             IsAlive = false;
-            StartCoroutine(LoadMainMenuAfterDeath());
+            // Drop any carried items/state immediately
+            if (Inventory.instance != null)
+            {
+                Inventory.instance.Clear();
+            }
+            // Destroy the persistent player so the menu/new game spawns a fresh one
+            PlayerPersistence.DestroyPersistentPlayer();
+            SceneManager.LoadScene("MainMenu");
             return;
         }
 
@@ -126,14 +133,6 @@ public class Player_Health : MonoBehaviour
         {
             healthSystem.SetHealth(maxHealth);
         }
-    }
-
-    private IEnumerator LoadMainMenuAfterDeath()
-    {
-        // Small delay lets death VFX/animation finish before the scene swap.
-        yield return null;
-        PlayerPersistence.ScheduleDestroyOnNextSceneLoad();
-        SceneManager.LoadScene("MainMenu");
     }
 
     private IEnumerator DamageEffect()

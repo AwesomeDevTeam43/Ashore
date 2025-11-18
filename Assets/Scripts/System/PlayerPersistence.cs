@@ -8,7 +8,6 @@ public class PlayerPersistence : MonoBehaviour
 {
     private static PlayerPersistence instance;
     public static string nextSpawnId;
-    private static bool destroyOnNextSceneLoad;
 
     private void Awake()
     {
@@ -56,19 +55,8 @@ public class PlayerPersistence : MonoBehaviour
         }
     }
 
-    public static void ScheduleDestroyOnNextSceneLoad()
-    {
-        destroyOnNextSceneLoad = true;
-    }
-
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (destroyOnNextSceneLoad)
-        {
-            destroyOnNextSceneLoad = false;
-            DestroyPersistentPlayer();
-            return;
-        }
         // Remove duplicates spawned by the new scene (keep this instance)
         var players = GameObject.FindGameObjectsWithTag("Player");
         Vector3? replacementPosition = null;
