@@ -17,8 +17,13 @@ MonoBehaviour:
   description: It's a hook that grapples
   isUsable: 0
   isCraftable: 0
-  craftIngredients: []
-  craftResult: {fileID: 0}
-  maxStackSize: 1
-  isStackable: 0
+  craftIngredients:
+  - material: {fileID: 11400000, guid: 32410df1c793ac94eaf344c30dad367a, type: 2}
+    amount: 5
+  - material: {fileID: 11400000, guid: c794599bb4cdcca4a8001e4ff1cba7fb, type: 2}
+    amount: 5
+  craftResult: {fileID: 11400000, guid: 81724805f06471741b21a84d8aface06, type: 2}
+  consumeOnCraft: 0
+  maxStackSize: 20
+  isStackable: 1
   equipmentPrefab: {fileID: 2511649203567988147, guid: 6ff72a742784f9945a3ac9be03f96fb6, type: 3}

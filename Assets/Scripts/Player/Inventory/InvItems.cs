@@ -26,6 +26,10 @@ public class ItemData : ScriptableObject
     [Tooltip("If set, this ItemData will be given when this recipe is crafted. If null, the recipe's ItemData is added.")]
     public ItemData craftResult;
 
+    [Header("Crafting Options")]
+    [Tooltip("If false, this recipe item will remain in the inventory after crafting (reusable blueprint).")]
+    public bool consumeOnCraft = true;
+
     [Header("Stacking")]
     public int maxStackSize = 50;
     public bool isStackable = false;
