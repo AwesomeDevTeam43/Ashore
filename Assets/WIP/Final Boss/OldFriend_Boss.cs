@@ -70,6 +70,9 @@ public class OldFriend_Boss : EnemyBase
         set => SetBossActive(value);
     }
 
+    // Returns a minimum allowed health (clamp) for incoming damage so that damage
+    // doesn't reduce health below the next configured threshold. Returns null if
+    // no clamping should be applied.
     public int? GetHealthClampForIncomingDamage(int incomingDamage)
     {
         if (healthSystem == null) return null;
