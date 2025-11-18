@@ -16,7 +16,7 @@ MonoBehaviour:
   icon: {fileID: 465835092643757830, guid: 4e89521b0427ba24a996fcb026224114, type: 3}
   description: It's a hook that grapples
   isUsable: 0
-  isCraftable: 0
+  isCraftable: 1
   craftIngredients:
   - material: {fileID: 11400000, guid: 32410df1c793ac94eaf344c30dad367a, type: 2}
     amount: 5
