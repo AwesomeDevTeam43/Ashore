@@ -87,4 +87,9 @@ public class GameState : MonoBehaviour
       }
     }
   }
+
+  public void ClearAll()
+  {
+    _state.Clear();
+  }
 }

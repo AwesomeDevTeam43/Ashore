@@ -122,7 +122,6 @@ public class LevelTransitionManager : MonoBehaviour
 
     _isTransitioning = true;
 
-    // Capture game state before leaving (future-proof for cross-scene)
     GameState.Instance?.CaptureAll();
 
     var targetScene = string.IsNullOrEmpty(from.targetScene) ? SceneManager.GetActiveScene().name : from.targetScene;
