@@ -19,6 +19,7 @@ public class Player_Health : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
     private int previousHealth;
+    private bool processingDeath;
 
     private Player_Camera playerCamera;
 
@@ -114,9 +115,9 @@ public class Player_Health : MonoBehaviour
 
         if (currentHealth <= 0)
         {
+            if (processingDeath) return;
+            processingDeath = true;
             IsAlive = false;
-            // Clear persistent player/avatar so a fresh one is spawned next time.
-            PlayerPersistence.DestroyPersistentPlayer();
             StartCoroutine(LoadMainMenuAfterDeath());
             return;
         }
@@ -131,6 +132,7 @@ public class Player_Health : MonoBehaviour
     {
         // Small delay lets death VFX/animation finish before the scene swap.
         yield return null;
+        PlayerPersistence.ScheduleDestroyOnNextSceneLoad();
         SceneManager.LoadScene("MainMenu");
     }
 
