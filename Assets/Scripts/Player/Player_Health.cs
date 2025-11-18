@@ -115,14 +115,23 @@ public class Player_Health : MonoBehaviour
         if (currentHealth <= 0)
         {
             IsAlive = false;
+            // Clear persistent player/avatar so a fresh one is spawned next time.
             PlayerPersistence.DestroyPersistentPlayer();
-            SceneManager.LoadScene("MainMenu");
+            StartCoroutine(LoadMainMenuAfterDeath());
+            return;
         }
 
         if (godMode && currentHealth < maxHealth)
         {
             healthSystem.SetHealth(maxHealth);
         }
+    }
+
+    private IEnumerator LoadMainMenuAfterDeath()
+    {
+        // Small delay lets death VFX/animation finish before the scene swap.
+        yield return null;
+        SceneManager.LoadScene("MainMenu");
     }
 
     private IEnumerator DamageEffect()
