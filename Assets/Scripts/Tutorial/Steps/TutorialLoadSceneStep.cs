@@ -73,13 +73,55 @@ public class TutorialLoadSceneStep : TutorialStep
     private void ResetPlayerStateForMainGame()
     {
         Inventory.instance?.Clear();
+        Time.timeScale = 1f;
+
         var player = GameObject.FindGameObjectWithTag("Player");
         if (player == null) return;
+
+        if (manager != null)
+        {
+            manager.SetPlayerMovementEnabled(true);
+        }
+        else
+        {
+            ForceEnablePlayerMovement(player);
+        }
+
+        var inputHandler = player.GetComponent<Player_InputHandler>();
+        if (inputHandler != null)
+        {
+            inputHandler.EnablePlayerActions();
+        }
 
         var controller = player.GetComponent<Player_Controller>();
         if (controller != null)
         {
             controller.ResetProgressToFreshStart();
+        }
+    }
+
+    private void ForceEnablePlayerMovement(GameObject player)
+    {
+        var movement = player.GetComponent<Player_Movement>();
+        if (movement != null)
+        {
+            movement.enabled = true;
+        }
+
+        var rb2D = player.GetComponent<Rigidbody2D>();
+        if (rb2D != null)
+        {
+            rb2D.linearVelocity = Vector2.zero;
+            rb2D.angularVelocity = 0f;
+            rb2D.WakeUp();
+        }
+
+        var rb3D = player.GetComponent<Rigidbody>();
+        if (rb3D != null)
+        {
+            rb3D.linearVelocity = Vector3.zero;
+            rb3D.angularVelocity = Vector3.zero;
+            rb3D.WakeUp();
         }
     }
 
