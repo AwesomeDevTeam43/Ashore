@@ -14,7 +14,7 @@ public class dissapearwtf : MonoBehaviour
         
     }
 
-    public void niggamove()
+    public void DoorMove()
     {
         Destroy(gameObject);
     }
