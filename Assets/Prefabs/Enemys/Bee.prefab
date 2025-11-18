@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 3117738573874044794}
   - component: {fileID: -2165011026002690327}
   - component: {fileID: 3539752144624605523}
+  - component: {fileID: -6406895806861494338}
   m_Layer: 7
   m_Name: Bee
   m_TagString: Enemy
@@ -106,6 +107,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stats: {fileID: 0}
+  animator: {fileID: 0}
+  isAttackingParam: isAttacking
+  isLungingParam: isLunging
+  isRetreatingParam: isRetreating
+  stingerHitbox: {fileID: 0}
+  stingerVisual: {fileID: 0}
+  windupDuration: 0.25
   obstacleMask:
     serializedVersion: 2
     m_Bits: 576
@@ -189,7 +197,7 @@ BoxCollider2D:
   m_Offset: {x: -0.06651878, y: 0.53215027}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: -0.06896552}
+    pivot: {x: 0.44, y: 0.5}
     oldSize: {x: 1, y: 0.90625}
     newSize: {x: 1, y: 0.90625}
     adaptiveTilingThreshold: 0.5
@@ -229,3 +237,25 @@ MonoBehaviour:
   maxHealth: 5
   damageable: 1
   invincibilityDuration: 0.2
+--- !u!95 &-6406895806861494338
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8379307940926905367}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 01e530cde844be241b146f81e46d25df, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 1
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
