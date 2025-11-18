@@ -122,6 +122,8 @@ public class LevelTransitionManager : MonoBehaviour
 
     _isTransitioning = true;
 
+    PersistWorldViaSaveSystem();
+
     GameState.Instance?.CaptureAll();
 
     var targetScene = string.IsNullOrEmpty(from.targetScene) ? SceneManager.GetActiveScene().name : from.targetScene;
@@ -177,6 +179,7 @@ public class LevelTransitionManager : MonoBehaviour
 
     // Restore states now that scene objects exist
     GameState.Instance?.RestoreAll();
+    RestoreWorldViaSaveSystem();
 
     // Place player (use destination portal's own spawnOffset)
     TeleportInScene(_pendingTargetScene, _pendingTargetPortalId);
@@ -398,6 +401,29 @@ public class LevelTransitionManager : MonoBehaviour
     SetFadeAlpha(target);
   }
 
+  private void PersistWorldViaSaveSystem()
+  {
+    var player = GameObject.FindGameObjectWithTag("Player");
+    if (player == null) return;
+
+    var controller = player.GetComponent<Player_Controller>();
+    if (controller != null)
+    {
+      controller.SaveGame();
+    }
+    else
+    {
+      Debug.LogWarning("LevelTransitionManager: Player_Controller missing; skipping save before transition.");
+    }
+  }
+
+  private void RestoreWorldViaSaveSystem()
+  {
+    var data = SaveSystem.LoadPlayer();
+    if (data == null || data.worldData == null || data.worldData.Count == 0) return;
+    SaveSystem.RestoreWorldState(data);
+  }
+
   private void SetLoadingVisible(bool visible)
   {
     if (_loadingGroup == null) return;
@@ -449,6 +475,7 @@ public class LevelTransitionManager : MonoBehaviour
 
     // After activation, portals should have registered; complete placement
     GameState.Instance?.RestoreAll();
+    RestoreWorldViaSaveSystem();
     TeleportInScene(sceneName, targetPortalId);
     // Extra delayed snap to ensure new scene's Cinemachine cameras have initialized
     StartCoroutine(SnapCinemachineAfterSceneLoad());

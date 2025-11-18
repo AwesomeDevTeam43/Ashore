@@ -2,7 +2,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Reflection;
 
-public class Chest : MonoBehaviour
+[RequireComponent(typeof(GuidComponent))]
+public class Chest : MonoBehaviour, ISaveable
 {
     private GameObject player;
     private Player_InputHandler player_InputHandler;
@@ -17,11 +18,13 @@ public class Chest : MonoBehaviour
     [SerializeField] private int ropeReward = 3;
 
     private SpriteRenderer spriteRenderer;
+    private Sprite closedSprite;
     private XP_System xP_System;
     private bool isOpen = false;
     private Drop_Materials drop_Materials;
 
     private DropEquipment dropEquipment;
+    private GuidComponent guidComponent;
 
     // reflection + action hook (non-invasive to Player_InputHandler)
     private InputAction playerInteractAction;
@@ -30,14 +33,20 @@ public class Chest : MonoBehaviour
     {
         player = GameObject.FindGameObjectWithTag("Player");
         spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null)
+        {
+            closedSprite = spriteRenderer.sprite;
+        }
         xP_System = player.GetComponent<XP_System>();
         drop_Materials = GetComponent<Drop_Materials>();
         if (player != null) player_InputHandler = player.GetComponent<Player_InputHandler>();
+        guidComponent = GetComponent<GuidComponent>();
     }
 
     void Start()
     {
         dropEquipment = this.GetComponent<DropEquipment>();
+        UpdateChestVisual();
     }
 
     private void Update()
@@ -106,9 +115,22 @@ public class Chest : MonoBehaviour
         if (!isOpen)
         {
             isOpen = true;
-            spriteRenderer.sprite = openSprite;
+            UpdateChestVisual();
             xP_System.DropXP(transform.position, xpReward);
-            drop_Materials.DropMaterial(stoneReward, woodReward,ropeReward);
+            drop_Materials?.DropMaterial(stoneReward, woodReward, ropeReward);
+        }
+    }
+
+    private void UpdateChestVisual()
+    {
+        if (spriteRenderer == null) return;
+        if (isOpen)
+        {
+            spriteRenderer.sprite = openSprite;
+        }
+        else if (closedSprite != null)
+        {
+            spriteRenderer.sprite = closedSprite;
         }
     }
 
@@ -118,4 +140,17 @@ public class Chest : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, 1f);
     }
 
+    public object CaptureState()
+    {
+        return isOpen;
+    }
+
+    public void RestoreState(object state)
+    {
+        if (state is bool savedOpenState)
+        {
+            isOpen = savedOpenState;
+            UpdateChestVisual();
+        }
+    }
 }

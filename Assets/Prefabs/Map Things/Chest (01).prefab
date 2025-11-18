@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3511647002900033405}
   - component: {fileID: -4843128180931224427}
   - component: {fileID: 4640424422146627041}
+  - component: {fileID: 6288968094309660115}
   m_Layer: 14
   m_Name: Chest (01)
   m_TagString: Untagged
@@ -169,3 +170,16 @@ MonoBehaviour:
   wood: {fileID: 11400000, guid: 321063f8e7c67734da1616587ab2def1, type: 2}
   rope: {fileID: 11400000, guid: 32410df1c793ac94eaf344c30dad367a, type: 2}
   material_particle: {fileID: 3009273275518452482, guid: 4faa844a12452a64982a14b05e65a988, type: 3}
+--- !u!114 &6288968094309660115
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1754115231248754664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5712449afb6cdea4dba591dad71e995d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 

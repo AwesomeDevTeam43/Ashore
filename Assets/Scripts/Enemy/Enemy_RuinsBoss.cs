@@ -329,16 +329,6 @@ public class Enemy_RuinsBoss : EnemyBase
         s.x = Mathf.Abs(s.x) * dir;
         transform.localScale = s;
     }
-
-    void OnDrawGizmos()
-    {
-        if (stats == null) return;
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, typedStats.followPlayerRange);
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, typedStats.attackRange);
-    }
-
-    // Expose whether an attack is currently in progress (used by SwordCollider)
+    
     public bool IsAttackInProgress() => attackInProgress;
 }
