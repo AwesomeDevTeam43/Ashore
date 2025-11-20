@@ -315,11 +315,9 @@ MonoBehaviour:
   speedParam: Speed
   isRunningParam: IsRunning
   isJumpingParam: isJumping
-  landingDetectDistance: 0.6
   yVelParam: YVel
   landTrigger: Land
   jumpStartTrigger: JumpStart
-  runThreshold: 0.1
   landingCooldown: 0.35
   playerInputHandler: {fileID: 0}
   inputDeadzone: 0.01
@@ -374,6 +372,9 @@ MonoBehaviour:
   rangeAttack: RangeAttack
   interact: Interact
   inventory: Inventory
+  keyboardMouseSchemeName: Keyboard&Mouse
+  gamepadSchemeName: Gamepad
+  defaultSchemeName: Keyboard&Mouse
   radialDeadzone: 0.2
   perAxisDeadzone: 0.2
   axisSnapBias: 0.3
@@ -399,10 +400,7 @@ MonoBehaviour:
   platformLayer:
     serializedVersion: 2
     m_Bits: 512
-  downwardAttackBounce: 10
   coyoteTime: 0.15
-  acceleration: 5
-  deceleration: 5
 --- !u!114 &3981617874585788842
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -579,7 +577,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f8a8574eec22e94e8147a5031f6be6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 1
+  defaultDamage: 20
   attackRadius: 1
   enemyLayer:
     serializedVersion: 2
@@ -607,7 +605,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a35502279d1951e468fb3815b1d66580, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  godMode: 0
+  godMode: 1
   playerStats: {fileID: 11400000, guid: bd35a466862b3c849af092f1d041e9c1, type: 2}
   IsAlive: 1
 --- !u!95 &7195073010775856911
