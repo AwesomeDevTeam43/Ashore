@@ -17,6 +17,8 @@ public class Enemy_RuinsBoss : EnemyBase
     [SerializeField] private string attackBoolName = "isAttacking";
     [SerializeField] private bool attackUsesAnimationEvent = true;
     [SerializeField] private float attackCommitDuration = 0.8f;
+    [Header("Targeting")]
+    [SerializeField] private LayerMask playerMask;
 
     private bool hasAttackTrigger = false;
     private bool hasAttackBool = false;
@@ -55,6 +57,11 @@ public class Enemy_RuinsBoss : EnemyBase
         if (playerObject != null)
         {
             player = playerObject.transform;
+        }
+
+        if (playerMask == 0)
+        {
+            playerMask = LayerMask.GetMask("Player");
         }
 
         if (stats != null)
@@ -233,7 +240,7 @@ public class Enemy_RuinsBoss : EnemyBase
     // Called by the boss or by the sword collider when a hit should be applied
     public void DoMeleeHit(Transform target)
     {
-        if (target == null) return;
+        if (target == null || !IsPlayerTransform(target)) return;
 
         HealthSystem targetHealth = target.GetComponent<HealthSystem>();
         Rigidbody2D targetRb = null;
@@ -264,10 +271,11 @@ public class Enemy_RuinsBoss : EnemyBase
     {
         if (player == null) return;
         // fallback melee check: overlap circle centered on boss to catch targets
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, typedStats.attackRange);
+        int mask = playerMask.value != 0 ? playerMask.value : LayerMask.GetMask("Player");
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, typedStats.attackRange, mask);
         foreach (var h in hits)
         {
-            if (h == null) continue;
+            if (!IsPlayerCollider(h)) continue;
             HealthSystem hs = h.GetComponent<HealthSystem>() ?? h.GetComponentInParent<HealthSystem>();
             if (hs != null)
             {
@@ -331,4 +339,20 @@ public class Enemy_RuinsBoss : EnemyBase
     }
     
     public bool IsAttackInProgress() => attackInProgress;
+
+    private static bool IsPlayerCollider(Collider2D col)
+    {
+        if (col == null) return false;
+        if (col.CompareTag("Player")) return true;
+        Transform root = col.transform.root;
+        return root != null && root.CompareTag("Player");
+    }
+
+    private static bool IsPlayerTransform(Transform t)
+    {
+        if (t == null) return false;
+        if (t.CompareTag("Player")) return true;
+        Transform root = t.root;
+        return root != null && root.CompareTag("Player");
+    }
 }

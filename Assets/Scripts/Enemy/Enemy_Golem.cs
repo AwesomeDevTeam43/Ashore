@@ -358,9 +358,11 @@ public class Enemy_Golem : EnemyBase
     {
         float radius = typedStats != null ? typedStats.slamRadius : 2.75f;
         int damage = typedStats != null ? typedStats.slamDamage : 6;
-        var hits = Physics2D.OverlapCircleAll(transform.position, radius, slamHitMask);
+        int mask = slamHitMask.value != 0 ? slamHitMask.value : LayerMask.GetMask("Player");
+        var hits = Physics2D.OverlapCircleAll(transform.position, radius, mask);
         foreach (var h in hits)
         {
+            if (!IsPlayerCollider(h)) continue;
             var hs = h.GetComponent<HealthSystem>() ?? h.GetComponentInParent<HealthSystem>();
             if (hs != null) hs.TakeDamage(damage);
         }
@@ -369,6 +371,14 @@ public class Enemy_Golem : EnemyBase
     private void Face(float dirX)
     {
         Vector3 s = stats.baseScale; s.x = Mathf.Abs(s.x) * (dirX >= 0 ? 1f : -1f); transform.localScale = s;
+    }
+
+    private static bool IsPlayerCollider(Collider2D col)
+    {
+        if (col == null) return false;
+        if (col.CompareTag("Player")) return true;
+        Transform root = col.transform.root;
+        return root != null && root.CompareTag("Player");
     }
 
     void OnDrawGizmos()

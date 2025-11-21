@@ -366,9 +366,11 @@ public class Enemy_Salamander : EnemyBase
     bool damaged = false;
     if (bitePoint != null)
     {
-      var hits = Physics2D.OverlapCircleAll(bitePoint.position, biteRadius, biteHitMask);
+      int mask = biteHitMask.value != 0 ? biteHitMask.value : LayerMask.GetMask("Player");
+      var hits = Physics2D.OverlapCircleAll(bitePoint.position, biteRadius, mask);
       foreach (var h in hits)
       {
+        if (!IsPlayerCollider(h)) continue;
         var hs = FindHealth(h.transform);
         if (hs != null)
         {
@@ -404,6 +406,14 @@ public class Enemy_Salamander : EnemyBase
     hs = t.GetComponentInParent<HealthSystem>();
     if (hs) return hs;
     return t.GetComponentInChildren<HealthSystem>();
+  }
+
+  private static bool IsPlayerCollider(Collider2D col)
+  {
+    if (col == null) return false;
+    if (col.CompareTag("Player")) return true;
+    Transform root = col.transform.root;
+    return root != null && root.CompareTag("Player");
   }
 
   void OnDrawGizmos()
