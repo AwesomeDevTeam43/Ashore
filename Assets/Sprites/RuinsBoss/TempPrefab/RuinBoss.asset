@@ -17,7 +17,7 @@ MonoBehaviour:
   dropA: 5
   dropB: 0
   dropC: 5
-  baseScale: {x: 1, y: 1, z: 1}
+  baseScale: {x: 1.5, y: 1.5, z: 1}
   moveSpeed: 2
   followPlayerRange: 8
   attackRange: 2.5
