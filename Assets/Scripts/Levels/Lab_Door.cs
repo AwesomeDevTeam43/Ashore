@@ -1,6 +1,8 @@
 using UnityEditor;
 using UnityEngine;
 using Unity.Cinemachine;
+using TMPro;
+using System.Collections;
 
 public class Lab_Door : MonoBehaviour
 {
@@ -25,6 +27,14 @@ public class Lab_Door : MonoBehaviour
     [SerializeField] private float fadeInDuration = 0.2f;
     [SerializeField] private bool snapCinemachineOnTeleport = true;
 
+    [Header("UI Message Settings")]
+    [SerializeField] private float messageDuration = 2f;
+    [SerializeField] private string noKeyMessage = "Você precisa do Keycard para abrir esta porta!";
+    [SerializeField] private int fontSize = 32;
+    [SerializeField] private Color messageColor = Color.white;
+    [SerializeField] private Color panelColor = new Color(0, 0, 0, 0.7f);
+    
+    private Coroutine messageCoroutine;
 
     private Canvas _fadeCanvas;
     private UnityEngine.UI.Image _fadeImage;
@@ -47,7 +57,13 @@ public class Lab_Door : MonoBehaviour
 
     private void EnterLab()
     {
-        if (!IsPlayerInArea() || !HaveKey()) return;
+        if (!IsPlayerInArea()) return;
+        
+        if (!HaveKey())
+        {
+            ShowMessage(noKeyMessage);
+            return;
+        }
 
         if (linkedDoor != null)
         {
@@ -77,6 +93,67 @@ public class Lab_Door : MonoBehaviour
             return false;
         }
         return true;
+    }
+
+    private void ShowMessage(string message)
+    {
+        // Cancelar mensagem anterior se existir
+        if (messageCoroutine != null)
+        {
+            StopCoroutine(messageCoroutine);
+        }
+        
+        messageCoroutine = StartCoroutine(DisplayMessageCoroutine(message));
+    }
+    
+    private IEnumerator DisplayMessageCoroutine(string message)
+    {
+        // Criar Canvas
+        GameObject canvasObj = new GameObject("MessageCanvas_LabDoor");
+        Canvas canvas = canvasObj.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 100;
+        
+        canvasObj.AddComponent<UnityEngine.UI.CanvasScaler>();
+        canvasObj.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+        
+        // Criar Panel (fundo semi-transparente)
+        GameObject panelObj = new GameObject("MessagePanel");
+        panelObj.transform.SetParent(canvasObj.transform, false);
+        
+        UnityEngine.UI.Image panelImage = panelObj.AddComponent<UnityEngine.UI.Image>();
+        panelImage.color = panelColor;
+        
+        RectTransform panelRect = panelObj.GetComponent<RectTransform>();
+        panelRect.anchorMin = new Vector2(0.2f, 0.8f);
+        panelRect.anchorMax = new Vector2(0.8f, 0.95f);
+        panelRect.offsetMin = Vector2.zero;
+        panelRect.offsetMax = Vector2.zero;
+        
+        // Criar Texto
+        GameObject textObj = new GameObject("MessageText");
+        textObj.transform.SetParent(panelObj.transform, false);
+        
+        TextMeshProUGUI textComponent = textObj.AddComponent<TextMeshProUGUI>();
+        textComponent.text = message;
+        textComponent.fontSize = fontSize;
+        textComponent.color = messageColor;
+        textComponent.alignment = TextAlignmentOptions.Center;
+        textComponent.enableWordWrapping = true;
+        
+        RectTransform textRect = textObj.GetComponent<RectTransform>();
+        textRect.anchorMin = Vector2.zero;
+        textRect.anchorMax = Vector2.one;
+        textRect.offsetMin = new Vector2(20, 10);
+        textRect.offsetMax = new Vector2(-20, -10);
+        
+        // Aguardar duração
+        yield return new WaitForSeconds(messageDuration);
+        
+        // Destruir canvas
+        Destroy(canvasObj);
+        
+        messageCoroutine = null;
     }
 
     private bool IsPlayerInArea()
@@ -161,7 +238,7 @@ public class Lab_Door : MonoBehaviour
         imgGo.transform.SetParent(go.transform, false);
         _fadeImage = imgGo.AddComponent<UnityEngine.UI.Image>();
         _fadeImage.color = Color.black;
-        _fadeImage.raycastTarget = true; // bloqueia input durante o fade
+        _fadeImage.raycastTarget = true;
         var rt = _fadeImage.rectTransform; rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one; rt.offsetMin = Vector2.zero; rt.offsetMax = Vector2.zero;
         SetFadeAlpha(0f);
     }
@@ -170,7 +247,6 @@ public class Lab_Door : MonoBehaviour
     {
         if (_fadeImage == null) return;
         var c = _fadeImage.color; c.a = Mathf.Clamp01(a); _fadeImage.color = c;
-        // Only block input while visible; release when fully transparent
         _fadeImage.raycastTarget = c.a > 0.001f;
     }
 
