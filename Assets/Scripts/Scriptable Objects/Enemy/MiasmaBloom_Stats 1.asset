@@ -17,7 +17,7 @@ MonoBehaviour:
   dropA: 2
   dropB: 2
   dropC: 2
-  baseScale: {x: 1, y: 1, z: 1}
+  baseScale: {x: 1.5, y: 1.5, z: 1}
   playerDetect: 3
   attackRange: 2.5
   attackDelay: 0.6

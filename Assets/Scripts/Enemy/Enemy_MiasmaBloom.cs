@@ -7,6 +7,10 @@ public class Enemy_MiasmaBloom : EnemyBase
 
     [Header("References")]
     [SerializeField] private LayerMask playerMask;
+    [SerializeField] private Animator animator;
+    [SerializeField] private string sideAttackTrigger = "AttackSide";
+    [SerializeField] private string upAttackTrigger = "AttackUp";
+    [SerializeField] private float upAttackVerticalThreshold = 0.75f;
 
     private float detectRadius;
     private float attackRange;
@@ -28,6 +32,7 @@ public class Enemy_MiasmaBloom : EnemyBase
     private Vector2 attackTarget;
     private Color originalColor;
     private float cooldownTimer;
+    private bool attackAnimTriggered;
 
     private void Start()
     {
@@ -67,6 +72,11 @@ public class Enemy_MiasmaBloom : EnemyBase
         sr = GetComponent<SpriteRenderer>();
         if (sr != null) originalColor = sr.color;
         else originalColor = Color.white;
+
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+        }
 
         player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
@@ -114,12 +124,18 @@ public class Enemy_MiasmaBloom : EnemyBase
             attackTarget = GetPlayerFeetPosition();
             stateTimer = attackDelay;
             state = State.Charging;
+            attackAnimTriggered = false;
             if (sr != null) sr.color = chargeTint;
         }
     }
 
     private void DoCharging()
     {
+        if (!attackAnimTriggered)
+        {
+            TriggerAttackAnimation();
+            attackAnimTriggered = true;
+        }
         stateTimer -= Time.deltaTime;
         if (stateTimer <= 0f)
         {
@@ -202,6 +218,30 @@ public class Enemy_MiasmaBloom : EnemyBase
         Vector3 s = stats.baseScale;
         s.x = Mathf.Abs(s.x) * dir;
         transform.localScale = s;
+    }
+
+    private void TriggerAttackAnimation()
+    {
+        if (animator == null) return;
+        var trigger = DetermineAttackTrigger();
+        if (string.IsNullOrEmpty(trigger)) return;
+        animator.SetTrigger(trigger);
+    }
+
+    private string DetermineAttackTrigger()
+    {
+        if (string.IsNullOrEmpty(upAttackTrigger) && string.IsNullOrEmpty(sideAttackTrigger))
+            return null;
+
+        float targetHeight = attackTarget.y;
+        float selfHeight = transform.position.y;
+        bool isUpAttack = (targetHeight - selfHeight) >= upAttackVerticalThreshold;
+
+        if (isUpAttack)
+        {
+            return string.IsNullOrEmpty(upAttackTrigger) ? sideAttackTrigger : upAttackTrigger;
+        }
+        return sideAttackTrigger;
     }
 
 
