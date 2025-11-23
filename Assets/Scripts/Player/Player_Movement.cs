@@ -31,6 +31,12 @@ public class Player_Movement : MonoBehaviour
     public bool IsFacingRight => isFacingRight;
     public bool IsFacingLeft => !isFacingRight;
 
+    //cheats
+    [SerializeField] public Transform place1;
+    [SerializeField] public Transform place2;
+    [SerializeField] public Transform place3;
+    [SerializeField] public Transform place4;
+
     void Start()
     {
         attackZone = GameObject.FindGameObjectWithTag("AttackZone");
@@ -43,6 +49,7 @@ public class Player_Movement : MonoBehaviour
 
     void FixedUpdate()
     {
+        HandleCheatTeleports();
         HandleMovement();
         HandleDirection();
         HandleJump();
@@ -130,6 +137,45 @@ public class Player_Movement : MonoBehaviour
         if (collision.gameObject.CompareTag("MovingPlatform"))
         {
             currentPlatform = null;
+        }
+    }
+
+    private void HandleCheatTeleports()
+    {
+        if (!Input.GetKey(KeyCode.Z)) return;
+
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            if (place1 == null) return;
+            TeleportTo(place1);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            if (place2 == null) return;
+            TeleportTo(place2);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            if (place3 == null) return;
+            TeleportTo(place3);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            if (place4 == null) return;
+            TeleportTo(place4);
+        }
+    }
+
+    private void TeleportTo(Transform destination)
+    {
+        if (destination == null) return;
+
+        transform.position = destination.position;
+
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.angularVelocity = 0f;
         }
     }
 }

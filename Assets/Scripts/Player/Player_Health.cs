@@ -66,6 +66,11 @@ public class Player_Health : MonoBehaviour
         previousHealth = healthSystem.CurrentHealth;
     }
 
+    private void Update()
+    {
+        HandleGodModeToggle();
+    }
+
     private void OnDisable()
     {
         if (healthSystem != null)
@@ -105,6 +110,14 @@ public class Player_Health : MonoBehaviour
 
     private void OnPlayerHealthChanged(int currentHealth, int maxHealth)
     {
+        if (godMode && currentHealth < maxHealth)
+        {
+            // Instantly restore HP and skip any death logic
+            healthSystem.SetHealth(maxHealth);
+            previousHealth = maxHealth;
+            return;
+        }
+
         if (currentHealth < previousHealth)
         {
             StartCoroutine(DamageEffect());
@@ -128,11 +141,6 @@ public class Player_Health : MonoBehaviour
             SceneManager.LoadScene("MainMenu");
             return;
         }
-
-        if (godMode && currentHealth < maxHealth)
-        {
-            healthSystem.SetHealth(maxHealth);
-        }
     }
 
     private IEnumerator DamageEffect()
@@ -143,6 +151,22 @@ public class Player_Health : MonoBehaviour
             yield return new WaitForSeconds(0.2f);
             spriteRenderer.color = originalColor;
         }
+    }
+
+    private void HandleGodModeToggle()
+    {
+        if (!Input.GetKey("z")) return;
+        if (!Input.GetKeyDown("p")) return;
+
+        godMode = !godMode;
+
+        if (godMode && healthSystem != null)
+        {
+            healthSystem.SetHealth(healthSystem.MaxHealth);
+            previousHealth = healthSystem.MaxHealth;
+        }
+
+        Debug.Log(godMode ? "God Mode ENABLED" : "God Mode DISABLED");
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
