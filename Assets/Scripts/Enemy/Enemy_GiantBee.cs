@@ -56,7 +56,7 @@ public class BeeEnemy : EnemyBase
     enemyHealth = GetComponent<Enemy_Health>();
     if (enemyHealth != null && typedStats != null)
     {
-      enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop);
+      enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop, typedStats.meleeResistance, typedStats.rangedResistance);
     }
 
     rb = GetComponent<Rigidbody2D>();

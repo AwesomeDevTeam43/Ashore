@@ -72,6 +72,10 @@ public class Weapon : MonoBehaviour
                 {
                     Vector2 shootDir = GetShootDirection();
                     proj.SetDirection(shootDir);
+                    if (playerController != null)
+                    {
+                        proj.SetDamage(playerController.AttackPower);
+                    }
                 }
             }
             timeBetweenShots = startTimeBetweenShots;

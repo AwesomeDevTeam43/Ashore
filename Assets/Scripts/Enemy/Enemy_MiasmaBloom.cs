@@ -64,9 +64,20 @@ public class Enemy_MiasmaBloom : EnemyBase
         if (enemyHealth != null)
         {
             if (typedStats != null)
-                enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop);
+            {
+                enemyHealth.Initialize(
+                    typedStats.maxHealth,
+                    typedStats.xpOnDeath,
+                    typedStats.woodDrop,
+                    typedStats.stoneDrop,
+                    typedStats.ropeDrop,
+                    typedStats.meleeResistance,
+                    typedStats.rangedResistance);
+            }
             else
-                enemyHealth.Initialize(Mathf.CeilToInt(detectRadius * 2f) + 1, 0, 0, 0, 0);
+            {
+                enemyHealth.Initialize(Mathf.CeilToInt(detectRadius * 2f) + 1, 0, 0, 0, 0, 0f, 0f);
+            }
         }
 
         sr = GetComponent<SpriteRenderer>();

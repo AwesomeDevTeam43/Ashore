@@ -44,7 +44,7 @@ public class BigCrab : EnemyBase
 
     if (enemyHealth != null && stats != null)
     {
-      enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop);
+      enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop, typedStats.meleeResistance, typedStats.rangedResistance);
     }
     GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
     if (playerObject != null)

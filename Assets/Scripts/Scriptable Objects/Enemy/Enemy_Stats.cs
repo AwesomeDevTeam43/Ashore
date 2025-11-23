@@ -18,4 +18,10 @@ public abstract class Enemy_Stats : ScriptableObject
 
     [Header("Visual")]
     public Vector3 baseScale = Vector3.one;
+
+    [Header("Damage Resistances")]
+    [Range(0f, 1f), Tooltip("Percent of incoming melee damage to reduce (0 = none, 1 = immune).")]
+    public float meleeResistance = 0f;
+    [Range(0f, 1f), Tooltip("Percent of incoming ranged damage to reduce (0 = none, 1 = immune).")]
+    public float rangedResistance = 0f;
 }

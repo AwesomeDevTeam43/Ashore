@@ -128,7 +128,7 @@ public class MeleeWeapon : MonoBehaviour
             var hp = c.GetComponent<Enemy_Health>();
             if (hp != null)
             {
-                hp.TakeDamage(GetCurrentDamage());
+                hp.TakeDamage(GetCurrentDamage(), Enemy_Health.DamageSourceType.PlayerMelee);
             }
             var rb = c.GetComponent<Rigidbody2D>();
             if (rb != null)

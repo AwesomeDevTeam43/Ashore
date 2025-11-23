@@ -12,7 +12,7 @@ public abstract class EnemyBase : MonoBehaviour
         var enemyHealth = GetComponent<Enemy_Health>();
         if (enemyHealth != null)
         {
-            enemyHealth.Initialize(s.maxHealth, s.xpOnDeath, s.woodDrop, s.stoneDrop, s.ropeDrop);
+            enemyHealth.Initialize(s.maxHealth, s.xpOnDeath, s.woodDrop, s.stoneDrop, s.ropeDrop, s.meleeResistance, s.rangedResistance);
         }
         transform.localScale = s.baseScale;
     }

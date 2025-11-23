@@ -30,8 +30,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 24.27, y: -0.16, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.16, y: 0.16, z: 0.32}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -104,9 +104,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   xpValue: 3
   playerTag: Player
-  floatSpeed: 1
-  floatAmplitude: 0.3
-  heightAboveGround: 0.5
+  groundLayers:
+    serializedVersion: 2
+    m_Bits: 64
+  fallGravityScale: 2
+  physicsColliderRadius: 0.35
+  triggerRadius: 0.6
 --- !u!58 &8352217487831030165
 CircleCollider2D:
   m_ObjectHideFlags: 0

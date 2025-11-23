@@ -232,7 +232,7 @@ public class BirdBomberEnemy : EnemyBase
 
         if (_enemyHealth != null && _typedStats != null)
         {
-            _enemyHealth.Initialize(_typedStats.maxHealth, _typedStats.xpOnDeath, _typedStats.woodDrop, _typedStats.stoneDrop, _typedStats.ropeDrop);
+            _enemyHealth.Initialize(_typedStats.maxHealth, _typedStats.xpOnDeath, _typedStats.woodDrop, _typedStats.stoneDrop, _typedStats.ropeDrop, _typedStats.meleeResistance, _typedStats.rangedResistance);
         }
     }
 }

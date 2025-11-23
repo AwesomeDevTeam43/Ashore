@@ -19,7 +19,7 @@ public class ShieldedCore : MonoBehaviour
 		enemyHealth = GetComponent<Enemy_Health>();
 		if (enemyHealth != null)
 		{
-			enemyHealth.Initialize(coreMaxHealth, 0, 0, 0, 0);
+			enemyHealth.Initialize(coreMaxHealth, 0, 0, 0, 0, 0f, 0f);
 		}
 
 		// cache sprite renderers to change color when protected

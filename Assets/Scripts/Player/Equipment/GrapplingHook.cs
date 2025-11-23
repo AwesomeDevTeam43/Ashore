@@ -161,14 +161,27 @@ public class GrapplingHook : Equipment
 
         if (collision.gameObject.layer == LayerMask.NameToLayer("Enemy") && !hasLanded)
         {
-            HealthSystem enemyHealth = collision.gameObject.GetComponent<HealthSystem>();
             Rigidbody2D rb = GetComponent<Rigidbody2D>();
-            if (enemyHealth != null && rb != null)
+            if (rb != null)
             {
                 rb.linearVelocity = Vector2.zero;
-                enemyHealth.TakeDamage(6);
-                Debug.Log("Enemy hit by grappling hook (projectile)");
             }
+
+            var enemyHealthComponent = collision.gameObject.GetComponent<Enemy_Health>();
+            if (enemyHealthComponent != null)
+            {
+                enemyHealthComponent.TakeDamage(6, Enemy_Health.DamageSourceType.PlayerMelee);
+            }
+            else
+            {
+                var genericHealth = collision.gameObject.GetComponent<HealthSystem>();
+                if (genericHealth != null)
+                {
+                    genericHealth.TakeDamage(6);
+                }
+            }
+
+            Debug.Log("Enemy hit by grappling hook (projectile)");
         }
 
         if (hasLanded && collision.gameObject.layer == LayerMask.NameToLayer("Enemy"))

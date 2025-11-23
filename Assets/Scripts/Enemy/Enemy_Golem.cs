@@ -49,7 +49,7 @@ public class Enemy_Golem : EnemyBase
         col2d = GetComponent<Collider2D>();
         if (enemyHealth != null && typedStats != null)
         {
-            enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop);
+            enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop, typedStats.meleeResistance, typedStats.rangedResistance);
         }
         var p = GameObject.FindGameObjectWithTag("Player");
         if (p) player = p.transform;

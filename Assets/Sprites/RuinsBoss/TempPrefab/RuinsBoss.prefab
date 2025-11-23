@@ -96,6 +96,7 @@ GameObject:
   - component: {fileID: 6768729614252844184}
   - component: {fileID: -7974720914433004839}
   - component: {fileID: 2210241494266545166}
+  - component: {fileID: -1167630307451259900}
   m_Layer: 7
   m_Name: RuinsBoss
   m_TagString: Enemy
@@ -284,6 +285,8 @@ MonoBehaviour:
   maxHealth: 5
   damageable: 1
   invincibilityDuration: 0.2
+  meleeResistance: 0
+  rangedResistance: 0
 --- !u!114 &1192275945727158720
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -303,6 +306,17 @@ MonoBehaviour:
   attackBoolName: isAttacking
   attackUsesAnimationEvent: 1
   attackCommitDuration: 0.8
+  playerMask:
+    serializedVersion: 2
+    m_Bits: 8
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 512
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 64
+  hopCooldownTime: 0.3
+  drawNavigationGizmos: 1
 --- !u!114 &6768729614252844184
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -330,6 +344,8 @@ MonoBehaviour:
   maxHealth: 15
   damageable: 1
   invincibilityDuration: 0.2
+  meleeResistance: 0
+  rangedResistance: 0
 --- !u!70 &2210241494266545166
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -367,3 +383,16 @@ CapsuleCollider2D:
   m_Offset: {x: -0.30914307, y: -0.49866128}
   m_Size: {x: 1.2810059, y: 2.0037575}
   m_Direction: 0
+--- !u!114 &-1167630307451259900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3912505023045689532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09d9d23da9bfbab408c72e9d111f9abf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  equipmentPrefab: {fileID: 2511649203567988147, guid: 447a42394772de441ac9fd9cf1deeb53, type: 3}

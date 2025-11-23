@@ -24,7 +24,7 @@ public class Enemy_Fly : EnemyBase
 
         if (enemyHealth != null && typedStats != null)
         {
-            enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop);
+            enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop, typedStats.meleeResistance, typedStats.rangedResistance);
         }
 
         rb.gravityScale = 0;

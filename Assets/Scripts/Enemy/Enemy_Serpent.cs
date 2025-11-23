@@ -45,7 +45,7 @@ public class VenomShooting : EnemyBase
         }
         if (enemyHealth != null && typedStats != null)
         {
-            enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop);
+            enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop, typedStats.meleeResistance, typedStats.rangedResistance);
         }
         transform.localScale = stats.baseScale;
         meleeCooldownTimer = 0f;

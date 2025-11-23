@@ -6,6 +6,8 @@ public class Enemy_Health : MonoBehaviour
     [SerializeField] private int maxHealth = 5;
     [SerializeField] private bool damageable = true;
     [SerializeField] private float invincibilityDuration = .2f;
+    [SerializeField, Range(0f, 1f)] private float meleeResistance;
+    [SerializeField, Range(0f, 1f)] private float rangedResistance;
 
     private bool hit;
     private HealthSystem healthSystem;
@@ -18,6 +20,14 @@ public class Enemy_Health : MonoBehaviour
     private int woodDrop;
     private int stoneDrop;
     private int ropeDrop;
+    private float pendingDamageBuffer;
+
+    public enum DamageSourceType
+    {
+        Generic,
+        PlayerMelee,
+        PlayerRanged
+    }
 
     private void Awake()
     {
@@ -41,13 +51,16 @@ public class Enemy_Health : MonoBehaviour
         healthSystem.OnHealthChanged += OnEnemyHealthChanged;
     }
 
-    public void Initialize(int maxHp, int xpOnDeath, int woodDrop, int stoneDrop, int ropeDrop)
+    public void Initialize(int maxHp, int xpOnDeath, int woodDrop, int stoneDrop, int ropeDrop, float meleeResistance = 0f, float rangedResistance = 0f)
     {
         this.maxHealth = maxHp;
         this.xpOnDeath = xpOnDeath;
         this.woodDrop = woodDrop;
         this.stoneDrop = stoneDrop;
         this.ropeDrop = ropeDrop;
+        this.meleeResistance = Mathf.Clamp01(meleeResistance);
+        this.rangedResistance = Mathf.Clamp01(rangedResistance);
+        pendingDamageBuffer = 0f;
 
         if (healthSystem != null)
         {
@@ -55,27 +68,27 @@ public class Enemy_Health : MonoBehaviour
         }
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(float damage, DamageSourceType damageSource = DamageSourceType.Generic)
     {
         if (!damageable || hit || healthSystem == null || healthSystem.CurrentHealth <= 0) return;
+
+        float scaledDamage = ApplyResistance(damage, damageSource);
+        if (scaledDamage <= 0f)
+        {
+            Debug.Log($"{name} ignored damage due to resistances against {damageSource} attacks.");
+            return;
+        }
 
         // Optionally compute a minimum allowed health (clamp) for special enemies (e.g., boss thresholds).
         int? minAllowed = null;
         var boss = GetComponent<OldFriend_Boss>();
         if (boss != null)
         {
-            minAllowed = boss.GetHealthClampForIncomingDamage(damage);
+            minAllowed = boss.GetHealthClampForIncomingDamage(Mathf.CeilToInt(scaledDamage));
         }
 
         hit = true;
-        if (minAllowed.HasValue)
-        {
-            healthSystem.TakeDamage(damage, null, minAllowed.Value);
-        }
-        else
-        {
-            healthSystem.TakeDamage(damage);
-        }
+        ApplyBufferedDamage(scaledDamage, minAllowed);
 
         StartCoroutine(TurnOffHit());
     }
@@ -125,5 +138,65 @@ public class Enemy_Health : MonoBehaviour
     {
         if (healthSystem != null)
             healthSystem.OnHealthChanged -= OnEnemyHealthChanged;
+    }
+
+    private float ApplyResistance(float incomingDamage, DamageSourceType damageSource)
+    {
+        if (incomingDamage <= 0f) return 0f;
+
+        float reduction = 0f;
+        switch (damageSource)
+        {
+            case DamageSourceType.PlayerMelee:
+                reduction = meleeResistance;
+                break;
+            case DamageSourceType.PlayerRanged:
+                reduction = rangedResistance;
+                break;
+            default:
+                return incomingDamage;
+        }
+
+        float reducedPercent = Mathf.Clamp01(1f - Mathf.Clamp01(reduction));
+        return incomingDamage * reducedPercent;
+    }
+
+    private void ApplyBufferedDamage(float scaledDamage, int? minAllowed)
+    {
+        if (scaledDamage <= 0f) return;
+
+        pendingDamageBuffer += scaledDamage;
+        int wholeDamage = Mathf.FloorToInt(pendingDamageBuffer);
+        if (wholeDamage <= 0) return;
+
+        int currentHealth = healthSystem.CurrentHealth;
+        int minClamp = minAllowed ?? int.MinValue;
+        if (minClamp != int.MinValue)
+        {
+            int maxAllowedLoss = Mathf.Max(0, currentHealth - minClamp);
+            if (maxAllowedLoss <= 0)
+            {
+                pendingDamageBuffer = Mathf.Min(pendingDamageBuffer, 0.999f);
+                return;
+            }
+            if (wholeDamage > maxAllowedLoss)
+            {
+                int prevented = wholeDamage - maxAllowedLoss;
+                wholeDamage = maxAllowedLoss;
+                pendingDamageBuffer -= prevented;
+            }
+        }
+
+        pendingDamageBuffer -= wholeDamage;
+        healthSystem.TakeDamage(wholeDamage);
+    }
+
+    public void RestoreFullHealth()
+    {
+        pendingDamageBuffer = 0f;
+        if (healthSystem != null)
+        {
+            healthSystem.SetHealth(maxHealth);
+        }
     }
 }
