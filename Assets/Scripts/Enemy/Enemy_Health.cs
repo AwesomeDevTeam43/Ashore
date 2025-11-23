@@ -15,9 +15,9 @@ public class Enemy_Health : MonoBehaviour
     private DropEquipment drop_Equipment;
 
     private int xpOnDeath;
-    private int dropA;
-    private int dropB;
-    private int dropC;
+    private int woodDrop;
+    private int stoneDrop;
+    private int ropeDrop;
 
     private void Awake()
     {
@@ -41,13 +41,13 @@ public class Enemy_Health : MonoBehaviour
         healthSystem.OnHealthChanged += OnEnemyHealthChanged;
     }
 
-    public void Initialize(int maxHp, int xpOnDeath, int dropA, int dropB, int dropC)
+    public void Initialize(int maxHp, int xpOnDeath, int woodDrop, int stoneDrop, int ropeDrop)
     {
         this.maxHealth = maxHp;
         this.xpOnDeath = xpOnDeath;
-        this.dropA = dropA;
-        this.dropB = dropB;
-        this.dropC = dropC;
+        this.woodDrop = woodDrop;
+        this.stoneDrop = stoneDrop;
+        this.ropeDrop = ropeDrop;
 
         if (healthSystem != null)
         {
@@ -98,7 +98,7 @@ public class Enemy_Health : MonoBehaviour
 
             if (drop_Materials != null)
             {
-                drop_Materials.DropMaterial(dropA, dropB, dropC);
+                drop_Materials.DropMaterial(woodDrop, stoneDrop, ropeDrop);
             }
 
             if (drop_Item != null)

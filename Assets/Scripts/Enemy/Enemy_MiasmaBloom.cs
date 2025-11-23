@@ -64,7 +64,7 @@ public class Enemy_MiasmaBloom : EnemyBase
         if (enemyHealth != null)
         {
             if (typedStats != null)
-                enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.dropA, typedStats.dropB, typedStats.dropC);
+                enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop);
             else
                 enemyHealth.Initialize(Mathf.CeilToInt(detectRadius * 2f) + 1, 0, 0, 0, 0);
         }

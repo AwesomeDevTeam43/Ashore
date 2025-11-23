@@ -1,13 +1,20 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public abstract class Enemy_Stats : ScriptableObject
 {
     [Header("Core")]
     public int maxHealth = 5;
     public int xpOnDeath = 1;
-    public int dropA = 0;
-    public int dropB = 0;
-    public int dropC = 0;
+    [FormerlySerializedAs("dropA")]
+    [Tooltip("Amount of wood that drops when this enemy dies.")]
+    public int woodDrop = 0;
+    [FormerlySerializedAs("dropB")]
+    [Tooltip("Amount of stone that drops when this enemy dies.")]
+    public int stoneDrop = 0;
+    [FormerlySerializedAs("dropC")]
+    [Tooltip("Amount of rope that drops when this enemy dies.")]
+    public int ropeDrop = 0;
 
     [Header("Visual")]
     public Vector3 baseScale = Vector3.one;

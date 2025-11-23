@@ -9,6 +9,7 @@ public class DroppingsProjectile : MonoBehaviour
     [SerializeField] private bool destroyOnGround = true;
     [SerializeField] private LayerMask groundMask;
     [SerializeField] private float groundCheckRadius = 0.12f;
+    [SerializeField] private LayerMask damageLayers;
 
     [Header("Puddle Spawn")]
     [SerializeField] private bool spawnPuddleOnGround = true;
@@ -51,10 +52,29 @@ public class DroppingsProjectile : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        if (!IsDamageLayer(other.gameObject.layer))
+        {
+            return;
+        }
+
         if (TryApplyDamage(other))
         {
             Destroy(gameObject);
         }
+    }
+
+    private bool IsDamageLayer(int otherLayer)
+    {
+        if (damageLayers == 0)
+        {
+            // Default to player-only (assumes Player layer exists)
+            int playerLayer = LayerMask.NameToLayer("Player");
+            if (playerLayer >= 0)
+            {
+                damageLayers = 1 << playerLayer;
+            }
+        }
+        return (damageLayers.value & (1 << otherLayer)) != 0;
     }
 
     private bool TryApplyDamage(Collider2D other)

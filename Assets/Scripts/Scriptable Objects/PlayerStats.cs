@@ -17,7 +17,8 @@ public class PlayerStats : ScriptableObject
 
     [Header("XP Settings")]
     [SerializeField] private int level1XpAmount = 5;
-    [SerializeField] private int levelGap = 5;
+    [SerializeField, Tooltip("Multiplier applied to XP requirements each level (>= 1.0)")]
+    private float xpGrowthMultiplier = 1.35f;
 
     public int GetHealth(int level) => baseHealth + (healthUpgradePerLevel * (level - 1));
     public int GetAttackPower(int level) => baseAttackPower + (attackPowerUpgradePerLevel * (level - 1));
@@ -25,5 +26,5 @@ public class PlayerStats : ScriptableObject
     public float GetJumpForce(int level) => baseJumpForce + (jumpForceUpgradePerLevel * (level - 1));
 
     public int Level1XpAmount => level1XpAmount;
-    public int LevelGap => levelGap;
+    public float XpGrowthMultiplier => xpGrowthMultiplier;
 }
