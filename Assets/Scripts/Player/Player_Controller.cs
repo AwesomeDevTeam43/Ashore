@@ -70,7 +70,7 @@ public class Player_Controller : MonoBehaviour
   public float MoveSpeed => currentMoveSpeed;
   public float JumpForce => currentJumpForce;
   public int LVL1XpAmount => playerStats != null ? playerStats.Level1XpAmount : 0;
-  public int LvlGap => playerStats != null ? playerStats.LevelGap : 0;
+  public float XpGrowthMultiplier => playerStats != null ? Mathf.Max(1f, playerStats.XpGrowthMultiplier) : 1f;
   public Equipment CurrentEquipment => currentEquipment;
   public EquipmentData LastEquippedData => lastEquippedData;
 
@@ -102,7 +102,7 @@ public class Player_Controller : MonoBehaviour
 
     if (xP_System != null)
     {
-      xP_System.Initialize(LVL1XpAmount, LvlGap);
+      xP_System.Initialize(LVL1XpAmount, XpGrowthMultiplier);
     }
 
     UpdateStats(1);
@@ -179,7 +179,7 @@ private void Start()
     else
     {
       // No save file to load, so start a fresh game.
-      xP_System.Initialize(LVL1XpAmount, LvlGap);
+      xP_System.Initialize(LVL1XpAmount, XpGrowthMultiplier);
     }
 }
 
@@ -407,7 +407,7 @@ private void Start()
           // Re-initialize systems with saved state
           GetComponent<HealthSystem>().MaxHealth = data.maxHealth;
           playerHealth.SetHealth(data.currentHealth);
-          xP_System.Initialize(data.level, data.currentXp, data.maxXp, LvlGap);
+          xP_System.Initialize(data.level, data.currentXp, data.maxXp, LVL1XpAmount, XpGrowthMultiplier);
 
           // Restore other stats and notify other systems of the level change
           UpdateStats(data.level);

@@ -6,27 +6,30 @@ public class XP_System : MonoBehaviour
     private int _current_Xp;
     private int _Max_Xp_PerLevel;
     private int _Current_Level = 1;
-    private int _levelGap;
+    private int _baseXpRequirement;
+    private float _xpGrowthMultiplier = 1f;
 
     [SerializeField] private GameObject _xp_Particle;
 
     public event Action<int> OnCollectXP;
     public event Action<int> OnLevelUp;
 
-    public void Initialize(int _max_Xp_1stLVL, int levelGap)
+    public void Initialize(int baseXpRequirement, float xpGrowthMultiplier)
     {
-        _Max_Xp_PerLevel = _max_Xp_1stLVL;
+        _baseXpRequirement = Mathf.Max(1, baseXpRequirement);
+        _xpGrowthMultiplier = Mathf.Max(1f, xpGrowthMultiplier);
         _current_Xp = 0;
         _Current_Level = 1;
-        _levelGap = levelGap;
+        _Max_Xp_PerLevel = CalculateXpForLevel(_Current_Level);
     }
 
-    public void Initialize(int level, int currentXp, int maxXp, int levelGap)
+    public void Initialize(int level, int currentXp, int maxXp, int baseXpRequirement, float xpGrowthMultiplier)
     {
-        _Current_Level = level;
-        _current_Xp = currentXp;
-        _Max_Xp_PerLevel = maxXp;
-        _levelGap = levelGap;
+        _baseXpRequirement = Mathf.Max(1, baseXpRequirement);
+        _xpGrowthMultiplier = Mathf.Max(1f, xpGrowthMultiplier);
+        _Current_Level = Mathf.Max(1, level);
+        _current_Xp = Mathf.Max(0, currentXp);
+        _Max_Xp_PerLevel = maxXp > 0 ? maxXp : CalculateXpForLevel(_Current_Level);
     }
 
     public void IncreaseXP(int xpAmount)
@@ -40,13 +43,8 @@ public class XP_System : MonoBehaviour
 
     public void SetLevel(int level)
     {
-        _Current_Level = level;
-        // Recalculate max XP for the new level
-        _Max_Xp_PerLevel = 100; // Assuming 100 is the base XP for level 1
-        for (int i = 1; i < level; i++)
-        {
-            _Max_Xp_PerLevel += _levelGap;
-        }
+        _Current_Level = Mathf.Max(1, level);
+        _Max_Xp_PerLevel = CalculateXpForLevel(_Current_Level);
         OnLevelUp?.Invoke(_Current_Level);
     }
 
@@ -57,19 +55,23 @@ public class XP_System : MonoBehaviour
 
     private void LevelUp()
     {
-        if (_current_Xp >= _Max_Xp_PerLevel)
+        while (_Max_Xp_PerLevel > 0 && _current_Xp >= _Max_Xp_PerLevel)
         {
-            int xpExceed = _current_Xp - _Max_Xp_PerLevel;
-            _current_Xp = xpExceed;
+            _current_Xp -= _Max_Xp_PerLevel;
             _Current_Level += 1;
-            _Max_Xp_PerLevel += _levelGap;
+            _Max_Xp_PerLevel = CalculateXpForLevel(_Current_Level);
 
             OnLevelUp?.Invoke(_Current_Level);
-
-            Debug.Log($"Level Up to {_Current_Level}, Current XP : {_current_Xp}");
-
-            LevelUp();
+            Debug.Log($"Level Up to {_Current_Level}, Current XP : {_current_Xp}, Next Level Requires {_Max_Xp_PerLevel}");
         }
+    }
+
+    private int CalculateXpForLevel(int level)
+    {
+        int normalizedLevel = Mathf.Max(1, level);
+        float exponent = Mathf.Max(0, normalizedLevel - 1);
+        float scaled = _baseXpRequirement * Mathf.Pow(_xpGrowthMultiplier, exponent);
+        return Mathf.Max(1, Mathf.CeilToInt(scaled));
     }
 
     public void DropXP(Vector3 position, int particlesAmount)
@@ -110,5 +112,5 @@ public class XP_System : MonoBehaviour
     public int CurrentXp => _current_Xp;
     public int CurrentLevel => _Current_Level;
     public int MaxXpPerLevel => _Max_Xp_PerLevel;
-    public float XpProgress => (float)_current_Xp / _Max_Xp_PerLevel;
+    public float XpProgress => _Max_Xp_PerLevel > 0 ? (float)_current_Xp / _Max_Xp_PerLevel : 0f;
 }

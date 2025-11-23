@@ -124,7 +124,7 @@ public class OldFriend_Boss : EnemyBase
 
         if (enemyHealth != null && TypedStats != null)
         {
-            enemyHealth.Initialize(TypedStats.maxHealth, TypedStats.xpOnDeath, TypedStats.dropA, TypedStats.dropB, TypedStats.dropC);
+            enemyHealth.Initialize(TypedStats.maxHealth, TypedStats.xpOnDeath, TypedStats.woodDrop, TypedStats.stoneDrop, TypedStats.ropeDrop);
         }
 
         if (healthSystem != null)

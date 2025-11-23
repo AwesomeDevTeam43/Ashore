@@ -83,7 +83,7 @@ public class Enemy_Salamander : EnemyBase
     homePosition = transform.position;
     if (enemyHealth != null && typedStats != null)
     {
-      enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.dropA, typedStats.dropB, typedStats.dropC);
+      enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop);
     }
     var playerObj = GameObject.FindGameObjectWithTag("Player");
     if (playerObj) player = playerObj.transform;

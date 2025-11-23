@@ -50,7 +50,7 @@ public class Enemy_RuinsBoss : EnemyBase
 
         if (enemyHealth != null && stats != null)
         {
-            enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.dropA, typedStats.dropB, typedStats.dropC);
+            enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop);
         }
 
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
