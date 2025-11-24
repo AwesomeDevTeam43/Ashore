@@ -12,12 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9f9d94b21a6405478b9e3f7af724c2e, type: 3}
   m_Name: Serpent_Stats 1
   m_EditorClassIdentifier: 
-  maxHealth: 15
-  xpOnDeath: 3
-  dropA: 3
-  dropB: 2
-  dropC: 4
+  maxHealth: 10
+  xpOnDeath: 5
+  woodDrop: 0
+  stoneDrop: 0
+  ropeDrop: 4
   baseScale: {x: 2, y: 2, z: 1}
+  meleeResistance: 0
+  rangedResistance: 0
   distanceToPlayer: 8
   meleeRange: 2
   biteDamage: 2

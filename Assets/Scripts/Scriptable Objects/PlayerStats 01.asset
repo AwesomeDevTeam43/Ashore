@@ -20,5 +20,5 @@ MonoBehaviour:
   attackPowerUpgradePerLevel: 1
   moveSpeedUpgradePerLevel: 0.5
   jumpForceUpgradePerLevel: 0.5
-  level1XpAmount: 5
-  levelGap: 5
+  level1XpAmount: 20
+  xpGrowthMultiplier: 1.35

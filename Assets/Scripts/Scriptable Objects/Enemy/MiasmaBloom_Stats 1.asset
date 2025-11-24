@@ -13,11 +13,13 @@ MonoBehaviour:
   m_Name: MiasmaBloom_Stats 1
   m_EditorClassIdentifier: 
   maxHealth: 10
-  xpOnDeath: 1
-  dropA: 2
-  dropB: 2
-  dropC: 2
+  xpOnDeath: 3
+  woodDrop: 2
+  stoneDrop: 0
+  ropeDrop: 2
   baseScale: {x: 1.5, y: 1.5, z: 1}
+  meleeResistance: 0
+  rangedResistance: 0
   playerDetect: 3
   attackRange: 2.5
   attackDelay: 0.6

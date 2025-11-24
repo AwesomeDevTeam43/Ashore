@@ -12,12 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cfec483b87b0bd41840aea0ec1c1f5d, type: 3}
   m_Name: Golem_Stats
   m_EditorClassIdentifier: 
-  maxHealth: 5
+  maxHealth: 10
   xpOnDeath: 1
-  dropA: 0
-  dropB: 0
-  dropC: 0
+  woodDrop: 0
+  stoneDrop: 3
+  ropeDrop: 0
   baseScale: {x: 1, y: 1, z: 1}
+  meleeResistance: 0
+  rangedResistance: 0
   moveSpeed: 2
   hopCheckDistance: 0.23
   maxStepHeight: 1

@@ -152,7 +152,7 @@ public class MenuController : MonoBehaviour
                         if (item != null)
                         {
                             string qtyStr = qty > 1 ? " x" + qty.ToString() : "";
-                            footerText.text = $"{item.itemName}{qtyStr} — {item.description}";
+                            footerText.text = $"{item.itemName}{qtyStr}  E{item.description}";
                         }
                         else
                         {
@@ -417,8 +417,8 @@ public class MenuController : MonoBehaviour
         if (cachedUIInventory != null)
         {
             cachedUIInventory.performed -= OnUIInventoryPerformed;
-            if (cachedUIInventory.enabled) cachedUIInventory.Disable();
-            cachedUIInventory = null;
+            // Do NOT disable cachedUIInventory; keep it enabled at all times
+            // cachedUIInventory = null; // Optionally keep reference
         }
         if (cachedUICancel != null)
         {
@@ -621,3 +621,4 @@ public class MenuController : MonoBehaviour
         }
     }
 }
+
