@@ -90,7 +90,7 @@ public class EquipmentPage : MonoBehaviour
             {
                 disableButton.gameObject.SetActive(true);
                 var label = disableButton.GetComponentInChildren<TextMeshProUGUI>();
-                if (label != null) label.text = "Disable";
+                if (label != null) label.text = "Unequip";
                 disableButton.interactable = true;
             }
         }
@@ -131,7 +131,7 @@ public class EquipmentPage : MonoBehaviour
         if (disableButton != null)
         {
             var label = disableButton.GetComponentInChildren<TextMeshProUGUI>();
-            if (label != null) label.text = "Disable";
+            if (label != null) label.text = "Unequip";
             disableButton.interactable = false;
         }
     }
