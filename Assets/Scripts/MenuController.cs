@@ -172,6 +172,26 @@ public class MenuController : MonoBehaviour
         }
     }
 
+    private void LateUpdate()
+    {
+        if (!pauseOnOpen) return;
+
+        if (IsMenuOpen)
+        {
+            if (!Mathf.Approximately(Time.timeScale, 0f))
+            {
+                Time.timeScale = 0f;
+            }
+        }
+        else
+        {
+            if (!Mathf.Approximately(Time.timeScale, 1f))
+            {
+                Time.timeScale = 1f;
+            }
+        }
+    }
+
     private void HandleHeaderToContentFallback()
     {
         // Detect a downward navigation intent
@@ -322,16 +342,8 @@ public class MenuController : MonoBehaviour
         // Ensure a selection guard exists so navigation cannot lose focus or select non-interactive elements
         var guard = menuRoot.GetComponent<UISelectionGuard>();
         if (guard == null) guard = menuRoot.AddComponent<UISelectionGuard>();
-        // Disable gameplay inputs while menu is open
-        if (inputHandler != null)
-        {
-            inputHandler.DisablePlayerActions();
-        }
-        // Switch PlayerInput to UI map if available (ensures UI actions are paired to the same user)
-        if (playerInput != null)
-        {
-            try { playerInput.SwitchCurrentActionMap("UI"); } catch { }
-        }
+        // Keep gameplay inputs enabled so builds never lose control after reloads.
+        // We rely on explicit UI actions instead of swapping/disable maps to avoid stuck input state.
         EnableUIShortcuts();
         EnsureHighlightsForAllInteractables();
         // Re-enable built-in navigation and disable any forced cycler
@@ -353,16 +365,6 @@ public class MenuController : MonoBehaviour
         if (es != null) es.SetSelectedGameObject(null);
         menuRoot.SetActive(false);
         DisableUIShortcuts();
-        // Re-enable gameplay inputs when closing menu
-        if (inputHandler != null)
-        {
-            inputHandler.EnablePlayerActions();
-        }
-        // Switch back to Player map after closing
-        if (playerInput != null)
-        {
-            try { playerInput.SwitchCurrentActionMap("Player"); } catch { }
-        }
         // Ensure built-in navigation is on
         if (es == null) es = EventSystem.current;
         if (es != null) es.sendNavigationEvents = true;
@@ -370,11 +372,26 @@ public class MenuController : MonoBehaviour
 
     private void OnDestroy()
     {
+        RestoreGameplayState();
         DisableUIShortcuts();
         if (inputHandler != null)
         {
             inputHandler.OnInventoryPressed -= ToggleMenu;
         }
+    }
+
+    private void OnDisable()
+    {
+        RestoreGameplayState();
+    }
+
+    private void RestoreGameplayState()
+    {
+        if (pauseOnOpen)
+        {
+            Time.timeScale = 1f;
+        }
+        // Input maps stay enabled at all times, nothing else required.
     }
 
     private void EnableUIShortcuts()
