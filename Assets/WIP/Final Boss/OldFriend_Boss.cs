@@ -39,6 +39,12 @@ public class OldFriend_Boss : EnemyBase
     [Header("Movement")]
     [SerializeField] private float followSpeed = 3f;
     [SerializeField] private float followLerpSpeed = 5f;
+    [SerializeField] private Transform movementBoundsCenter;
+    [SerializeField] private float minX = -10f;
+    [SerializeField] private float maxX = 10f;
+    [SerializeField] private float minY = -5f;
+    [SerializeField] private float maxY = 5f;
+    [SerializeField] private Color gizmoBoundsColor = new Color(0.2f, 0.8f, 1f, 0.65f);
 
     [Header("Activation")]
     [SerializeField] private bool bossActive = false;
@@ -261,8 +267,11 @@ public class OldFriend_Boss : EnemyBase
             float baseY = (transform.parent != null ? transform.parent.position.y : transform.position.y) + y;
 
             float desiredX = Mathf.Lerp(transform.position.x, player.position.x, followSpeed * Time.deltaTime);
+            GetMovementBounds(out float xMin, out float xMax, out float yMin, out float yMax);
+            float clampedX = Mathf.Clamp(desiredX, xMin, xMax);
+            float clampedY = Mathf.Clamp(baseY, yMin, yMax);
 
-            Vector3 targetPos = new Vector3(desiredX, baseY, transform.position.z);
+            Vector3 targetPos = new Vector3(clampedX, clampedY, transform.position.z);
             transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * followLerpSpeed);
         }
 
@@ -558,5 +567,37 @@ public class OldFriend_Boss : EnemyBase
                 animator.SetBool(animInjuredHash, false);
             }
         }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        GetMovementBounds(out float xMin, out float xMax, out float yMin, out float yMax);
+        Vector3 center = new Vector3((xMin + xMax) * 0.5f, (yMin + yMax) * 0.5f, transform.position.z);
+        Vector3 size = new Vector3(Mathf.Abs(xMax - xMin), Mathf.Abs(yMax - yMin), 0.1f);
+
+        Color prev = Gizmos.color;
+        Gizmos.color = gizmoBoundsColor;
+        Gizmos.DrawWireCube(center, size);
+
+        Color fill = gizmoBoundsColor;
+        fill.a *= 0.25f;
+        Gizmos.color = fill;
+        Gizmos.DrawCube(center, size);
+        Gizmos.color = prev;
+    }
+
+    private void GetMovementBounds(out float outMinX, out float outMaxX, out float outMinY, out float outMaxY)
+    {
+        Vector3 anchor = movementBoundsCenter != null ? movementBoundsCenter.position : transform.position;
+
+        float localMinX = Mathf.Min(minX, maxX);
+        float localMaxX = Mathf.Max(minX, maxX);
+        float localMinY = Mathf.Min(minY, maxY);
+        float localMaxY = Mathf.Max(minY, maxY);
+
+        outMinX = anchor.x + localMinX;
+        outMaxX = anchor.x + localMaxX;
+        outMinY = anchor.y + localMinY;
+        outMaxY = anchor.y + localMaxY;
     }
 }
