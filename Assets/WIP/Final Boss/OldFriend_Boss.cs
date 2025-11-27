@@ -60,6 +60,7 @@ public class OldFriend_Boss : EnemyBase
     private bool coreDestroyedDuringPhase = false;
     private Coroutine injuredCoroutine;
     private bool injuredPhaseEnded = false;
+    private int pendingStageTarget = -1;
 
     private readonly float[] thresholds = new float[] { 0.75f, 0.5f, 0.25f };
     private bool[] thresholdTriggered;
@@ -339,6 +340,7 @@ public class OldFriend_Boss : EnemyBase
         shootTimer = 0f;
         coreDestroyedDuringPhase = false;
         injuredPhaseEnded = false;
+        pendingStageTarget = Mathf.Clamp(stageIndex + 2, 1, 4);
         Debug.Log($"{name}: Entering InjuredPhase stage {stageIndex}. Unprotecting cores for {injuredStopDuration}s or until one is destroyed.");
 
         try
@@ -407,9 +409,12 @@ public class OldFriend_Boss : EnemyBase
             Debug.Log($"{name}: InjuredPhase finishing; running cleanup.");
             ExitInjuredPhaseCleanup();
             injuredCoroutine = null;
-
-            int newStage = Mathf.Clamp(stageIndex + 2, 1, 4);
-            ApplyStageSettings(newStage);
+            if (!coreDestroyedDuringPhase)
+            {
+                if (stageIndex >= 0 && stageIndex < thresholdTriggered.Length)
+                    thresholdTriggered[stageIndex] = false;
+                pendingStageTarget = -1;
+            }
         }
     }
 
@@ -448,6 +453,10 @@ public class OldFriend_Boss : EnemyBase
         ExitInjuredPhaseCleanup();
 
         currentShootInterval *= 0.85f;
+
+        if (pendingStageTarget > currentStage)
+            ApplyStageSettings(pendingStageTarget);
+        pendingStageTarget = -1;
     }
 
 	private void ExitInjuredPhaseCleanup()
