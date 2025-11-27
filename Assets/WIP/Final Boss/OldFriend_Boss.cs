@@ -16,6 +16,7 @@ public class OldFriend_Boss : EnemyBase
 
     [Header("Timing")]
     [SerializeField] private float injuredStopDuration = 10f;
+    [SerializeField] private float injuredCoreUnlockDelay = 1f;
 
     private Enemy_Health enemyHealth;
     private HealthSystem healthSystem;
@@ -353,6 +354,13 @@ public class OldFriend_Boss : EnemyBase
 
             RefreshCores(true);
             Debug.Log($"{name}: InjuredPhase - cores count={(cores!=null?cores.Length:0)}");
+
+            if (injuredCoreUnlockDelay > 0f)
+            {
+                Debug.Log($"{name}: InjuredPhase - waiting {injuredCoreUnlockDelay}s before exposing cores.");
+                yield return new WaitForSeconds(injuredCoreUnlockDelay);
+            }
+
             if (cores != null)
             {
                 for (int i = 0; i < cores.Length; i++)
