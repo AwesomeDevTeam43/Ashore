@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60ae19962eecdde42a0b75d5cce4fdbd, type: 3}
+  m_Name: MiasmaBloom_Stats 1
+  m_EditorClassIdentifier: 
+  maxHealth: 10
+  xpOnDeath: 3
+  woodDrop: 2
+  stoneDrop: 0
+  ropeDrop: 2
+  baseScale: {x: 1.5, y: 1.5, z: 1}
+  meleeResistance: 0
+  rangedResistance: 0
+  playerDetect: 3
+  attackRange: 2.5
+  attackDelay: 0.6
+  attackRadius: 0.6
+  biteDamage: 2
+  attackCooldown: 1.5
