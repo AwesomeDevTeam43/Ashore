@@ -102,7 +102,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 734b4189fb2bccf4abeae0661de23fb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xpValue: 3
+  xpValue: 2
   playerTag: Player
   groundLayers:
     serializedVersion: 2

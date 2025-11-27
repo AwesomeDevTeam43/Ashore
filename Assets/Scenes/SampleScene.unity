@@ -12601,6 +12601,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 284604024}
     m_Modifications:
+    - target: {fileID: 2708723344323603956, guid: d93b88b915da8484bbb592e1e866f2ee, type: 3}
+      propertyPath: enemyPrefab
+      value: 
+      objectReference: {fileID: 5083669464025086213, guid: 16b11298468613d49891ba424d2370d4, type: 3}
     - target: {fileID: 3081010686561599349, guid: d93b88b915da8484bbb592e1e866f2ee, type: 3}
       propertyPath: m_LocalPosition.x
       value: -269.47498
@@ -19603,6 +19607,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5141185270747572182, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
+      propertyPath: godMode
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6252809459483690441, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
       propertyPath: m_Name
       value: Player

@@ -61,7 +61,7 @@ public class Player_Health : MonoBehaviour
         {
             return;
         }
-        Debug.Log($"Initializing HealthSystem with {currentHealth} HP");
+        Debug.Log($"Player_Health: Initializing HealthSystem with {currentHealth} HP");
         healthSystem.Initialize(currentHealth);
         previousHealth = healthSystem.CurrentHealth;
     }
@@ -99,6 +99,8 @@ public class Player_Health : MonoBehaviour
             // Update max health and set current health
             healthSystem.MaxHealth = currentHealth;
             healthSystem.SetHealth(newCurrentHealth);
+            
+            Debug.Log($"Player_Health: Level up! Max HP: {currentHealth}, Current HP: {newCurrentHealth}");
         }
     }
 
@@ -109,37 +111,46 @@ public class Player_Health : MonoBehaviour
     }
 
     private void OnPlayerHealthChanged(int currentHealth, int maxHealth)
-    {
+    {        
+        // IMPORTANTE: NÃO chamar SetHealth aqui - isso causa loop e eventos duplicados!
+        // O HealthSystem já atualizou internamente antes de invocar este evento
+
+        // God Mode: restaura vida instantaneamente
         if (godMode && currentHealth < maxHealth)
         {
-            // Instantly restore HP and skip any death logic
+            Debug.Log("Player_Health: God Mode ativo - restaurando HP");
+            // Aqui pode chamar SetHealth porque é intencional restaurar
             healthSystem.SetHealth(maxHealth);
             previousHealth = maxHealth;
             return;
         }
 
+        // Efeito visual de dano
         if (currentHealth < previousHealth)
         {
             StartCoroutine(DamageEffect());
             playerCamera?.StartCameraShake();
         }
 
+        // Atualiza o HP anterior
         previousHealth = currentHealth;
 
+        // Verifica morte
         if (currentHealth <= 0)
         {
-            if (processingDeath) return;
+            if (processingDeath)
+            {
+                return;
+            }
+            
             processingDeath = true;
             IsAlive = false;
-            // Drop any carried items/state immediately
-            if (Inventory.instance != null)
-            {
-                Inventory.instance.Clear();
-            }
+            
+            Debug.Log("Player_Health: Player morreu - voltando ao menu");
+            
             // Destroy the persistent player so the menu/new game spawns a fresh one
             PlayerPersistence.DestroyPersistentPlayer();
             SceneManager.LoadScene("MainMenu");
-            return;
         }
     }
 
@@ -173,6 +184,7 @@ public class Player_Health : MonoBehaviour
     {
         if (collision.gameObject.layer == LayerMask.NameToLayer("FallLevel"))
         {
+            Debug.Log("Player_Health: Player caiu - voltando ao checkpoint e tomando dano");
             GetComponent<Player_Controller>().ReturnToLastPoint();
             healthSystem.TakeDamage(1);
         }
