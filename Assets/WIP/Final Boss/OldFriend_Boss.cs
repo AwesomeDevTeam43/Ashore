@@ -106,6 +106,9 @@ public class OldFriend_Boss : EnemyBase
         {
             var parentRb = transform.parent.GetComponent<Rigidbody2D>();
             transform.SetParent(null);
+            Vector3 pos = transform.position;
+            pos.z = 0f;
+            transform.position = pos;
         }
 
         var rbs = GetComponentsInChildren<Rigidbody2D>(true);
