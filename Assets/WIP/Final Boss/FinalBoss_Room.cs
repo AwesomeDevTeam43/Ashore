@@ -49,7 +49,7 @@ public class FinalBoss_Room : MonoBehaviour
 
 		if (destroyTriggerAfterActivation && triggerCollider != null)
 		{
-			Destroy(triggerCollider);
+			triggerCollider.enabled = false;
 		}
 	}
 }

@@ -16,6 +16,7 @@ public class OldFriend_Boss : EnemyBase
 
     [Header("Timing")]
     [SerializeField] private float injuredStopDuration = 10f;
+    [SerializeField] private float injuredCoreUnlockDelay = 1f;
 
     private Enemy_Health enemyHealth;
     private HealthSystem healthSystem;
@@ -38,6 +39,12 @@ public class OldFriend_Boss : EnemyBase
     [Header("Movement")]
     [SerializeField] private float followSpeed = 3f;
     [SerializeField] private float followLerpSpeed = 5f;
+    [SerializeField] private Transform movementBoundsCenter;
+    [SerializeField] private float minX = -10f;
+    [SerializeField] private float maxX = 10f;
+    [SerializeField] private float minY = -5f;
+    [SerializeField] private float maxY = 5f;
+    [SerializeField] private Color gizmoBoundsColor = new Color(0.2f, 0.8f, 1f, 0.65f);
 
     [Header("Activation")]
     [SerializeField] private bool bossActive = false;
@@ -59,6 +66,7 @@ public class OldFriend_Boss : EnemyBase
     private bool coreDestroyedDuringPhase = false;
     private Coroutine injuredCoroutine;
     private bool injuredPhaseEnded = false;
+    private int pendingStageTarget = -1;
 
     private readonly float[] thresholds = new float[] { 0.75f, 0.5f, 0.25f };
     private bool[] thresholdTriggered;
@@ -106,6 +114,9 @@ public class OldFriend_Boss : EnemyBase
         {
             var parentRb = transform.parent.GetComponent<Rigidbody2D>();
             transform.SetParent(null);
+            Vector3 pos = transform.position;
+            pos.z = 0f;
+            transform.position = pos;
         }
 
         var rbs = GetComponentsInChildren<Rigidbody2D>(true);
@@ -256,8 +267,11 @@ public class OldFriend_Boss : EnemyBase
             float baseY = (transform.parent != null ? transform.parent.position.y : transform.position.y) + y;
 
             float desiredX = Mathf.Lerp(transform.position.x, player.position.x, followSpeed * Time.deltaTime);
+            GetMovementBounds(out float xMin, out float xMax, out float yMin, out float yMax);
+            float clampedX = Mathf.Clamp(desiredX, xMin, xMax);
+            float clampedY = Mathf.Clamp(baseY, yMin, yMax);
 
-            Vector3 targetPos = new Vector3(desiredX, baseY, transform.position.z);
+            Vector3 targetPos = new Vector3(clampedX, clampedY, transform.position.z);
             transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * followLerpSpeed);
         }
 
@@ -335,6 +349,7 @@ public class OldFriend_Boss : EnemyBase
         shootTimer = 0f;
         coreDestroyedDuringPhase = false;
         injuredPhaseEnded = false;
+        pendingStageTarget = Mathf.Clamp(stageIndex + 2, 1, 4);
         Debug.Log($"{name}: Entering InjuredPhase stage {stageIndex}. Unprotecting cores for {injuredStopDuration}s or until one is destroyed.");
 
         try
@@ -350,6 +365,13 @@ public class OldFriend_Boss : EnemyBase
 
             RefreshCores(true);
             Debug.Log($"{name}: InjuredPhase - cores count={(cores!=null?cores.Length:0)}");
+
+            if (injuredCoreUnlockDelay > 0f)
+            {
+                Debug.Log($"{name}: InjuredPhase - waiting {injuredCoreUnlockDelay}s before exposing cores.");
+                yield return new WaitForSeconds(injuredCoreUnlockDelay);
+            }
+
             if (cores != null)
             {
                 for (int i = 0; i < cores.Length; i++)
@@ -396,9 +418,12 @@ public class OldFriend_Boss : EnemyBase
             Debug.Log($"{name}: InjuredPhase finishing; running cleanup.");
             ExitInjuredPhaseCleanup();
             injuredCoroutine = null;
-
-            int newStage = Mathf.Clamp(stageIndex + 2, 1, 4);
-            ApplyStageSettings(newStage);
+            if (!coreDestroyedDuringPhase)
+            {
+                if (stageIndex >= 0 && stageIndex < thresholdTriggered.Length)
+                    thresholdTriggered[stageIndex] = false;
+                pendingStageTarget = -1;
+            }
         }
     }
 
@@ -437,6 +462,10 @@ public class OldFriend_Boss : EnemyBase
         ExitInjuredPhaseCleanup();
 
         currentShootInterval *= 0.85f;
+
+        if (pendingStageTarget > currentStage)
+            ApplyStageSettings(pendingStageTarget);
+        pendingStageTarget = -1;
     }
 
 	private void ExitInjuredPhaseCleanup()
@@ -538,5 +567,37 @@ public class OldFriend_Boss : EnemyBase
                 animator.SetBool(animInjuredHash, false);
             }
         }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        GetMovementBounds(out float xMin, out float xMax, out float yMin, out float yMax);
+        Vector3 center = new Vector3((xMin + xMax) * 0.5f, (yMin + yMax) * 0.5f, transform.position.z);
+        Vector3 size = new Vector3(Mathf.Abs(xMax - xMin), Mathf.Abs(yMax - yMin), 0.1f);
+
+        Color prev = Gizmos.color;
+        Gizmos.color = gizmoBoundsColor;
+        Gizmos.DrawWireCube(center, size);
+
+        Color fill = gizmoBoundsColor;
+        fill.a *= 0.25f;
+        Gizmos.color = fill;
+        Gizmos.DrawCube(center, size);
+        Gizmos.color = prev;
+    }
+
+    private void GetMovementBounds(out float outMinX, out float outMaxX, out float outMinY, out float outMaxY)
+    {
+        Vector3 anchor = movementBoundsCenter != null ? movementBoundsCenter.position : transform.position;
+
+        float localMinX = Mathf.Min(minX, maxX);
+        float localMaxX = Mathf.Max(minX, maxX);
+        float localMinY = Mathf.Min(minY, maxY);
+        float localMaxY = Mathf.Max(minY, maxY);
+
+        outMinX = anchor.x + localMinX;
+        outMaxX = anchor.x + localMaxX;
+        outMinY = anchor.y + localMinY;
+        outMaxY = anchor.y + localMaxY;
     }
 }
