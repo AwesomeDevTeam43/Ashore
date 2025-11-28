@@ -134,6 +134,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stats: {fileID: 0}
+  currentLevel: 1
   typedStats: {fileID: 0}
   walkBoolName: isWalking
   attackTriggerName: Attack

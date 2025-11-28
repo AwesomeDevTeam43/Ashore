@@ -22,11 +22,6 @@ public class Enemy_Fly : EnemyBase
         enemyHealth = GetComponent<Enemy_Health>();
         rb = GetComponent<Rigidbody2D>();
 
-        if (enemyHealth != null && typedStats != null)
-        {
-            enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop, typedStats.meleeResistance, typedStats.rangedResistance);
-        }
-
         rb.gravityScale = 0;
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
 

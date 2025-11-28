@@ -47,26 +47,22 @@ public class Enemy_Golem : EnemyBase
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponentInChildren<Animator>();
         col2d = GetComponent<Collider2D>();
-        if (enemyHealth != null && typedStats != null)
-        {
-            enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop, typedStats.meleeResistance, typedStats.rangedResistance);
-        }
+        
         var p = GameObject.FindGameObjectWithTag("Player");
         if (p) player = p.transform;
 
         rb.gravityScale = 3f;
         rb.freezeRotation = true;
-    defaultDamping = rb.linearDamping;
+        defaultDamping = rb.linearDamping;
 
-        // Prepare a low-friction material to reduce wall sticking when airborne
         if (col2d != null)
         {
             originalMaterial = col2d.sharedMaterial;
             lowFrictionMaterial = new PhysicsMaterial2D("GolemLowFriction") { friction = 0f, bounciness = 0f };
         }
 
-    lastX = transform.position.x;
-    spawnPos = transform.position;
+        lastX = transform.position.x;
+        spawnPos = transform.position;
 
     }
 
@@ -354,17 +350,15 @@ public class Enemy_Golem : EnemyBase
 
     // Animation event hook: call from the slam animation at the hit frame
     public void AnimEvent_GolemSlam()
-        
     {
         float radius = typedStats != null ? typedStats.slamRadius : 2.75f;
-        int damage = typedStats != null ? typedStats.slamDamage : 6;
         int mask = slamHitMask.value != 0 ? slamHitMask.value : LayerMask.GetMask("Player");
         var hits = Physics2D.OverlapCircleAll(transform.position, radius, mask);
         foreach (var h in hits)
         {
             if (!IsPlayerCollider(h)) continue;
             var hs = h.GetComponent<HealthSystem>() ?? h.GetComponentInParent<HealthSystem>();
-            if (hs != null) hs.TakeDamage(damage);
+            if (hs != null) hs.TakeDamage((int)currentDamage);
         }
     }
 

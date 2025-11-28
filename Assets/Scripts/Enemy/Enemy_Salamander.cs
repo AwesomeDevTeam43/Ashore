@@ -81,10 +81,7 @@ public class Enemy_Salamander : EnemyBase
     rb = GetComponent<Rigidbody2D>();
     animator = GetComponentInChildren<Animator>();
     homePosition = transform.position;
-    if (enemyHealth != null && typedStats != null)
-    {
-      enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop, typedStats.meleeResistance, typedStats.rangedResistance);
-    }
+    
     var playerObj = GameObject.FindGameObjectWithTag("Player");
     if (playerObj) player = playerObj.transform;
     shotCooldown = 0f;
@@ -374,9 +371,9 @@ public class Enemy_Salamander : EnemyBase
         var hs = FindHealth(h.transform);
         if (hs != null)
         {
-          hs.TakeDamage(typedStats.biteDamage);
+          hs.TakeDamage((int)currentDamage);
           damaged = true;
-          break; // one target per bite
+          break;
         }
       }
     }
@@ -387,7 +384,7 @@ public class Enemy_Salamander : EnemyBase
       {
         Vector2 source = bitePoint != null ? (Vector2)bitePoint.position : (Vector2)transform.position;
         float dist2D = Vector2.Distance(source, player.position);
-        if (dist2D <= BiteRange * 1.1f) hs.TakeDamage(typedStats.biteDamage);
+        if (dist2D <= BiteRange * 1.1f) hs.TakeDamage((int)currentDamage);
       }
     }
   }

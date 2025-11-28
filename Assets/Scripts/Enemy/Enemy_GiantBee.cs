@@ -54,14 +54,9 @@ public class BeeEnemy : EnemyBase
     typedStats = stats as GiantBee_Stats;
 
     enemyHealth = GetComponent<Enemy_Health>();
-    if (enemyHealth != null && typedStats != null)
-    {
-      enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop, typedStats.meleeResistance, typedStats.rangedResistance);
-    }
-
+    
     rb = GetComponent<Rigidbody2D>();
     if (rb == null) rb = gameObject.AddComponent<Rigidbody2D>();
-    // Configure Rigidbody2D for flying enemy and robust collision
     rb.gravityScale = 0f;
     rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
     rb.interpolation = RigidbodyInterpolation2D.Interpolate;
@@ -539,7 +534,7 @@ public class BeeEnemy : EnemyBase
       Debug.Log("Stung the player! Retreating.");
       if (playerHealth != null)
       {
-        playerHealth.TakeDamage(typedStats.stingDamage);
+        playerHealth.TakeDamage((int)currentDamage);
       }
       EndLunge();
     }

@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: BigCrab_Stats 1
   m_EditorClassIdentifier: 
   maxHealth: 5
-  xpOnDeath: 3
-  woodDrop: 5
-  stoneDrop: 2
-  ropeDrop: 3
+  damage: 1
+  xpOnDeath: 1
+  woodDrop: 1
+  stoneDrop: 1
+  ropeDrop: 1
   baseScale: {x: 3.34, y: 3.34, z: 1}
   meleeResistance: 0
   rangedResistance: 0
