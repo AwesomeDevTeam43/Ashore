@@ -30922,7 +30922,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 5
   m_Sprite: {fileID: 5960758186573134404, guid: 50553dde9aed0394781a2cf76a35f98a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -69564,14 +69564,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stats: {fileID: 11400000, guid: 5132dcdf12051334284a247d24eaae1a, type: 2}
+  currentLevel: 1
   projectilePrefab: {fileID: 3141687366189240326, guid: ed640759143572f42bf203056a735210, type: 3}
   projectileSpawn: {fileID: 264760813}
   projectileSpawnSecondary: {fileID: 605508387}
   injuredStopDuration: 10
+  injuredCoreUnlockDelay: 1
   stage2CooldownMultiplier: 0.85
   stage4CooldownMultiplier: 0.7
   followSpeed: 3
   followLerpSpeed: 5
+  movementBoundsCenter: {fileID: 0}
+  minX: -10
+  maxX: 10
+  minY: -5
+  maxY: 5
+  gizmoBoundsColor: {r: 0.2, g: 0.8, b: 1, a: 0.65}
   bossActive: 0
   contactDamage: 1
   animIdleParam: Idle
@@ -710263,6 +710271,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e67db58c9bef2c9448102187b2eb82b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  targetScene: CaveAfterFall
+  doorID: labdoor
+  targetDoorID: cavedoor
   keyCard: {fileID: 11400000, guid: ecbaa7ac669a8074fb513752026c7231, type: 2}
   areaCenter: {x: 0.18, y: 0.18}
   areaSize: {x: 8.42, y: 5.17}

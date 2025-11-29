@@ -752,6 +752,10 @@ PrefabInstance:
       value: Road_End
       objectReference: {fileID: 0}
     - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
+      propertyPath: targetScene
+      value: Ruins
+      objectReference: {fileID: 0}
+    - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
       propertyPath: targetPortalId
       value: Ruins
       objectReference: {fileID: 0}

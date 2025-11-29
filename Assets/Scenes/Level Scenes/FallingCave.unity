@@ -3610,6 +3610,10 @@ PrefabInstance:
       value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
+      propertyPath: targetScene
+      value: ForestMiasma
+      objectReference: {fileID: 0}
+    - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
       propertyPath: targetPortalId
       value: 7
       objectReference: {fileID: 0}
@@ -16411,6 +16415,10 @@ PrefabInstance:
     - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
       propertyPath: portalId
       value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
+      propertyPath: targetScene
+      value: CaveAfterFall
       objectReference: {fileID: 0}
     - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
       propertyPath: spawnOffset.y

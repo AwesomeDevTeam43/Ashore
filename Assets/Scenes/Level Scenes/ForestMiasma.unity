@@ -28949,6 +28949,10 @@ PrefabInstance:
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
+      propertyPath: targetScene
+      value: FallingCave
+      objectReference: {fileID: 0}
+    - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
       propertyPath: spawnOffset.x
       value: 4.93
       objectReference: {fileID: 0}
@@ -41146,6 +41150,10 @@ PrefabInstance:
     - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
       propertyPath: portalId
       value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
+      propertyPath: targetScene
+      value: Forest
       objectReference: {fileID: 0}
     - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
       propertyPath: targetPortalId

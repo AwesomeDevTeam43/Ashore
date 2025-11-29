@@ -4,8 +4,19 @@ using Unity.Cinemachine;
 using TMPro;
 using System.Collections;
 
+using UnityEngine.SceneManagement;
+
 public class Lab_Door : MonoBehaviour
 {
+    [Header("Scene Linking")]
+    [Tooltip("If set, entering this door will load the target scene and teleport to the door with the matching Target Door ID.")]
+    public string targetScene = "";
+    [Tooltip("Unique ID for this door in its scene. Must match the Target Door ID in the other scene.")]
+    public string doorID = "";
+    [Tooltip("If set, this is the ID of the door in the target scene to arrive at.")]
+    public string targetDoorID = "";
+    // Used to pass the target door ID between scenes
+    private static string s_PendingDoorID = null;
     private GameObject player;
     private Inventory playerInventory;
     private Player_InputHandler inputHandler;
@@ -58,13 +69,33 @@ public class Lab_Door : MonoBehaviour
     private void EnterLab()
     {
         if (!IsPlayerInArea()) return;
-        
+
         if (!HaveKey())
         {
             ShowMessage(noKeyMessage);
             return;
         }
 
+        // If targetScene is set and different from current, do a scene change
+        if (!string.IsNullOrEmpty(targetScene) && targetScene != SceneManager.GetActiveScene().name)
+        {
+            if (Time.time - lastTeleportTime < teleportCooldown) return;
+            s_PendingDoorID = targetDoorID;
+            if (useFade)
+            {
+                if (_fadeRoutine != null) StopCoroutine(_fadeRoutine);
+                _fadeRoutine = StartCoroutine(DoSceneChangeWithFade(targetScene));
+            }
+            else
+            {
+                SceneManager.sceneLoaded += OnSceneLoadedTeleport;
+                SceneManager.LoadScene(targetScene);
+            }
+            lastTeleportTime = Time.time;
+            return;
+        }
+
+        // Otherwise, use linkedDoor in the same scene
         if (linkedDoor != null)
         {
             if (Time.time - lastTeleportTime < teleportCooldown) return;
@@ -81,6 +112,45 @@ public class Lab_Door : MonoBehaviour
             }
             return;
         }
+    }
+
+    private IEnumerator DoSceneChangeWithFade(string sceneName)
+    {
+        yield return FadeTo(1f, fadeOutDuration);
+        Canvas.ForceUpdateCanvases();
+        SceneManager.sceneLoaded += OnSceneLoadedTeleport;
+        SceneManager.LoadScene(sceneName);
+        // Fade-in will be handled after teleport in OnSceneLoadedTeleport
+    }
+
+    private void OnSceneLoadedTeleport(Scene scene, LoadSceneMode mode)
+    {
+        // Find the Lab_Door with matching doorID
+        Lab_Door[] doors = FindObjectsOfType<Lab_Door>();
+        Lab_Door dest = null;
+        foreach (var d in doors)
+        {
+            if (!string.IsNullOrEmpty(s_PendingDoorID) && d.doorID == s_PendingDoorID)
+            {
+                dest = d;
+                break;
+            }
+        }
+        if (dest == null && doors.Length > 0)
+        {
+            dest = doors[0]; // fallback: just use the first
+        }
+        if (dest != null)
+        {
+            dest.lastTeleportTime = Time.time;
+            dest.TeleportPlayerTo(dest);
+            if (dest.useFade)
+            {
+                dest.StartCoroutine(dest.FadeTo(0f, dest.fadeInDuration));
+            }
+        }
+        s_PendingDoorID = null;
+        SceneManager.sceneLoaded -= OnSceneLoadedTeleport;
     }
 
     private bool HaveKey()

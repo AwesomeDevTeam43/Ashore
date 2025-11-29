@@ -19,27 +19,85 @@ public class Manage_UI : MonoBehaviour
     private HealthSystem healthSystem;
     private Player_Controller player_Controller;
 
-    void Awake()
+    void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player");
-        player_Controller = player != null ? player.GetComponent<Player_Controller>() : null;
-        xpSystem = player != null ? player.GetComponent<XP_System>() : null;
-        healthSystem = player != null ? player.GetComponent<HealthSystem>() : null;
+        InitializeReferences();
+        SubscribeToEvents();
+        RefreshAllUI();
     }
 
-    void Start()
+    private void OnEnable()
+    {
+        Player_Controller.OnPlayerLoad += UpdateAllUI;
+    }
+
+    private void OnDisable()
+    {
+        Player_Controller.OnPlayerLoad -= UpdateAllUI;
+        UnsubscribeFromEvents();
+    }
+
+    private void InitializeReferences()
+    {
+        player = GameObject.FindGameObjectWithTag("Player");
+        
+        if (player == null)
+        {
+            Debug.LogError("Manage_UI: Player não encontrado!");
+            return;
+        }
+
+        player_Controller = player.GetComponent<Player_Controller>();
+        xpSystem = player.GetComponent<XP_System>();
+        healthSystem = player.GetComponent<HealthSystem>();
+
+        if (xpSystem == null)
+            Debug.LogError("Manage_UI: XP_System não encontrado no player!");
+        
+        if (healthSystem == null)
+            Debug.LogError("Manage_UI: HealthSystem não encontrado no player!");
+    }
+
+    private void SubscribeToEvents()
     {
         if (xpSystem != null)
         {
             xpSystem.OnCollectXP += UpdateXPBar;
             xpSystem.OnLevelUp += UpdateLevel;
+            Debug.Log("Manage_UI: Subscrito aos eventos de XP");
+        }
+
+        if (healthSystem != null)
+        {
+            healthSystem.OnHealthChanged += UpdateHPBar;
+            Debug.Log("Manage_UI: Subscrito aos eventos de Health");
+        }
+    }
+
+    private void UnsubscribeFromEvents()
+    {
+        if (xpSystem != null)
+        {
+            xpSystem.OnCollectXP -= UpdateXPBar;
+            xpSystem.OnLevelUp -= UpdateLevel;
+        }
+
+        if (healthSystem != null)
+        {
+            healthSystem.OnHealthChanged -= UpdateHPBar;
+        }
+    }
+
+    private void RefreshAllUI()
+    {
+        if (xpSystem != null)
+        {
             UpdateLevel(xpSystem.CurrentLevel);
             UpdateXPBar(0);
         }
         
         if (healthSystem != null)
         {
-            healthSystem.OnHealthChanged += UpdateHPBar;
             UpdateHPBar(healthSystem.CurrentHealth, healthSystem.MaxHealth);
         }
     }
