@@ -13,11 +13,21 @@ public class BossProjectile : MonoBehaviour
 	public float rotationSpeed = 720f; // degrees per second
 	public float rotationOffset = 0f; // tweak if sprite forward is not +X
 
+	[Header("Curve Entry")]
+	public bool curvedEntry = true;
+	public float curveDuration = 0.35f;
+	public float curveAngularSpeed = 360f;
+	public bool randomizeCurveSide = true;
+	public int forcedCurveSide = 1; // 1 = clockwise, -1 = counter-clockwise
+
 	private Rigidbody2D rb;
 	private GameObject player;
 
 	private float currentSpeed = 0f;
 	private bool following = false;
+	private bool curvePhaseActive = false;
+	private float curveTimer = 0f;
+	private int curveSide = 1;
 
 	private void Awake()
 	{
@@ -34,7 +44,11 @@ public class BossProjectile : MonoBehaviour
 	{
 		damage = damageAmount;
 		currentSpeed = speed * speedMultiplier;
-		following = homing;
+		curvePhaseActive = curvedEntry && curveDuration > 0f;
+		curveTimer = 0f;
+		int fallbackSide = forcedCurveSide == 0 ? 1 : (forcedCurveSide > 0 ? 1 : -1);
+		curveSide = randomizeCurveSide ? (Random.value > 0.5f ? 1 : -1) : fallbackSide;
+		following = homing && !curvePhaseActive;
 		stopFollowDistance = stopDistance;
 
 		if (rb == null)
@@ -56,6 +70,12 @@ public class BossProjectile : MonoBehaviour
 
 	private void FixedUpdate()
 	{
+		if (curvePhaseActive)
+		{
+			RunCurvePhase();
+			return;
+		}
+
 		if (!following) return;
 		if (player == null) return;
 
@@ -85,6 +105,28 @@ public class BossProjectile : MonoBehaviour
 		if (rb != null)
 		{
 			rb.linearVelocity = transform.right * currentSpeed;
+		}
+	}
+
+	private void RunCurvePhase()
+	{
+		if (rb == null)
+		{
+			curvePhaseActive = false;
+			following = homing;
+			return;
+		}
+
+		curveTimer += Time.fixedDeltaTime;
+		float angleDelta = curveSide * curveAngularSpeed * Time.fixedDeltaTime;
+		float newAngle = transform.eulerAngles.z + angleDelta;
+		transform.rotation = Quaternion.AngleAxis(newAngle, Vector3.forward);
+		rb.linearVelocity = transform.right * currentSpeed;
+
+		if (curveTimer >= curveDuration)
+		{
+			curvePhaseActive = false;
+			following = homing;
 		}
 	}
 
