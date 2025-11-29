@@ -107,15 +107,35 @@ public class Player_InputHandler : MonoBehaviour
 
     private void Awake()
     {
+        if (playerControls == null)
+        {
+            Debug.LogError("Player_InputHandler: playerControls InputActionAsset is not assigned.");
+            return;
+        }
         InputActionMap mapReference = playerControls.FindActionMap(actionMapName);
+        if (mapReference == null)
+        {
+            Debug.LogError($"Player_InputHandler: Action map '{actionMapName}' not found in InputActionAsset.");
+            return;
+        }
 
         movementAction = mapReference.FindAction(movement);
+        if (movementAction == null) Debug.LogError($"Player_InputHandler: Movement action '{movement}' not found.");
         lookAction = mapReference.FindAction(look);
+        if (lookAction == null) Debug.LogError($"Player_InputHandler: Look action '{look}' not found.");
         jumpAction = mapReference.FindAction(jump);
+        if (jumpAction == null) Debug.LogError($"Player_InputHandler: Jump action '{jump}' not found.");
         attackAction = mapReference.FindAction(attack);
+        if (attackAction == null) Debug.LogError($"Player_InputHandler: Attack action '{attack}' not found.");
         rangeAttackAction = mapReference.FindAction(rangeAttack);
+        if (rangeAttackAction == null) Debug.LogError($"Player_InputHandler: RangeAttack action '{rangeAttack}' not found.");
         interactAction = mapReference.FindAction(interact);
+        if (interactAction == null) Debug.LogError($"Player_InputHandler: Interact action '{interact}' not found.");
         inventoryAction = mapReference.FindAction(inventory);
+        if (inventoryAction == null) Debug.LogError($"Player_InputHandler: Inventory action '{inventory}' not found.");
+
+        // Always enable inventory action in Player map
+        if (inventoryAction != null && !inventoryAction.enabled) inventoryAction.Enable();
 
         MakeInputEvents();
     }

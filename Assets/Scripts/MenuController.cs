@@ -60,31 +60,102 @@ public class MenuController : MonoBehaviour
         {
             menuRoot = this.gameObject; // assume this script is on the MenuCanvas root
         }
-
-        // Subscribe to inventory input as early as possible
-        var playerObj = GameObject.FindGameObjectWithTag("Player");
-        if (playerObj != null)
-        {
-            inputHandler = playerObj.GetComponent<Player_InputHandler>();
-            playerInput = playerObj.GetComponent<PlayerInput>();
-        }
-        if (inputHandler == null)
-        {
-            inputHandler = FindFirstObjectByType<Player_InputHandler>();
-        }
-        if (playerInput == null)
-        {
-            playerInput = FindFirstObjectByType<PlayerInput>();
-        }
-        if (inputHandler != null)
-        {
-            inputHandler.OnInventoryPressed += ToggleMenu;
-        }
-
+        FindAndSubscribeInputHandler();
+        // Always enable inventory toggle in both Player and UI maps
+        EnableInventoryActionInAllMaps();
         // Start with menu hidden
         if (menuRoot != null)
         {
             menuRoot.SetActive(false);
+        }
+    }
+
+    private void OnEnable()
+    {
+        FindAndSubscribeInputHandler();
+        EnableInventoryActionInAllMaps();
+        DebugInventoryActionState("OnEnable");
+    }
+
+    private void OnDisable()
+    {
+        if (inputHandler != null)
+        {
+            inputHandler.OnInventoryPressed -= ToggleMenu;
+        }
+        RestoreGameplayState();
+    }
+
+    private void FindAndSubscribeInputHandler()
+    {
+        var playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            inputHandler = playerObj.GetComponent<Player_InputHandler>();
+            if (inputHandler == null)
+                Debug.LogWarning("MenuController: Player_InputHandler not found on Player GameObject.");
+            playerInput = playerObj.GetComponent<PlayerInput>();
+            if (playerInput == null)
+                Debug.LogWarning("MenuController: PlayerInput not found on Player GameObject.");
+        }
+        if (inputHandler == null)
+        {
+            inputHandler = FindFirstObjectByType<Player_InputHandler>();
+            if (inputHandler == null)
+                Debug.LogError("MenuController: Could not find Player_InputHandler in scene.");
+        }
+        if (playerInput == null)
+        {
+            playerInput = FindFirstObjectByType<PlayerInput>();
+            if (playerInput == null)
+                Debug.LogError("MenuController: Could not find PlayerInput in scene.");
+        }
+        if (inputHandler != null)
+        {
+            inputHandler.OnInventoryPressed -= ToggleMenu; // Prevent double subscription
+            inputHandler.OnInventoryPressed += ToggleMenu;
+            Debug.Log("MenuController: Subscribed to OnInventoryPressed event.");
+        }
+    }
+
+    private void DebugInventoryActionState(string context)
+    {
+        if (playerInput != null && playerInput.actions != null)
+        {
+            var playerMap = playerInput.actions.FindActionMap("Player", false);
+            var uiMap = playerInput.actions.FindActionMap("UI", false);
+            var invPlayer = playerMap?.FindAction("Inventory", false);
+            var invUI = uiMap?.FindAction("Inventory", false);
+            Debug.Log($"[InputDebug] {context}: PlayerMap.Inventory enabled={invPlayer?.enabled}, UIMap.Inventory enabled={invUI?.enabled}");
+        }
+    }
+
+    private void EnableInventoryActionInAllMaps()
+    {
+        if (playerInput == null || playerInput.actions == null)
+        {
+            Debug.LogError("MenuController: playerInput or playerInput.actions is null in EnableInventoryActionInAllMaps.");
+            return;
+        }
+        var playerMap = playerInput.actions.FindActionMap("Player", false);
+        var uiMap = playerInput.actions.FindActionMap("UI", false);
+        if (playerMap == null)
+            Debug.LogError("MenuController: Player action map not found.");
+        if (uiMap == null)
+            Debug.LogError("MenuController: UI action map not found.");
+        if (playerMap != null)
+        {
+            var inv = playerMap.FindAction("Inventory", false);
+            if (inv == null)
+                Debug.LogError("MenuController: Inventory action not found in Player map.");
+            else if (!inv.enabled) inv.Enable();
+        }
+        if (uiMap != null)
+        {
+            var inv = uiMap.FindAction("Inventory", false);
+            if (inv == null)
+                Debug.LogError("MenuController: Inventory action not found in UI map.");
+            else if (!inv.enabled) inv.Enable();
         }
     }
 
@@ -339,19 +410,20 @@ public class MenuController : MonoBehaviour
         if (menuRoot == null) return;
         menuRoot.SetActive(true);
         if (pauseOnOpen) Time.timeScale = 0f;
-        // Ensure a selection guard exists so navigation cannot lose focus or select non-interactive elements
         var guard = menuRoot.GetComponent<UISelectionGuard>();
         if (guard == null) guard = menuRoot.AddComponent<UISelectionGuard>();
-        // Keep gameplay inputs enabled so builds never lose control after reloads.
-        // We rely on explicit UI actions instead of swapping/disable maps to avoid stuck input state.
+        // Switch to UI input map
+        if (playerInput != null)
+        {
+            try { playerInput.SwitchCurrentActionMap("UI"); } catch { }
+        }
         EnableUIShortcuts();
+        EnableInventoryActionInAllMaps();
         EnsureHighlightsForAllInteractables();
-        // Re-enable built-in navigation and disable any forced cycler
         if (es == null) es = EventSystem.current;
         if (es != null) es.sendNavigationEvents = true;
         var cycler = menuRoot.GetComponent<UINavForceCycle>();
         if (cycler != null) cycler.enabled = false;
-        // Ensure any existing root-level scope is disabled so it doesn't filter navigation
         var rootScope = menuRoot.GetComponent<UINavScope>();
         if (rootScope != null) rootScope.enabled = false;
         ShowPage(currentTabIndex);
@@ -361,11 +433,16 @@ public class MenuController : MonoBehaviour
     {
         if (menuRoot == null) return;
         if (pauseOnOpen) Time.timeScale = 1f;
-        // Clear selection (optional)
         if (es != null) es.SetSelectedGameObject(null);
         menuRoot.SetActive(false);
+        // Switch back to Player input map
+        if (playerInput != null)
+        {
+            try { playerInput.SwitchCurrentActionMap("Player"); } catch { }
+        }
         DisableUIShortcuts();
-        // Ensure built-in navigation is on
+        EnableInventoryActionInAllMaps();
+        DebugInventoryActionState("CloseMenu");
         if (es == null) es = EventSystem.current;
         if (es != null) es.sendNavigationEvents = true;
     }
@@ -378,11 +455,22 @@ public class MenuController : MonoBehaviour
         {
             inputHandler.OnInventoryPressed -= ToggleMenu;
         }
-    }
-
-    private void OnDisable()
-    {
-        RestoreGameplayState();
+        if (cachedUIInventory != null)
+        {
+            cachedUIInventory.performed -= OnUIInventoryPerformed;
+        }
+        if (cachedUICancel != null)
+        {
+            cachedUICancel.performed -= OnUICancelPerformed;
+        }
+        if (cachedUILeftTab != null)
+        {
+            cachedUILeftTab.performed -= OnUILeftTabPerformed;
+        }
+        if (cachedUIRightTab != null)
+        {
+            cachedUIRightTab.performed -= OnUIRightTabPerformed;
+        }
     }
 
     private void RestoreGameplayState()
@@ -435,7 +523,6 @@ public class MenuController : MonoBehaviour
         {
             cachedUIInventory.performed -= OnUIInventoryPerformed;
             // Do NOT disable cachedUIInventory; keep it enabled at all times
-            // cachedUIInventory = null; // Optionally keep reference
         }
         if (cachedUICancel != null)
         {

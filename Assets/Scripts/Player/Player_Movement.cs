@@ -37,14 +37,22 @@ public class Player_Movement : MonoBehaviour
     [SerializeField] public Transform place3;
     [SerializeField] public Transform place4;
 
-    void Start()
+    void Awake()
     {
         attackZone = GameObject.FindGameObjectWithTag("AttackZone");
-        startPos = attackZone.transform.localPosition;
         player_Controller = GetComponent<Player_Controller>();
-        moveSpeed = player_Controller.MoveSpeed;
-        jumpingPower = player_Controller.JumpForce;
         combinedGroundLayers = groundLayer | platformLayer;
+    }
+
+    void Start()
+    {
+        if (attackZone != null)
+            startPos = attackZone.transform.localPosition;
+        if (player_Controller != null)
+        {
+            moveSpeed = player_Controller.MoveSpeed;
+            jumpingPower = player_Controller.JumpForce;
+        }
     }
 
     void FixedUpdate()

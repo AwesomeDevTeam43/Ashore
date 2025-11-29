@@ -20,34 +20,26 @@ public class Manage_UI : MonoBehaviour
 
     private Player_Controller player_Controller;
 
-    void Start()
+    void Awake()
     {
         player = GameObject.FindGameObjectWithTag("Player");
+        player_Controller = player != null ? player.GetComponent<Player_Controller>() : null;
+        xpSystem = player != null ? player.GetComponent<XP_System>() : null;
+        healthSystem = player != null ? player.GetComponent<HealthSystem>() : null;
+    }
 
-        player_Controller = player.GetComponent<Player_Controller>();
-
-        xpSystem = player.GetComponent<XP_System>();
-        healthSystem = player.GetComponent<HealthSystem>();
-
+    void Start()
+    {
         if (xpSystem != null)
         {
             xpSystem.OnCollectXP += UpdateXPBar;
             xpSystem.OnLevelUp += UpdateLevel;
-        }
-
-        if (healthSystem != null)
-        {
-            healthSystem.OnHealthChanged += UpdateHPBar;
-        }
-
-        // Initial sync to current player state
-        if (xpSystem != null)
-        {
             UpdateLevel(xpSystem.CurrentLevel);
             UpdateXPBar(0);
         }
         if (healthSystem != null)
         {
+            healthSystem.OnHealthChanged += UpdateHPBar;
             UpdateHPBar(healthSystem.CurrentHealth, healthSystem.MaxHealth);
         }
     }

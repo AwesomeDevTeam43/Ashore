@@ -30,6 +30,14 @@ public class InventoryPage : MonoBehaviour
     [SerializeField] private InventoryDetailsPanel detailsPanel;
 
     private Inventory inventory;
+        private void Awake()
+        {
+            inventory = Inventory.instance;
+            if (inventory == null)
+            {
+                Debug.LogWarning("InventoryPage: Inventory.instance is null in Awake. This may indicate script execution order issues.");
+            }
+        }
     private InventorySlot[] slots;
     private bool gridBuilt = false;
 
@@ -45,6 +53,14 @@ public class InventoryPage : MonoBehaviour
 
     private void OnEnable()
     {
+        if (inventory == null)
+        {
+            inventory = Inventory.instance;
+            if (inventory == null)
+            {
+                Debug.LogWarning("InventoryPage: Inventory.instance is null in OnEnable. Inventory UI may not function correctly.");
+            }
+        }
         EnsureInitialized();
         HideLegacyInvPanels();
         if (inventory != null)
@@ -85,7 +101,7 @@ public class InventoryPage : MonoBehaviour
             inventory = Inventory.instance;
             if (inventory == null)
             {
-                Debug.LogWarning("InventoryPage: Inventory.instance not found in scene.");
+                Debug.LogWarning("InventoryPage: Inventory.instance is null in EnsureInitialized. Inventory UI may not function correctly.");
             }
         }
 

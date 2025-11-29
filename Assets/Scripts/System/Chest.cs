@@ -37,15 +37,15 @@ public class Chest : MonoBehaviour, ISaveable
         {
             closedSprite = spriteRenderer.sprite;
         }
-        xP_System = player.GetComponent<XP_System>();
+        xP_System = player != null ? player.GetComponent<XP_System>() : null;
         drop_Materials = GetComponent<Drop_Materials>();
         if (player != null) player_InputHandler = player.GetComponent<Player_InputHandler>();
         guidComponent = GetComponent<GuidComponent>();
+        dropEquipment = this.GetComponent<DropEquipment>();
     }
 
     void Start()
     {
-        dropEquipment = this.GetComponent<DropEquipment>();
         UpdateChestVisual();
     }
 
