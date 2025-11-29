@@ -106,7 +106,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67f769797b49247f2bca15758c943441, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stats: {fileID: 0}
+  stats: {fileID: 11400000, guid: 6cd5ce0ad94975c468742e32ec259006, type: 2}
+  forcedLevel: 0
+  showDebugLogs: 1
   animator: {fileID: 0}
   isAttackingParam: isAttacking
   isLungingParam: isLunging
@@ -237,6 +239,8 @@ MonoBehaviour:
   maxHealth: 5
   damageable: 1
   invincibilityDuration: 0.2
+  meleeResistance: 0
+  rangedResistance: 0
 --- !u!95 &-6406895806861494338
 Animator:
   serializedVersion: 7

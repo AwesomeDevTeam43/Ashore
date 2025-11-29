@@ -49,8 +49,9 @@ GameObject:
   - component: {fileID: 8948803797263182623}
   - component: {fileID: 1084081544449621823}
   - component: {fileID: -6718143549694596749}
+  - component: {fileID: -8509199971328571955}
   m_Layer: 7
-  m_Name: Samaleco 1
+  m_Name: SalamanderRecepite
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -192,6 +193,8 @@ MonoBehaviour:
   maxHealth: 5
   damageable: 1
   invincibilityDuration: 0.2
+  meleeResistance: 0
+  rangedResistance: 0
 --- !u!114 &8708871058753416345
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -304,6 +307,8 @@ MonoBehaviour:
   maxHealth: 5
   damageable: 1
   invincibilityDuration: 0.2
+  meleeResistance: 0
+  rangedResistance: 0
 --- !u!114 &-6718143549694596749
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -317,6 +322,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   equipmentPrefab: {fileID: 2511649203567988147, guid: 447a42394772de441ac9fd9cf1deeb53, type: 3}
+--- !u!114 &-8509199971328571955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5027360677917986048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e616ffe88f71c145929265635770b0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stone: {fileID: 11400000, guid: c794599bb4cdcca4a8001e4ff1cba7fb, type: 2}
+  wood: {fileID: 0}
+  rope: {fileID: 11400000, guid: 32410df1c793ac94eaf344c30dad367a, type: 2}
+  material_particle: {fileID: 3009273275518452482, guid: 4faa844a12452a64982a14b05e65a988, type: 3}
 --- !u!1 &9040285423462698423
 GameObject:
   m_ObjectHideFlags: 0

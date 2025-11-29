@@ -61,24 +61,7 @@ public class Enemy_MiasmaBloom : EnemyBase
         }
 
         enemyHealth = GetComponent<Enemy_Health>();
-        if (enemyHealth != null)
-        {
-            if (typedStats != null)
-            {
-                enemyHealth.Initialize(
-                    typedStats.maxHealth,
-                    typedStats.xpOnDeath,
-                    typedStats.woodDrop,
-                    typedStats.stoneDrop,
-                    typedStats.ropeDrop,
-                    typedStats.meleeResistance,
-                    typedStats.rangedResistance);
-            }
-            else
-            {
-                enemyHealth.Initialize(Mathf.CeilToInt(detectRadius * 2f) + 1, 0, 0, 0, 0, 0f, 0f);
-            }
-        }
+        
 
         sr = GetComponent<SpriteRenderer>();
         if (sr != null) originalColor = sr.color;
@@ -158,14 +141,12 @@ public class Enemy_MiasmaBloom : EnemyBase
     {
         bool hitPlayer = false;
 
-        // use OverlapCircleAll and check by tag/root to handle child colliders
         Collider2D[] cols = Physics2D.OverlapCircleAll(attackTarget, biteRadius, playerMask);
         for (int i = 0; i < cols.Length; i++)
         {
             var c = cols[i];
             if (c == null) continue;
 
-            // prefer direct tag match, fall back to root
             if (c.gameObject.CompareTag("Player") || c.transform.root.CompareTag("Player"))
             {
                 hitPlayer = true;
@@ -175,13 +156,12 @@ public class Enemy_MiasmaBloom : EnemyBase
 
         if (hitPlayer)
         {
-            // try to find HealthSystem if we didn't find it earlier
             if (playerHealth == null && player != null)
                 playerHealth = player.GetComponent<HealthSystem>() ?? player.GetComponentInChildren<HealthSystem>();
 
             if (playerHealth != null)
             {
-                playerHealth.TakeDamage(biteDamage);
+                playerHealth.TakeDamage((int)currentDamage);
             }
             else
             {

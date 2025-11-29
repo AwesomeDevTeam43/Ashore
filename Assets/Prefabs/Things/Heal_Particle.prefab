@@ -167,6 +167,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   healAmount: 2
   playerTag: Player
+  groundLayers:
+    serializedVersion: 2
+    m_Bits: 64
+  fallGravityScale: 2
+  physicsColliderRadius: 0.35
+  triggerRadius: 0.6
   floatSpeed: 1
   floatAmplitude: 0.3
-  heightAboveGround: 0.5

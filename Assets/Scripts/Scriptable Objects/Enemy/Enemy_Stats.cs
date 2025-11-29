@@ -5,6 +5,7 @@ public abstract class Enemy_Stats : ScriptableObject
 {
     [Header("Core")]
     public int maxHealth = 5;
+    public float damage = 1f; // Adicionar esta linha
     public int xpOnDeath = 1;
     [FormerlySerializedAs("dropA")]
     [Tooltip("Amount of wood that drops when this enemy dies.")]

@@ -10,15 +10,15 @@ public class BigCrab : EnemyBase
   private Transform player;
   private Rigidbody2D rb;
   private Animator animator;
-  [SerializeField] private string walkBoolName = "isWalking"; // Animator bool
+  [SerializeField] private string walkBoolName = "isWalking";
   [Header("Animation")]
-  [SerializeField] private string attackTriggerName = "Attack"; // Animator trigger to start attack anim
-  [SerializeField] private string attackBoolName = "isAttacking"; // Animator bool alternative
-  [SerializeField] private bool attackUsesAnimationEvent = true; // Damage applied via AnimEvent_DoAttack
-  [SerializeField] private float attackCommitDuration = 0.6f; // Fallback commit time when no events
+  [SerializeField] private string attackTriggerName = "Attack";
+  [SerializeField] private string attackBoolName = "isAttacking";
+  [SerializeField] private bool attackUsesAnimationEvent = true;
+  [SerializeField] private float attackCommitDuration = 0.6f;
   private bool hasAttackTrigger = false;
   private bool hasAttackBool = false;
-  private bool attackInProgress = false; // Prevents leaving Attacking until finished
+  private bool attackInProgress = false;
   private Coroutine attackCommitRoutine;
   public enum EnemyState { Idle, Chasing, Attacking }
   private EnemyState currentState;
@@ -31,6 +31,7 @@ public class BigCrab : EnemyBase
     enemyHealth = GetComponent<Enemy_Health>();
     rb = GetComponent<Rigidbody2D>();
     animator = GetComponentInChildren<Animator>();
+    
     if (animator != null)
     {
       foreach (var p in animator.parameters)
@@ -42,10 +43,12 @@ public class BigCrab : EnemyBase
       }
     }
 
-    if (enemyHealth != null && stats != null)
-    {
-      enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop, typedStats.meleeResistance, typedStats.rangedResistance);
-    }
+    // REMOVER ESTA INICIALIZAÇÃO - Será feita pelo SpawnManager via ApplyLevelMultipliers
+    // if (enemyHealth != null && stats != null)
+    // {
+    //   enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop, typedStats.meleeResistance, typedStats.rangedResistance);
+    // }
+    
     GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
     if (playerObject != null)
     {
@@ -86,7 +89,6 @@ public class BigCrab : EnemyBase
     switch (currentState)
     {
       case EnemyState.Idle:
-        // Transição: Idle -> Chasing
         if (distanceToPlayer <= typedStats.followPlayerRange)
         {
           currentState = EnemyState.Chasing;
@@ -94,12 +96,10 @@ public class BigCrab : EnemyBase
         break;
 
       case EnemyState.Chasing:
-        // Transição: Chasing -> Attacking
         if (distanceToPlayer <= typedStats.attackRange)
         {
           currentState = EnemyState.Attacking;
         }
-        // Transição: Chasing -> Idle
         else if (distanceToPlayer > typedStats.followPlayerRange)
         {
           currentState = EnemyState.Idle;
@@ -107,7 +107,6 @@ public class BigCrab : EnemyBase
         break;
 
       case EnemyState.Attacking:
-        // Do not leave Attacking while committed to this attack
         if (!attackInProgress && distanceToPlayer > typedStats.attackRange)
         {
           currentState = EnemyState.Chasing;
@@ -134,17 +133,16 @@ public class BigCrab : EnemyBase
         break;
 
       case EnemyState.Chasing:
-        // Move toward player like before and drive the animation from movement
         float moveDirection = (player.position.x > transform.position.x) ? 1f : -1f;
         rb.linearVelocity = new Vector2(moveDirection * typedStats.speed, rb.linearVelocity.y);
-        FlipSpriteOnMove(); // flip based on move dir
+        FlipSpriteOnMove();
         if (animator != null) animator.SetBool(walkBoolName, true);
         if (animator != null && hasAttackBool) animator.SetBool(attackBoolName, false);
         break;
 
       case EnemyState.Attacking:
         rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
-        FacePlayer(); // Garante que está virado para o jogador
+        FacePlayer();
         if (animator != null && hasAttackBool) animator.SetBool(attackBoolName, attackInProgress);
         AttemptAttack();
         if (animator != null) animator.SetBool(walkBoolName, false);
@@ -158,17 +156,15 @@ public class BigCrab : EnemyBase
     {
       if (typedStats.startTimeBtwAttack <= 0)
       {
-        timeBtwAttack = 2f; // Define um padrão de 2s para evitar loop infinito
+        timeBtwAttack = 2f;
       }
       else
       {
-        timeBtwAttack = typedStats.startTimeBtwAttack; // Reinicia o cooldown
+        timeBtwAttack = typedStats.startTimeBtwAttack;
       }
-      // Begin an attack and commit to it until it completes
       BeginAttackCommit(maybeTimedFallback: true);
       if (attackUsesAnimationEvent)
       {
-        // Start the attack animation; actual damage should be fired by AnimEvent_DoAttack
         if (animator != null)
         {
           if (hasAttackTrigger)
@@ -177,37 +173,30 @@ public class BigCrab : EnemyBase
           }
           else if (hasAttackBool)
           {
-            // Bool is already being set in HandleStateActions
           }
           else
           {
-            // Animator exists but no known params to drive attack; fallback to immediate
             CheckEnemyAttack();
           }
         }
         else
         {
-          // No animator available; fallback to immediate damage
           CheckEnemyAttack();
         }
       }
       else
       {
-        // Legacy behavior: apply damage immediately
         CheckEnemyAttack();
       }
     }
   }
 
-  // Marks attack as committed, optionally also starting a timed fallback window
   private void BeginAttackCommit(bool maybeTimedFallback)
   {
     attackInProgress = true;
-    // If an animation event will call AnimEvent_AttackEnd, we won't need a timer.
     bool expectAnimToEnd = attackUsesAnimationEvent && animator != null && (hasAttackTrigger || hasAttackBool);
     if (!expectAnimToEnd && maybeTimedFallback)
     {
-      // Use a simple timed commit fallback
       if (attackCommitRoutine != null) StopCoroutine(attackCommitRoutine);
       attackCommitRoutine = StartCoroutine(AttackCommitWindow(attackCommitDuration));
     }
@@ -220,16 +209,13 @@ public class BigCrab : EnemyBase
     attackCommitRoutine = null;
   }
 
-  // Public function to be called from an Animation Event at the hit frame
   public void AnimEvent_DoAttack()
   {
     CheckEnemyAttack();
   }
 
-  // Optional: call at the start of the attack animation to ensure commitment
   public void AnimEvent_AttackStart()
   {
-    // Cancel any fallback timer and mark commit on
     if (attackCommitRoutine != null)
     {
       StopCoroutine(attackCommitRoutine);
@@ -238,7 +224,6 @@ public class BigCrab : EnemyBase
     attackInProgress = true;
   }
 
-  // Call at the end of the attack animation to release commitment
   public void AnimEvent_AttackEnd()
   {
     attackInProgress = false;
@@ -272,7 +257,8 @@ public class BigCrab : EnemyBase
     {
       if (typedStats.biteDamage <= 0) Debug.LogWarning("Enemy: biteDamage <= 0");
 
-      playerHealth.TakeDamage(typedStats.biteDamage);
+      // Usar currentDamage ao invés de biteDamage para aplicar o dano escalado
+      playerHealth.TakeDamage((int)currentDamage);
       if (playerRb != null)
       {
         StartCoroutine(ApplyPlayerKnockback(playerRb, player));
@@ -285,15 +271,11 @@ public class BigCrab : EnemyBase
     if (playerRb == null || stats == null) yield break;
 
     Transform attackOrigin = transform;
-
     Vector2 dir = (playerTransform.position - attackOrigin.position).normalized;
-
     playerRb.linearVelocity = Vector2.zero;
-
     playerRb.AddForce(dir * typedStats.knockbackForce, ForceMode2D.Impulse);
 
     float t = 0f;
-
     Vector2 startVel = playerRb.linearVelocity;
 
     while (t < typedStats.knockbackDuration && playerRb != null)

@@ -43,10 +43,7 @@ public class VenomShooting : EnemyBase
             enabled = false;
             return;
         }
-        if (enemyHealth != null && typedStats != null)
-        {
-            enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop, typedStats.meleeResistance, typedStats.rangedResistance);
-        }
+        
         transform.localScale = stats.baseScale;
         meleeCooldownTimer = 0f;
         shootCooldownTimer = 0f;
@@ -176,8 +173,8 @@ public class VenomShooting : EnemyBase
         {
             if (player.TryGetComponent<HealthSystem>(out var ph) || (ph = player.GetComponentInParent<HealthSystem>()) != null)
             {
-                if (typedStats.biteDamage <= 0) Debug.LogWarning("VenomShooting: biteDamage <= 0");
-                ph.TakeDamage(typedStats.biteDamage);
+                if (currentDamage <= 0) Debug.LogWarning("VenomShooting: currentDamage <= 0");
+                ph.TakeDamage((int)currentDamage);
                 Debug.Log("Serpent Bite! Player hit.");
             }
             else
