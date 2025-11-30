@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: -2165011026002690327}
   - component: {fileID: 3539752144624605523}
   - component: {fileID: -6406895806861494338}
+  - component: {fileID: 1803234359606023249}
   m_Layer: 7
   m_Name: Bee
   m_TagString: Enemy
@@ -107,8 +108,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stats: {fileID: 11400000, guid: 6cd5ce0ad94975c468742e32ec259006, type: 2}
-  forcedLevel: 0
-  showDebugLogs: 1
+  currentLevel: 1
+  damageVariance: 0.1
   animator: {fileID: 0}
   isAttackingParam: isAttacking
   isLungingParam: isLunging
@@ -123,6 +124,9 @@ MonoBehaviour:
   nodeRadius: 0.2
   pathPointThreshold: 0.15
   repathInterval: 0.25
+  combatFeedback: {fileID: 0}
+  lungeTelegraphLine: {fileID: 0}
+  telegraphLineColor: {r: 1, g: 0, b: 0, a: 0.5}
 --- !u!114 &6401071433118823938
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -241,6 +245,7 @@ MonoBehaviour:
   invincibilityDuration: 0.2
   meleeResistance: 0
   rangedResistance: 0
+  combatFeedback: {fileID: 0}
 --- !u!95 &-6406895806861494338
 Animator:
   serializedVersion: 7
@@ -263,3 +268,28 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1803234359606023249
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8379307940926905367}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f47f7893e5c4d3449cd8717b46d9707, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteRenderers: []
+  hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
+  hitFlashDuration: 0.1
+  shakeOnHit: 1
+  shakeIntensity: 0.15
+  shakeDuration: 0.2
+  attackTelegraphColor: {r: 1, g: 0.5, b: 0, a: 0.7}
+  telegraphDuration: 0.3
+  pulseWhileTelegraphing: 1
+  pulseCycleTime: 0.15
+  hitParticlePrefab: {fileID: 0}
+  attackParticlePrefab: {fileID: 0}
+  deathParticlePrefab: {fileID: 0}

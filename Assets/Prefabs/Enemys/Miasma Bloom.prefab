@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 100262068618553158}
   - component: {fileID: 2384647205633909231}
   - component: {fileID: -4600171107686472438}
+  - component: {fileID: 4914990007136314267}
   m_Layer: 7
   m_Name: Miasma Bloom
   m_TagString: Enemy
@@ -107,6 +108,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stats: {fileID: 11400000, guid: 608c48247f3b5c04789ed8fa1e4dabd0, type: 2}
+  currentLevel: 1
+  damageVariance: 0.1
   playerMask:
     serializedVersion: 2
     m_Bits: 8
@@ -214,6 +217,9 @@ MonoBehaviour:
   maxHealth: 5
   damageable: 1
   invincibilityDuration: 0.2
+  meleeResistance: 0
+  rangedResistance: 0
+  combatFeedback: {fileID: 0}
 --- !u!114 &2384647205633909231
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -252,3 +258,28 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &4914990007136314267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1209253475454012991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f47f7893e5c4d3449cd8717b46d9707, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteRenderers: []
+  hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
+  hitFlashDuration: 0.1
+  shakeOnHit: 1
+  shakeIntensity: 0.15
+  shakeDuration: 0.2
+  attackTelegraphColor: {r: 1, g: 0.5, b: 0, a: 0.7}
+  telegraphDuration: 0.3
+  pulseWhileTelegraphing: 1
+  pulseCycleTime: 0.15
+  hitParticlePrefab: {fileID: 0}
+  attackParticlePrefab: {fileID: 0}
+  deathParticlePrefab: {fileID: 0}

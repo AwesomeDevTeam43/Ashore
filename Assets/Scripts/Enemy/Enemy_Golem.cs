@@ -27,6 +27,14 @@ public class Enemy_Golem : EnemyBase
     [Header("Slam Attack")]
     [SerializeField] private LayerMask slamHitMask;
 
+    [Header("Combat Feedback")]
+    [SerializeField] private EnemyCombatFeedback combatFeedback;
+    
+    [Header("Slam Effects")]
+    [SerializeField] private GameObject slamImpactPrefab;
+    [SerializeField] private float screenShakeIntensity = 0.3f;
+    [SerializeField] private float slamWarningDuration = 0.4f;
+
     private float cooldown;
     private float windupTimer;
     private float hopCooldown;
@@ -98,10 +106,16 @@ public class Enemy_Golem : EnemyBase
                     state = State.Return;
                     break;
                 }
+                
+                // ADICIONAR: Telegraph visual antes do slam
+                if (windupTimer >= (typedStats.slamWindup - slamWarningDuration) && combatFeedback != null)
+                {
+                    combatFeedback.PlayAttackTelegraph();
+                }
+                
                 windupTimer -= Time.deltaTime;
                 if (windupTimer <= 0f)
                 {
-                    // Damage is applied via AnimEvent_GolemSlam from the animation. Just exit the slam state.
                     cooldown = typedStats != null ? typedStats.slamCooldown : 2.2f;
                     state = State.Chase;
                 }
@@ -353,11 +367,23 @@ public class Enemy_Golem : EnemyBase
         float radius = typedStats != null ? typedStats.slamRadius : 2.75f;
         int mask = slamHitMask.value != 0 ? slamHitMask.value : LayerMask.GetMask("Player");
         var hits = Physics2D.OverlapCircleAll(transform.position, radius, mask);
+        
+        // ADICIONAR: Efeito de impacto
+        if (slamImpactPrefab != null)
+            Instantiate(slamImpactPrefab, transform.position, Quaternion.identity);
+        
         foreach (var h in hits)
         {
             if (!IsPlayerCollider(h)) continue;
             var hs = h.GetComponent<HealthSystem>() ?? h.GetComponentInParent<HealthSystem>();
-            if (hs != null) hs.TakeDamage((int)currentDamage);
+            if (hs != null)
+            {
+                hs.TakeDamage((int)currentDamage);
+                
+                // ADICIONAR: Feedback no ponto de impacto
+                if (combatFeedback != null)
+                    combatFeedback.PlayAttackFeedback(h.transform.position);
+            }
         }
     }
 

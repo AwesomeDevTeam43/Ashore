@@ -10,6 +10,9 @@ public abstract class EnemyBase : MonoBehaviour
     [SerializeField] private int currentLevel = 1;
     public float currentDamage { get; private set; }
     
+    [Header("Damage Scaling")]
+    [SerializeField] protected float damageVariance = 0.1f; // ±10% variação aleatória
+    
     protected Enemy_Health enemyHealth; // Tornar protected para classes filhas usarem
 
     protected virtual void Awake() // Mudar para protected virtual
@@ -81,6 +84,12 @@ public abstract class EnemyBase : MonoBehaviour
         {
             transform.localScale = stats.baseScale;
         }
+    }
+
+    protected int GetScaledDamage()
+    {
+        float variance = Random.Range(1f - damageVariance, 1f + damageVariance);
+        return Mathf.RoundToInt(currentDamage * variance);
     }
 
     public int GetLevel() => currentLevel;

@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 4303542695551263993}
   - component: {fileID: 6411164282680619522}
   - component: {fileID: -4874473007516744658}
+  - component: {fileID: -6050992702018294182}
   m_Layer: 7
   m_Name: MiasmaBird-Sheet_0 1
   m_TagString: Enemy
@@ -128,6 +129,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stats: {fileID: 11400000, guid: 6f704ec810e361c47b57976c973649c0, type: 2}
+  currentLevel: 1
+  damageVariance: 0.1
   patrolSpeed: 2.5
   leftX: -5
   rightX: 5
@@ -161,6 +164,7 @@ MonoBehaviour:
   invincibilityDuration: 0.2
   meleeResistance: 0
   rangedResistance: 0
+  combatFeedback: {fileID: 0}
 --- !u!114 &6411164282680619522
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -219,6 +223,31 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 3.125, y: 3.125}
   m_EdgeRadius: 0
+--- !u!114 &-6050992702018294182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 83480763817178628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f47f7893e5c4d3449cd8717b46d9707, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteRenderers: []
+  hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
+  hitFlashDuration: 0.1
+  shakeOnHit: 1
+  shakeIntensity: 0.15
+  shakeDuration: 0.2
+  attackTelegraphColor: {r: 1, g: 0.5, b: 0, a: 0.7}
+  telegraphDuration: 0.3
+  pulseWhileTelegraphing: 1
+  pulseCycleTime: 0.15
+  hitParticlePrefab: {fileID: 0}
+  attackParticlePrefab: {fileID: 0}
+  deathParticlePrefab: {fileID: 0}
 --- !u!1 &5839572414982354396
 GameObject:
   m_ObjectHideFlags: 0

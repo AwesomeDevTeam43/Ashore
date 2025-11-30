@@ -17,6 +17,8 @@ GameObject:
   - component: {fileID: 2803447172678884119}
   - component: {fileID: 7203006818411415510}
   - component: {fileID: 8872292057630377456}
+  - component: {fileID: -3343438842683711612}
+  - component: {fileID: -3999928058766099748}
   m_Layer: 7
   m_Name: MiasmaGolem
   m_TagString: Enemy
@@ -206,6 +208,7 @@ MonoBehaviour:
   invincibilityDuration: 0.2
   meleeResistance: 0
   rangedResistance: 0
+  combatFeedback: {fileID: 0}
 --- !u!114 &2803447172678884119
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -219,6 +222,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stats: {fileID: 11400000, guid: b07395be782cb4e4380990c4719674c3, type: 2}
+  currentLevel: 1
+  damageVariance: 0.1
   typedStats: {fileID: 11400000, guid: b07395be782cb4e4380990c4719674c3, type: 2}
   walkBool: isWalking
   attackTrigger: Attack
@@ -232,6 +237,10 @@ MonoBehaviour:
   slamHitMask:
     serializedVersion: 2
     m_Bits: 8
+  combatFeedback: {fileID: 0}
+  slamImpactPrefab: {fileID: 0}
+  screenShakeIntensity: 0.3
+  slamWarningDuration: 0.4
 --- !u!114 &7203006818411415510
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -260,3 +269,53 @@ MonoBehaviour:
   wood: {fileID: 0}
   rope: {fileID: 0}
   material_particle: {fileID: 3009273275518452482, guid: 4faa844a12452a64982a14b05e65a988, type: 3}
+--- !u!114 &-3343438842683711612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5384982542472265557}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f47f7893e5c4d3449cd8717b46d9707, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteRenderers: []
+  hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
+  hitFlashDuration: 0.1
+  shakeOnHit: 1
+  shakeIntensity: 0.15
+  shakeDuration: 0.2
+  attackTelegraphColor: {r: 1, g: 0.5, b: 0, a: 0.7}
+  telegraphDuration: 0.3
+  pulseWhileTelegraphing: 1
+  pulseCycleTime: 0.15
+  hitParticlePrefab: {fileID: 0}
+  attackParticlePrefab: {fileID: 0}
+  deathParticlePrefab: {fileID: 0}
+--- !u!114 &-3999928058766099748
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5384982542472265557}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f47f7893e5c4d3449cd8717b46d9707, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteRenderers: []
+  hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
+  hitFlashDuration: 0.1
+  shakeOnHit: 1
+  shakeIntensity: 0.15
+  shakeDuration: 0.2
+  attackTelegraphColor: {r: 1, g: 0.5, b: 0, a: 0.7}
+  telegraphDuration: 0.3
+  pulseWhileTelegraphing: 1
+  pulseCycleTime: 0.15
+  hitParticlePrefab: {fileID: 0}
+  attackParticlePrefab: {fileID: 0}
+  deathParticlePrefab: {fileID: 0}

@@ -6,7 +6,6 @@ public class MeleeWeapon : MonoBehaviour
     [Header("Damage & Range")]
     [SerializeField] private float attackRadius = 1f;
     [SerializeField] private LayerMask enemyLayer;
-    [SerializeField] private float criticalChance = 15f; // 15% chance
     [SerializeField] private float criticalMultiplier = 1.5f;
 
     [Header("Knockback")]
@@ -16,7 +15,7 @@ public class MeleeWeapon : MonoBehaviour
 
     [Header("Effect Prefab")]
     [SerializeField] private GameObject meleeEffectPrefab;
-    [SerializeField] private GameObject criticalEffectPrefab; // Different effect for crits
+    [SerializeField] private GameObject criticalEffectPrefab;
     [SerializeField] private float effectLifetime = 0.25f;
     [SerializeField] private Transform attackOrigin;
 
@@ -30,7 +29,7 @@ public class MeleeWeapon : MonoBehaviour
     [SerializeField] private float rightRadius = 1f;
     [SerializeField] private float leftRadius = 1f;
     [SerializeField] private float upRadius = 0.8f;
-    [SerializeField] private float downRadius = 1.2f; // Bigger downward attack
+    [SerializeField] private float downRadius = 1.2f;
 
     [Header("Input Thresholds")]
     [Tooltip("Absolute axis value required to consider that axis active.")]
@@ -68,8 +67,6 @@ public class MeleeWeapon : MonoBehaviour
         ResolveFromInput();
         
         float critChance = playerController != null ? playerController.CriticalChance : 10f;
-        
-        // DEBUG: Ver chance e resultado
         float roll = Random.Range(0f, 100f);
         lastAttackWasCritical = roll < critChance;
                 
@@ -122,11 +119,10 @@ public class MeleeWeapon : MonoBehaviour
         {
             sr.flipX = currentDir == MeleeDir.Left;
             
-            // Extra visual feedback for critical
             if (lastAttackWasCritical)
             {
                 sr.color = Color.yellow;
-                effect.transform.localScale *= 1.2f; // Slightly bigger
+                effect.transform.localScale *= 1.2f;
             }
         }
         
@@ -176,7 +172,6 @@ public class MeleeWeapon : MonoBehaviour
         float currentRadius = GetCurrentAttackRadius();
         Collider2D[] hits = Physics2D.OverlapCircleAll(attackOrigin.position, currentRadius, enemyLayer);
         
-        // Sort by distance for cleave priority
         System.Array.Sort(hits, (a, b) => 
         {
             float distA = Vector2.Distance(attackOrigin.position, a.transform.position);
@@ -192,11 +187,12 @@ public class MeleeWeapon : MonoBehaviour
                 int damage = CalculateDamage();
                 hp.TakeDamage(damage, Enemy_Health.DamageSourceType.PlayerMelee);
                 enemiesHitThisAttack++;
-                
             }
             
             var rb = c.GetComponent<Rigidbody2D>();
-            if (rb != null)
+            
+            // CORREÇÃO: Só aplicar knockback se for Dynamic
+            if (rb != null && rb.bodyType == RigidbodyType2D.Dynamic)
             {
                 float knockback = lastAttackWasCritical ? knockbackForce * criticalKnockbackMultiplier : knockbackForce;
                 StartCoroutine(ApplyKnockback(rb, c.transform, knockback));
@@ -211,7 +207,6 @@ public class MeleeWeapon : MonoBehaviour
 
     private int CalculateDamage()
     {
-        // Get base damage from Player_Controller (which gets it from PlayerStats)
         int baseDamage = playerController != null ? playerController.AttackPower : 1;
         
         if (lastAttackWasCritical)
@@ -226,6 +221,12 @@ public class MeleeWeapon : MonoBehaviour
     {
         if (enemyRb == null) yield break;
         
+        // SEGURANÇA EXTRA: Verificar novamente se é Dynamic
+        if (enemyRb.bodyType != RigidbodyType2D.Dynamic)
+        {
+            yield break;
+        }
+        
         Vector2 dir = (enemyTf.position - attackOrigin.position).normalized;
         enemyRb.linearVelocity = Vector2.zero;
         enemyRb.AddForce(dir * force, ForceMode2D.Impulse);
@@ -235,12 +236,16 @@ public class MeleeWeapon : MonoBehaviour
         
         while (t < knockbackDuration && enemyRb != null)
         {
+            // Verificar se ainda é Dynamic (pode ter mudado durante coroutine)
+            if (enemyRb.bodyType != RigidbodyType2D.Dynamic)
+                yield break;
+            
             enemyRb.linearVelocity = Vector2.Lerp(startVel, Vector2.zero, t / knockbackDuration);
             t += Time.deltaTime; 
             yield return null;
         }
         
-        if (enemyRb != null) 
+        if (enemyRb != null && enemyRb.bodyType == RigidbodyType2D.Dynamic) 
             enemyRb.linearVelocity = Vector2.zero;
     }
 
@@ -252,23 +257,15 @@ public class MeleeWeapon : MonoBehaviour
         }
     }
 
-    // Public methods for upgrades/power-ups
-    public void ModifyCriticalChance(float amount)
-    {
-        criticalChance = Mathf.Clamp(criticalChance + amount, 0f, 100f);
-    }
-
     private void OnDrawGizmos()
     {
         if (attackOrigin == null) return;
         
-        // Draw different colored gizmos per direction
         Gizmos.color = lastAttackWasCritical ? Color.yellow : Color.red;
         
         float radius = GetCurrentAttackRadius();
         Gizmos.DrawWireSphere(attackOrigin.position, radius);
         
-        // Draw direction indicator
         Vector3 dirVector = currentDir switch
         {
             MeleeDir.Right => Vector3.right,
