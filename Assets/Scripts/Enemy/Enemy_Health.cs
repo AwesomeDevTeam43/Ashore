@@ -22,6 +22,8 @@ public class Enemy_Health : MonoBehaviour
     private int ropeDrop;
     private float pendingDamageBuffer;
 
+    [Header("Combat Feedback")]
+    [SerializeField] private EnemyCombatFeedback combatFeedback;
     public enum DamageSourceType
     {
         Generic,
@@ -35,6 +37,9 @@ public class Enemy_Health : MonoBehaviour
         drop_Materials = GetComponent<Drop_Materials>();
         drop_Item = GetComponent<Drop_Item>();
         drop_Equipment = GetComponent<DropEquipment>();
+
+        if (combatFeedback == null)
+            combatFeedback = GetComponent<EnemyCombatFeedback>();
     }
 
     private void Start()
@@ -68,7 +73,7 @@ public class Enemy_Health : MonoBehaviour
         }
     }
 
-    public void TakeDamage(float damage, DamageSourceType damageSource = DamageSourceType.Generic)
+    public void TakeDamage(int damage, DamageSourceType damageSource = DamageSourceType.PlayerMelee)
     {
         if (!damageable || hit || healthSystem == null || healthSystem.CurrentHealth <= 0) return;
 
@@ -89,6 +94,10 @@ public class Enemy_Health : MonoBehaviour
 
         hit = true;
         ApplyBufferedDamage(scaledDamage, minAllowed);
+
+        // ADICIONAR: Feedback visual ao tomar dano
+        if (combatFeedback != null)
+            combatFeedback.PlayHitFeedback(transform.position);
 
         StartCoroutine(TurnOffHit());
     }

@@ -16,9 +16,11 @@ MonoBehaviour:
   baseAttackPower: 1
   baseMoveSpeed: 5
   baseJumpForce: 15
+  baseCriticalChance: 10
   healthUpgradePerLevel: 1
   attackPowerUpgradePerLevel: 1
   moveSpeedUpgradePerLevel: 0.5
   jumpForceUpgradePerLevel: 0.5
+  criticalChanceUpgradePerLevel: 2
   level1XpAmount: 20
   xpGrowthMultiplier: 1.35

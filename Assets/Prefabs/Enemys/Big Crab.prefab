@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: -2770615711749428176}
   - component: {fileID: 7973088768013213042}
   - component: {fileID: -548673277206740306}
+  - component: {fileID: 4381523814020422034}
   m_Layer: 7
   m_Name: Big Crab
   m_TagString: Enemy
@@ -135,6 +136,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stats: {fileID: 0}
   currentLevel: 1
+  damageVariance: 0.1
   typedStats: {fileID: 0}
   walkBoolName: isWalking
   attackTriggerName: Attack
@@ -232,6 +234,7 @@ MonoBehaviour:
   invincibilityDuration: 0.2
   meleeResistance: 0
   rangedResistance: 0
+  combatFeedback: {fileID: 0}
 --- !u!95 &-548673277206740306
 Animator:
   serializedVersion: 7
@@ -254,3 +257,28 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &4381523814020422034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1772538608698774022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f47f7893e5c4d3449cd8717b46d9707, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteRenderers: []
+  hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
+  hitFlashDuration: 0.1
+  shakeOnHit: 1
+  shakeIntensity: 0.15
+  shakeDuration: 0.2
+  attackTelegraphColor: {r: 1, g: 0.5, b: 0, a: 0.7}
+  telegraphDuration: 0.3
+  pulseWhileTelegraphing: 1
+  pulseCycleTime: 0.15
+  hitParticlePrefab: {fileID: 0}
+  attackParticlePrefab: {fileID: 0}
+  deathParticlePrefab: {fileID: 0}

@@ -42,6 +42,11 @@ public class BeeEnemy : EnemyBase
   [SerializeField] private float pathPointThreshold = 0.15f;
   [SerializeField] private float repathInterval = 0.25f;
 
+  [Header("Combat Feedback")]
+  [SerializeField] private EnemyCombatFeedback combatFeedback;
+  [SerializeField] private LineRenderer lungeTelegraphLine;
+  [SerializeField] private Color telegraphLineColor = new Color(1f, 0f, 0f, 0.5f);
+
   private GridPathfinder2D pathfinder;
   private readonly System.Collections.Generic.List<Vector2> currentPath = new System.Collections.Generic.List<Vector2>();
   private int pathIndex = 0;
@@ -228,6 +233,20 @@ public class BeeEnemy : EnemyBase
       animator.SetBool(isRetreatingParam, false);
     }
     EnableStinger(true); // stinger visually out during windup
+
+    // ADICIONAR: Telegraph visual
+    if (combatFeedback != null)
+      combatFeedback.PlayAttackTelegraph();
+    
+    // ADICIONAR: Linha mostrando trajetória do lunge
+    if (lungeTelegraphLine != null)
+    {
+      lungeTelegraphLine.enabled = true;
+      lungeTelegraphLine.SetPosition(0, transform.position);
+      lungeTelegraphLine.SetPosition(1, playerAttackPoint);
+      lungeTelegraphLine.startColor = telegraphLineColor;
+      lungeTelegraphLine.endColor = telegraphLineColor;
+    }
   }
 
   private void AttackWindupBehavior(float playerDistance)
@@ -249,6 +268,10 @@ public class BeeEnemy : EnemyBase
       animator.SetBool(isAttackingParam, false);
       animator.SetBool(isLungingParam, true);
     }
+
+    // ADICIONAR: Desabilitar linha de telegraph
+    if (lungeTelegraphLine != null)
+      lungeTelegraphLine.enabled = false;
   }
 
   private void EnableStinger(bool on)
@@ -533,6 +556,10 @@ public class BeeEnemy : EnemyBase
       if (playerHealth != null)
       {
         playerHealth.TakeDamage((int)currentDamage);
+        
+        // ADICIONAR: Feedback de ataque bem-sucedido
+        if (combatFeedback != null)
+          combatFeedback.PlayAttackFeedback(collision.contacts[0].point);
       }
       EndLunge();
     }

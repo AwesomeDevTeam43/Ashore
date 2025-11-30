@@ -103,7 +103,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   plant_dead: {fileID: 8116476127508738298, guid: 7b1765bed85561e48afc16909fb94c04, type: 3}
-  heal_amount: 0
+  heal_amount: 2
   heal_particle: {fileID: 6643727125893635682, guid: eb62d858bd93346489f3820509685166, type: 3}
   isDead: 0
 --- !u!114 &6418534031175381300

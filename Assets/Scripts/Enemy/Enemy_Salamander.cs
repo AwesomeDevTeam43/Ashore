@@ -56,6 +56,9 @@ public class Enemy_Salamander : EnemyBase
   [Tooltip("Distance from home X to consider arrived when returning.")]
   [SerializeField] private float homeArriveThreshold = 0.2f;
 
+  [Header("Combat Feedback")] // ADICIONADO
+  [SerializeField] private EnemyCombatFeedback combatFeedback; // ADICIONADO
+
   private bool aggressiveRush; // when true, movement speed boosted until bite attempt
   private float aggressiveLockTimer; // counts down while in aggressive rush to avoid instant flip back to Shoot
   private float timeInShoot;
@@ -80,6 +83,10 @@ public class Enemy_Salamander : EnemyBase
     rb = GetComponent<Rigidbody2D>();
     animator = GetComponentInChildren<Animator>();
     homePosition = transform.position;
+    
+    // ADICIONADO: Pegar combatFeedback se não foi atribuído
+    if (combatFeedback == null)
+      combatFeedback = GetComponent<EnemyCombatFeedback>();
     
     var playerObj = GameObject.FindGameObjectWithTag("Player");
     if (playerObj) player = playerObj.transform;
@@ -299,30 +306,19 @@ public class Enemy_Salamander : EnemyBase
   private void TryShoot()
   {
     if (shotCooldown > 0f) return;
+    
     if (spineProjectilePrefab != null)
     {
       Transform spawn = projectileSpawnPoint != null ? projectileSpawnPoint : transform;
       var proj = Instantiate(spineProjectilePrefab, spawn.position, Quaternion.identity);
+      
       if (proj != null && player != null)
       {
-        // If the prefab has a SalamanderSpine component, use its LaunchAtTarget API so it properly ignores the owner and handles sticking.
         var spineComp = proj.GetComponent<SalamanderSpine>();
         if (spineComp != null)
         {
-          // configure the spine's parameters from the salamander overrides
           spineComp.launchSpeed = projectileSpeed;
-          // Launch and pass the salamander GameObject as the owner so it won't collide with itself
           spineComp.LaunchAtTarget(player, this.gameObject);
-        }
-        else
-        {
-          // fallback: simple linear velocity
-          var rbp = proj.GetComponent<Rigidbody2D>();
-          if (rbp != null)
-          {
-            Vector2 dir = (player.position - spawn.position).normalized;
-            rbp.linearVelocity = dir * projectileSpeed;
-          }
         }
       }
     }

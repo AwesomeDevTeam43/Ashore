@@ -6,7 +6,6 @@ using UnityEngine;
 public class Enemy_RuinsBoss : EnemyBase
 {
     public RuinBoss_Stats typedStats;
-    private Enemy_Health enemyHealth;
     private Transform player;
     private Rigidbody2D rb;
     private Animator animator;
