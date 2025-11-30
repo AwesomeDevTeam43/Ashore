@@ -3,20 +3,20 @@ using UnityEngine;
 
 public class MeleeWeapon : MonoBehaviour
 {
-    // SIMPLE CARDINAL MELEE: Each attack samples raw movement and snaps to nearest axis.
-    // Diagonals collapse to whichever axis has larger magnitude (tie -> vertical).
-
     [Header("Damage & Range")]
-    [SerializeField] private int defaultDamage = 20;
     [SerializeField] private float attackRadius = 1f;
     [SerializeField] private LayerMask enemyLayer;
+    [SerializeField] private float criticalChance = 15f; // 15% chance
+    [SerializeField] private float criticalMultiplier = 1.5f;
 
     [Header("Knockback")]
     [SerializeField] private float knockbackForce = 6f;
     [SerializeField] private float knockbackDuration = 0.3f;
+    [SerializeField] private float criticalKnockbackMultiplier = 1.5f;
 
     [Header("Effect Prefab")]
-    [SerializeField] private GameObject meleeEffectPrefab; // Must have SpriteRenderer
+    [SerializeField] private GameObject meleeEffectPrefab;
+    [SerializeField] private GameObject criticalEffectPrefab; // Different effect for crits
     [SerializeField] private float effectLifetime = 0.25f;
     [SerializeField] private Transform attackOrigin;
 
@@ -25,6 +25,12 @@ public class MeleeWeapon : MonoBehaviour
     [SerializeField] private Vector2 offsetLeft = new Vector2(-0.6f, 0.1f);
     [SerializeField] private Vector2 offsetUp = new Vector2(0f, 0.9f);
     [SerializeField] private Vector2 offsetDown = new Vector2(0f, -0.2f);
+
+    [Header("Attack Range Per Direction")]
+    [SerializeField] private float rightRadius = 1f;
+    [SerializeField] private float leftRadius = 1f;
+    [SerializeField] private float upRadius = 0.8f;
+    [SerializeField] private float downRadius = 1.2f; // Bigger downward attack
 
     [Header("Input Thresholds")]
     [Tooltip("Absolute axis value required to consider that axis active.")]
@@ -37,8 +43,11 @@ public class MeleeWeapon : MonoBehaviour
     private Player_Controller playerController;
 
     public enum MeleeDir { Right, Left, Up, Down }
-    [Header("Current Cardinal (debug)")] [SerializeField]
-    private MeleeDir currentDir = MeleeDir.Right;
+    [Header("Current Cardinal (debug)")] 
+    [SerializeField] private MeleeDir currentDir = MeleeDir.Right;
+    
+    private bool lastAttackWasCritical = false;
+    private int enemiesHitThisAttack = 0;
 
     private void Start()
     {
@@ -47,12 +56,24 @@ public class MeleeWeapon : MonoBehaviour
         inputHandler = GetComponentInParent<Player_InputHandler>();
         animator = GetComponentInParent<Animator>();
         playerController = GetComponentInParent<Player_Controller>();
+
+        if (playerController == null)
+        {
+            Debug.LogError("Player_Controller not found! MeleeWeapon needs it to calculate damage.");
+        }
     }
 
     public void PerformAttack()
     {
-        // Sample input once per attack and resolve to cardinal.
         ResolveFromInput();
+        
+        float critChance = playerController != null ? playerController.CriticalChance : 10f;
+        
+        // DEBUG: Ver chance e resultado
+        float roll = Random.Range(0f, 100f);
+        lastAttackWasCritical = roll < critChance;
+                
+        enemiesHitThisAttack = 0;
         Attack_Animation();
     }
 
@@ -67,33 +88,50 @@ public class MeleeWeapon : MonoBehaviour
         Vector2 raw = inputHandler != null ? inputHandler.MovementInput : new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         bool facingLeft = playerMovement != null && playerMovement.IsFacingLeft;
         Vector2 dir = CardinalDirectionResolver.Resolve(raw, axisThreshold, facingLeft);
-        // Convert to enum
-        if (dir == Vector2.up) currentDir = MeleeDir.Up;
+        
+        if (dir == Vector2.up) 
+            currentDir = MeleeDir.Up;
         else if (dir == Vector2.down)
         {
             if (playerMovement != null && playerMovement.IsGrounded())
             {
-                currentDir = facingLeft ? MeleeDir.Left : MeleeDir.Right; // block downward when grounded
+                currentDir = facingLeft ? MeleeDir.Left : MeleeDir.Right;
             }
-            else currentDir = MeleeDir.Down;
+            else 
+                currentDir = MeleeDir.Down;
         }
-        else if (dir == Vector2.left) currentDir = MeleeDir.Left;
-        else currentDir = MeleeDir.Right;
+        else if (dir == Vector2.left) 
+            currentDir = MeleeDir.Left;
+        else 
+            currentDir = MeleeDir.Right;
     }
 
     private void SpawnEffect()
     {
-        if (meleeEffectPrefab == null) return;
-        // Base position: player root (not damage origin) for independence
+        GameObject prefabToUse = lastAttackWasCritical && criticalEffectPrefab != null 
+            ? criticalEffectPrefab 
+            : meleeEffectPrefab;
+            
+        if (prefabToUse == null) return;
+        
         Vector3 worldPos = transform.position + ResolveWorldOffset();
-        GameObject effect = Instantiate(meleeEffectPrefab, worldPos, Quaternion.identity);
+        GameObject effect = Instantiate(prefabToUse, worldPos, Quaternion.identity);
+        
         var sr = effect.GetComponent<SpriteRenderer>();
         if (sr != null)
         {
             sr.flipX = currentDir == MeleeDir.Left;
+            
+            // Extra visual feedback for critical
+            if (lastAttackWasCritical)
+            {
+                sr.color = Color.yellow;
+                effect.transform.localScale *= 1.2f; // Slightly bigger
+            }
         }
+        
         float rotZ = ResolveRotationZ();
-        effect.transform.rotation = Quaternion.Euler(0,0,rotZ);
+        effect.transform.rotation = Quaternion.Euler(0, 0, rotZ);
         Destroy(effect, effectLifetime);
     }
 
@@ -119,55 +157,128 @@ public class MeleeWeapon : MonoBehaviour
         };
     }
 
+    private float GetCurrentAttackRadius()
+    {
+        return currentDir switch
+        {
+            MeleeDir.Right => rightRadius,
+            MeleeDir.Left => leftRadius,
+            MeleeDir.Up => upRadius,
+            MeleeDir.Down => downRadius,
+            _ => attackRadius
+        };
+    }
+
     private void DamageEnemies()
     {
         if (attackOrigin == null) return;
-        Collider2D[] hits = Physics2D.OverlapCircleAll(attackOrigin.position, attackRadius, enemyLayer);
+        
+        float currentRadius = GetCurrentAttackRadius();
+        Collider2D[] hits = Physics2D.OverlapCircleAll(attackOrigin.position, currentRadius, enemyLayer);
+        
+        // Sort by distance for cleave priority
+        System.Array.Sort(hits, (a, b) => 
+        {
+            float distA = Vector2.Distance(attackOrigin.position, a.transform.position);
+            float distB = Vector2.Distance(attackOrigin.position, b.transform.position);
+            return distA.CompareTo(distB);
+        });
+
         foreach (var c in hits)
         {
             var hp = c.GetComponent<Enemy_Health>();
             if (hp != null)
             {
-                hp.TakeDamage(GetCurrentDamage(), Enemy_Health.DamageSourceType.PlayerMelee);
+                int damage = CalculateDamage();
+                hp.TakeDamage(damage, Enemy_Health.DamageSourceType.PlayerMelee);
+                enemiesHitThisAttack++;
+                
             }
+            
             var rb = c.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
-                StartCoroutine(ApplyKnockback(rb, c.transform));
+                float knockback = lastAttackWasCritical ? knockbackForce * criticalKnockbackMultiplier : knockbackForce;
+                StartCoroutine(ApplyKnockback(rb, c.transform, knockback));
             }
         }
-        if (playerCamera != null) playerCamera.StartCameraShake();
+
+        if (enemiesHitThisAttack > 0 && playerCamera != null) 
+        {
+            playerCamera.StartCameraShake();
+        }
     }
 
-    private IEnumerator ApplyKnockback(Rigidbody2D enemyRb, Transform enemyTf)
+    private int CalculateDamage()
+    {
+        // Get base damage from Player_Controller (which gets it from PlayerStats)
+        int baseDamage = playerController != null ? playerController.AttackPower : 1;
+        
+        if (lastAttackWasCritical)
+        {
+            return Mathf.RoundToInt(baseDamage * criticalMultiplier);
+        }
+        
+        return baseDamage;
+    }
+
+    private IEnumerator ApplyKnockback(Rigidbody2D enemyRb, Transform enemyTf, float force)
     {
         if (enemyRb == null) yield break;
+        
         Vector2 dir = (enemyTf.position - attackOrigin.position).normalized;
         enemyRb.linearVelocity = Vector2.zero;
-        enemyRb.AddForce(dir * knockbackForce, ForceMode2D.Impulse);
-        float t = 0f; Vector2 startVel = enemyRb.linearVelocity;
+        enemyRb.AddForce(dir * force, ForceMode2D.Impulse);
+        
+        float t = 0f; 
+        Vector2 startVel = enemyRb.linearVelocity;
+        
         while (t < knockbackDuration && enemyRb != null)
         {
             enemyRb.linearVelocity = Vector2.Lerp(startVel, Vector2.zero, t / knockbackDuration);
-            t += Time.deltaTime; yield return null;
+            t += Time.deltaTime; 
+            yield return null;
         }
-        if (enemyRb != null) enemyRb.linearVelocity = Vector2.zero;
+        
+        if (enemyRb != null) 
+            enemyRb.linearVelocity = Vector2.zero;
     }
 
     private void Attack_Animation()
     {
-        if (animator != null) animator.SetTrigger("Meele Attack");
+        if (animator != null) 
+        {
+            animator.SetTrigger("Meele Attack");
+        }
     }
 
-    private int GetCurrentDamage()
+    // Public methods for upgrades/power-ups
+    public void ModifyCriticalChance(float amount)
     {
-        return playerController != null ? playerController.AttackPower : defaultDamage;
+        criticalChance = Mathf.Clamp(criticalChance + amount, 0f, 100f);
     }
 
     private void OnDrawGizmos()
     {
         if (attackOrigin == null) return;
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(attackOrigin.position, attackRadius);
+        
+        // Draw different colored gizmos per direction
+        Gizmos.color = lastAttackWasCritical ? Color.yellow : Color.red;
+        
+        float radius = GetCurrentAttackRadius();
+        Gizmos.DrawWireSphere(attackOrigin.position, radius);
+        
+        // Draw direction indicator
+        Vector3 dirVector = currentDir switch
+        {
+            MeleeDir.Right => Vector3.right,
+            MeleeDir.Left => Vector3.left,
+            MeleeDir.Up => Vector3.up,
+            MeleeDir.Down => Vector3.down,
+            _ => Vector3.right
+        };
+        
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawRay(attackOrigin.position, dirVector * radius);
     }
 }

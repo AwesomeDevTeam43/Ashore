@@ -19619,6 +19619,10 @@ PrefabInstance:
       propertyPath: godMode
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5682699157367814936, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
+      propertyPath: criticalChance
+      value: 15
+      objectReference: {fileID: 0}
     - target: {fileID: 6252809459483690441, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
       propertyPath: m_Name
       value: Player
