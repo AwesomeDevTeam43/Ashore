@@ -6,7 +6,6 @@ using UnityEngine;
 public class BigCrab : EnemyBase
 {
   public BigCrab_Stats typedStats;
-  private Enemy_Health enemyHealth;
   private Transform player;
   private Rigidbody2D rb;
   private Animator animator;

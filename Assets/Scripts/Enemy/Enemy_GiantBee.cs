@@ -3,8 +3,6 @@ using UnityEngine;
 public class BeeEnemy : EnemyBase
 {
   private GiantBee_Stats typedStats;
-  private Enemy_Health enemyHealth;
-
   private GameObject player;
   private Rigidbody2D rb;
   private Collider2D col2D;

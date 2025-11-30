@@ -7,7 +7,6 @@ public class Enemy_Fly : EnemyBase
     public LayerMask boundaryLayer;
 
     private Fly_Stats typedStats;
-    private Enemy_Health enemyHealth;
     private float damageTimer;
     private HealthSystem playerHealth;
     private Rigidbody2D rb;

@@ -6,7 +6,6 @@ public class Enemy_Salamander : EnemyBase
 {
   // Core refs
   public Salamander_Stats typedStats; // cast from stats asset
-  private Enemy_Health enemyHealth;
   private Transform player;
   private Rigidbody2D rb;
   private Animator animator;

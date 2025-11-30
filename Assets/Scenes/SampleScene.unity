@@ -12671,7 +12671,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6775553293958379709, guid: d93b88b915da8484bbb592e1e866f2ee, type: 3}
       propertyPath: enemyLevel
-      value: 2
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6775553293958379709, guid: d93b88b915da8484bbb592e1e866f2ee, type: 3}
+      propertyPath: damageMultiplierPerLevel
+      value: 1.15
       objectReference: {fileID: 0}
     - target: {fileID: 8083365211489249149, guid: d93b88b915da8484bbb592e1e866f2ee, type: 3}
       propertyPath: m_LocalPosition.x

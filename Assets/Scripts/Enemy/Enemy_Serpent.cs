@@ -5,7 +5,6 @@ public class VenomShooting : EnemyBase
     private Serpent_Stats typedStats;
     public GameObject venomPrefab;
     public Transform shootPoint;
-    private Enemy_Health enemyHealth;
     private Transform player;
     [Header("Animation")]
     [SerializeField] private Animator animator;

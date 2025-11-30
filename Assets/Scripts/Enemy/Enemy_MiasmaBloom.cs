@@ -25,7 +25,6 @@ public class Enemy_MiasmaBloom : EnemyBase
     private GameObject player;
     private HealthSystem playerHealth;
     private Collider2D playerCollider;
-    private Enemy_Health enemyHealth;
     private SpriteRenderer sr;
 
     private float stateTimer;

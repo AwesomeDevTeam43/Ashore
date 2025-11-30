@@ -32,7 +32,7 @@ public class BirdBomberEnemy : EnemyBase
     private BirdBomber_Stats _typedStats;
     private Enemy_Health _enemyHealth;
 
-    private void Awake()
+    protected override void Awake()
     {
         _enemyHealth = GetComponent<Enemy_Health>();
         CacheStatsFromAssignedAsset();

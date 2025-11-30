@@ -7,7 +7,6 @@ using UnityEngine;
 public class Enemy_Golem : EnemyBase
 {
     public Golem_Stats typedStats;
-    private Enemy_Health enemyHealth;
     private Rigidbody2D rb;
     private Animator animator;
     private Transform player;
