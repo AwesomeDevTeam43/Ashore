@@ -2210,6 +2210,7 @@ MonoBehaviour:
   invincibilityDuration: 0.2
   meleeResistance: 0
   rangedResistance: 0
+  combatFeedback: {fileID: 0}
 --- !u!114 &64498104
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9831,6 +9832,7 @@ MonoBehaviour:
   invincibilityDuration: 0.2
   meleeResistance: 0
   rangedResistance: 0
+  combatFeedback: {fileID: 0}
 --- !u!114 &499709808
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17735,6 +17737,7 @@ MonoBehaviour:
   invincibilityDuration: 0.2
   meleeResistance: 0
   rangedResistance: 0
+  combatFeedback: {fileID: 0}
 --- !u!114 &868224174
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -69551,6 +69554,7 @@ MonoBehaviour:
   invincibilityDuration: 0.2
   meleeResistance: 0
   rangedResistance: 0
+  combatFeedback: {fileID: 0}
 --- !u!114 &1229059587
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -69565,6 +69569,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stats: {fileID: 11400000, guid: 5132dcdf12051334284a247d24eaae1a, type: 2}
   currentLevel: 1
+  damageVariance: 0.1
   projectilePrefab: {fileID: 3141687366189240326, guid: ed640759143572f42bf203056a735210, type: 3}
   projectileSpawn: {fileID: 264760813}
   projectileSpawnSecondary: {fileID: 605508387}
@@ -700851,6 +700856,10 @@ PrefabInstance:
     - target: {fileID: 2800428428711574712, guid: 0a74d4a25a930d54db7c55e41b34e86b, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3588425962174342462, guid: 0a74d4a25a930d54db7c55e41b34e86b, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 591
       objectReference: {fileID: 0}
     - target: {fileID: 6656333252252744522, guid: 0a74d4a25a930d54db7c55e41b34e86b, type: 3}
       propertyPath: m_AnchorMax.y
