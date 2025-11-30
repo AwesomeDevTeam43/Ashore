@@ -5,6 +5,8 @@ public class TutorialManager : MonoBehaviour
 {
     [Header("Steps")]
     public TutorialStep[] steps;
+    [Tooltip("Index of the load scene step to skip to. Set in Inspector.")]
+    public int loadSceneStepIndex = -1;
 
     [Header("UI Overlay")]
     public TutorialOverlay overlayPrefab;
@@ -66,6 +68,12 @@ public class TutorialManager : MonoBehaviour
 
     private void Update()
     {
+        // Skip to load scene step on Escape
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SkipToLoadScene();
+        }
+
         if (currentIndex < 0 || currentIndex >= (steps?.Length ?? 0)) return;
         var s = steps[currentIndex];
         if (s != null && s.IsComplete())
@@ -108,6 +116,22 @@ public class TutorialManager : MonoBehaviour
         if (s != null)
         {
             s.Begin(this);
+        }
+    }
+
+    private void SkipToLoadScene()
+    {
+        if (loadSceneStepIndex >= 0 && loadSceneStepIndex < (steps?.Length ?? 0))
+        {
+            // End current step
+            if (currentIndex >= 0 && currentIndex < (steps?.Length ?? 0))
+            {
+                var s = steps[currentIndex];
+                if (s != null) s.End();
+            }
+            // Set to the step before the load scene step, then Advance will go to it
+            currentIndex = loadSceneStepIndex - 1;
+            Advance();
         }
     }
 

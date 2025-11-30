@@ -4,6 +4,7 @@ using System;
 
 public class Player_InputHandler : MonoBehaviour
 {
+    public static bool InventoryOpen => MenuController.InventoryOpen;
     [Header("Input Action Asset")]
     [SerializeField] private InputActionAsset playerControls;
 
@@ -48,16 +49,18 @@ public class Player_InputHandler : MonoBehaviour
     // Expose methods to enable/disable the entire player action map when UI is open
     public void DisablePlayerActions()
     {
-        if (playerControls == null) return;
+        if (playerControls == null) { Debug.LogWarning("[Player_InputHandler] DisablePlayerActions: playerControls is null"); return; }
         var map = playerControls.FindActionMap(actionMapName);
-        if (map != null) map.Disable();
+        if (map != null) { map.Disable(); Debug.Log($"[Player_InputHandler] Disabled action map: {actionMapName}"); }
+        else { Debug.LogWarning($"[Player_InputHandler] Could not find action map: {actionMapName}"); }
     }
 
     public void EnablePlayerActions()
     {
-        if (playerControls == null) return;
+        if (playerControls == null) { Debug.LogWarning("[Player_InputHandler] EnablePlayerActions: playerControls is null"); return; }
         var map = playerControls.FindActionMap(actionMapName);
-        if (map != null) map.Enable();
+        if (map != null) { map.Enable(); Debug.Log($"[Player_InputHandler] Enabled action map: {actionMapName}"); }
+        else { Debug.LogWarning($"[Player_InputHandler] Could not find action map: {actionMapName}"); }
     }
 
     [Header("8-Direction Inputs")]
@@ -93,7 +96,9 @@ public class Player_InputHandler : MonoBehaviour
 
     private void OnEnable()
     {
-        playerControls.FindActionMap(actionMapName).Enable();
+        var map = playerControls.FindActionMap(actionMapName);
+        if (map != null) { map.Enable(); Debug.Log($"[Player_InputHandler] OnEnable: Enabled action map {actionMapName}"); }
+        else { Debug.LogWarning($"[Player_InputHandler] OnEnable: Could not find action map {actionMapName}"); }
         currentControlScheme = defaultSchemeName;
         UIInputMode.OnSchemeChanged += HandleUISchemeChanged;
         HandleUISchemeChanged(UIInputMode.CurrentScheme);
@@ -101,42 +106,27 @@ public class Player_InputHandler : MonoBehaviour
 
     private void OnDisable()
     {
-        playerControls.FindActionMap(actionMapName).Disable();
+        var map = playerControls.FindActionMap(actionMapName);
+        if (map != null) { map.Disable(); Debug.Log($"[Player_InputHandler] OnDisable: Disabled action map {actionMapName}"); }
+        else { Debug.LogWarning($"[Player_InputHandler] OnDisable: Could not find action map {actionMapName}"); }
         UIInputMode.OnSchemeChanged -= HandleUISchemeChanged;
     }
 
     private void Awake()
     {
-        if (playerControls == null)
-        {
-            Debug.LogError("Player_InputHandler: playerControls InputActionAsset is not assigned.");
-            return;
-        }
         InputActionMap mapReference = playerControls.FindActionMap(actionMapName);
-        if (mapReference == null)
-        {
-            Debug.LogError($"Player_InputHandler: Action map '{actionMapName}' not found in InputActionAsset.");
-            return;
-        }
+        if (mapReference == null) Debug.LogError($"[Player_InputHandler] Awake: Could not find action map {actionMapName}");
+        else Debug.Log($"[Player_InputHandler] Awake: Found action map {actionMapName}");
 
-        movementAction = mapReference.FindAction(movement);
-        if (movementAction == null) Debug.LogError($"Player_InputHandler: Movement action '{movement}' not found.");
-        lookAction = mapReference.FindAction(look);
-        if (lookAction == null) Debug.LogError($"Player_InputHandler: Look action '{look}' not found.");
-        jumpAction = mapReference.FindAction(jump);
-        if (jumpAction == null) Debug.LogError($"Player_InputHandler: Jump action '{jump}' not found.");
-        attackAction = mapReference.FindAction(attack);
-        if (attackAction == null) Debug.LogError($"Player_InputHandler: Attack action '{attack}' not found.");
-        rangeAttackAction = mapReference.FindAction(rangeAttack);
-        if (rangeAttackAction == null) Debug.LogError($"Player_InputHandler: RangeAttack action '{rangeAttack}' not found.");
-        interactAction = mapReference.FindAction(interact);
-        if (interactAction == null) Debug.LogError($"Player_InputHandler: Interact action '{interact}' not found.");
-        inventoryAction = mapReference.FindAction(inventory);
-        if (inventoryAction == null) Debug.LogError($"Player_InputHandler: Inventory action '{inventory}' not found.");
+        movementAction = mapReference?.FindAction(movement);
+        lookAction = mapReference?.FindAction(look);
+        jumpAction = mapReference?.FindAction(jump);
+        attackAction = mapReference?.FindAction(attack);
+        rangeAttackAction = mapReference?.FindAction(rangeAttack);
+        interactAction = mapReference?.FindAction(interact);
+        inventoryAction = mapReference?.FindAction(inventory);
 
-        // Always enable inventory action in Player map
-        if (inventoryAction != null && !inventoryAction.enabled) inventoryAction.Enable();
-
+        Debug.Log($"[Player_InputHandler] Awake: Actions - Move: {movementAction != null}, Look: {lookAction != null}, Jump: {jumpAction != null}, Attack: {attackAction != null}, RangeAttack: {rangeAttackAction != null}, Interact: {interactAction != null}, Inventory: {inventoryAction != null}");
         MakeInputEvents();
     }
 
@@ -145,7 +135,29 @@ public class Player_InputHandler : MonoBehaviour
         Handle8Directions();
         if (InventoryActionTriggered)
         {
+            Debug.Log("[Player_InputHandler] InventoryActionTriggered detected in Update");
             InventoryActionTriggered = false;
+            EnforceInputMap();
+        }
+    }
+
+    private void EnforceInputMap()
+    {
+        var playerInput = GetComponent<PlayerInput>();
+        if (playerInput == null) { Debug.LogWarning("[Player_InputHandler] EnforceInputMap: PlayerInput is null"); return; }
+        if (InventoryOpen)
+        {
+            Debug.Log("[Player_InputHandler] EnforceInputMap: InventoryOpen, switching to UI map");
+            try { playerInput.actions.FindActionMap("Player").Disable(); Debug.Log("[Player_InputHandler] Disabled Player map"); } catch (Exception ex) { Debug.LogWarning($"[Player_InputHandler] Failed to disable Player map: {ex.Message}"); }
+            try { playerInput.actions.FindActionMap("UI").Enable(); Debug.Log("[Player_InputHandler] Enabled UI map"); } catch (Exception ex) { Debug.LogWarning($"[Player_InputHandler] Failed to enable UI map: {ex.Message}"); }
+            try { playerInput.SwitchCurrentActionMap("UI"); Debug.Log("[Player_InputHandler] Switched to UI map"); } catch (Exception ex) { Debug.LogWarning($"[Player_InputHandler] Failed to switch to UI map: {ex.Message}"); }
+        }
+        else
+        {
+            Debug.Log("[Player_InputHandler] EnforceInputMap: Inventory closed, switching to Player map");
+            try { playerInput.actions.FindActionMap("UI").Disable(); Debug.Log("[Player_InputHandler] Disabled UI map"); } catch (Exception ex) { Debug.LogWarning($"[Player_InputHandler] Failed to disable UI map: {ex.Message}"); }
+            try { playerInput.actions.FindActionMap("Player").Enable(); Debug.Log("[Player_InputHandler] Enabled Player map"); } catch (Exception ex) { Debug.LogWarning($"[Player_InputHandler] Failed to enable Player map: {ex.Message}"); }
+            try { playerInput.SwitchCurrentActionMap("Player"); Debug.Log("[Player_InputHandler] Switched to Player map"); } catch (Exception ex) { Debug.LogWarning($"[Player_InputHandler] Failed to switch to Player map: {ex.Message}"); }
         }
     }
 
@@ -159,26 +171,26 @@ public class Player_InputHandler : MonoBehaviour
 
     private void MakeInputEvents()
     {
-        movementAction.performed += inputInfo => { MovementInput = inputInfo.ReadValue<Vector2>(); UpdateControlScheme(inputInfo); };
-        movementAction.canceled += inputInfo => MovementInput = Vector2.zero;
+        movementAction.performed += inputInfo => { MovementInput = inputInfo.ReadValue<Vector2>(); Debug.Log($"[Player_InputHandler] Movement performed: {MovementInput}"); UpdateControlScheme(inputInfo); };
+        movementAction.canceled += inputInfo => { MovementInput = Vector2.zero; Debug.Log("[Player_InputHandler] Movement canceled"); };
 
-        lookAction.performed += inputInfo => { LookInput = inputInfo.ReadValue<Vector2>(); UpdateControlScheme(inputInfo); };
-        lookAction.canceled += inputInfo => LookInput = Vector2.zero;
+        lookAction.performed += inputInfo => { LookInput = inputInfo.ReadValue<Vector2>(); Debug.Log($"[Player_InputHandler] Look performed: {LookInput}"); UpdateControlScheme(inputInfo); };
+        lookAction.canceled += inputInfo => { LookInput = Vector2.zero; Debug.Log("[Player_InputHandler] Look canceled"); };
 
-        jumpAction.performed += inputInfo => { JumpTriggered = true; UpdateControlScheme(inputInfo); };
-        jumpAction.canceled += inputInfo => JumpTriggered = false;
+        jumpAction.performed += inputInfo => { JumpTriggered = true; Debug.Log("[Player_InputHandler] Jump performed"); UpdateControlScheme(inputInfo); };
+        jumpAction.canceled += inputInfo => { JumpTriggered = false; Debug.Log("[Player_InputHandler] Jump canceled"); };
 
-        attackAction.performed += inputInfo => { AttackTriggered = true; UpdateControlScheme(inputInfo); };
-        attackAction.canceled += inputInfo => AttackTriggered = false;
+        attackAction.performed += inputInfo => { AttackTriggered = true; Debug.Log("[Player_InputHandler] Attack performed"); UpdateControlScheme(inputInfo); };
+        attackAction.canceled += inputInfo => { AttackTriggered = false; Debug.Log("[Player_InputHandler] Attack canceled"); };
 
-        rangeAttackAction.performed += inputInfo => { RangeAttackTriggered = true; UpdateControlScheme(inputInfo); };
-        rangeAttackAction.canceled += inputInfo => RangeAttackTriggered = false;
+        rangeAttackAction.performed += inputInfo => { RangeAttackTriggered = true; Debug.Log("[Player_InputHandler] RangeAttack performed"); UpdateControlScheme(inputInfo); };
+        rangeAttackAction.canceled += inputInfo => { RangeAttackTriggered = false; Debug.Log("[Player_InputHandler] RangeAttack canceled"); };
 
-        interactAction.performed += inputInfo => { InteractActionTriggered = true; UpdateControlScheme(inputInfo); };
-        interactAction.canceled += inputInfo => InteractActionTriggered = false;
+        interactAction.performed += inputInfo => { InteractActionTriggered = true; Debug.Log("[Player_InputHandler] Interact performed"); UpdateControlScheme(inputInfo); };
+        interactAction.canceled += inputInfo => { InteractActionTriggered = false; Debug.Log("[Player_InputHandler] Interact canceled"); };
 
-        inventoryAction.performed += inputInfo => { InventoryActionTriggered = true; OnInventoryPressed?.Invoke(); UpdateControlScheme(inputInfo); };
-        inventoryAction.canceled += inputInfo => InventoryActionTriggered = false;
+        inventoryAction.performed += inputInfo => { InventoryActionTriggered = true; Debug.Log("[Player_InputHandler] Inventory performed"); OnInventoryPressed?.Invoke(); UpdateControlScheme(inputInfo); };
+        inventoryAction.canceled += inputInfo => { InventoryActionTriggered = false; Debug.Log("[Player_InputHandler] Inventory canceled"); };
     }
 
     private void Handle8Directions()
@@ -352,6 +364,7 @@ public class Player_InputHandler : MonoBehaviour
             return;
         }
 
+        Debug.Log($"[Player_InputHandler] Control scheme changed: {currentControlScheme} -> {newScheme}");
         currentControlScheme = newScheme;
         OnControlSchemeChanged?.Invoke(currentControlScheme);
     }
@@ -424,4 +437,3 @@ public class Player_InputHandler : MonoBehaviour
         }
     }
 }
-
