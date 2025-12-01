@@ -13,17 +13,20 @@ MonoBehaviour:
   m_Name: GiantBee_Stats 1
   m_EditorClassIdentifier: 
   maxHealth: 5
+  damage: 1
   xpOnDeath: 3
-  dropA: 5
-  dropB: 4
-  dropC: 5
+  woodDrop: 5
+  stoneDrop: 4
+  ropeDrop: 5
   baseScale: {x: 2, y: 2, z: 1}
+  meleeResistance: 0
+  rangedResistance: 0
   roamSpeed: 4
   lungingForce: 15
   retreatSpeed: 6
-  playerDetect: 8
-  lungeRange: 4
-  retreatRange: 5
+  playerDetect: 10
+  lungeRange: 6.5
+  retreatRange: 7
   lungeCooldown: 2
   lungeDuration: 1
   stingDamage: 2

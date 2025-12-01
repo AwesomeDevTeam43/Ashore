@@ -347,6 +347,11 @@ public class BeeEnemy : EnemyBase
     if (Vector2.Distance(transform.position, retreatTargetPosition) < 0.5f)
     {
       rb.linearVelocity = Vector2.zero;
+      // Finished retreat: return to roaming and allow immediate reactions to the player.
+      // Clear the lunge cooldown so the Bee can respond if the player re-approaches.
+      currentCooldown = 0f;
+      repathTimer = 0f; // force a fresh path next frame
+      desiredVelocity = Vector2.zero;
       enemyState = EnemyState.Roaming;
       Debug.Log("Retreat complete, back to roaming!");
       if (animator != null)
@@ -537,15 +542,43 @@ public class BeeEnemy : EnemyBase
 
   private float GetClearance()
   {
+    // Prefer precise per-collider estimates for clearance so the pathfinder and
+    // collision checks treat the Bee's physical footprint correctly.
     if (col2D is CircleCollider2D cc)
     {
-      return cc.radius * Mathf.Abs(transform.localScale.x) * 0.6f;
+      float scale = Mathf.Max(Mathf.Abs(transform.localScale.x), Mathf.Abs(transform.localScale.y));
+      return cc.radius * scale * 0.6f;
     }
+
     if (col2D is CapsuleCollider2D cap)
     {
-      return Mathf.Max(cap.size.x, cap.size.y) * 0.3f;
+      float scale = Mathf.Max(Mathf.Abs(transform.localScale.x), Mathf.Abs(transform.localScale.y));
+      return Mathf.Max(cap.size.x, cap.size.y) * 0.3f * scale;
     }
-    return nodeRadius * 0.75f; // fallback
+
+    // Fallback: compute a conservative radius from the collider's world bounds
+    // which works for BoxCollider2D, PolygonCollider2D and other collider types.
+    float clearance = nodeRadius * 0.75f;
+    if (col2D != null)
+    {
+      Bounds b = col2D.bounds; // world-space bounds
+      float halfDiagonal = 0.5f * Mathf.Sqrt(b.size.x * b.size.x + b.size.y * b.size.y);
+      clearance = Mathf.Max(clearance, halfDiagonal);
+    }
+
+    // If a stinger hitbox exists and extends beyond the body, ensure clearance
+    // accounts for it as well (prevents the stinger from clipping geometry).
+    if (stingerHitbox != null)
+    {
+      Bounds sb = stingerHitbox.bounds;
+      float stingerHalfDiag = 0.5f * Mathf.Sqrt(sb.size.x * sb.size.x + sb.size.y * sb.size.y);
+      clearance = Mathf.Max(clearance, stingerHalfDiag);
+    }
+
+    // Don't allow an absurdly small clearance; keep a reasonable minimum.
+    clearance = Mathf.Max(clearance, nodeRadius * 0.5f);
+
+    return clearance;
   }
 
   private void OnCollisionEnter2D(Collision2D collision)
