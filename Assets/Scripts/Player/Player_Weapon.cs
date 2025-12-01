@@ -74,7 +74,9 @@ public class Weapon : MonoBehaviour
                     proj.SetDirection(shootDir);
                     if (playerController != null)
                     {
-                        proj.SetDamage(playerController.AttackPower);
+                        float rangedCritChance = playerController.GetRangedCriticalChance();
+                        bool isCrit = UnityEngine.Random.value * 100f < rangedCritChance;
+                        proj.SetDamage(playerController.AttackPower, isCrit);
                     }
                 }
             }

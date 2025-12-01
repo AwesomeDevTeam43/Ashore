@@ -201,6 +201,15 @@ public class Player_Controller : MonoBehaviour
         Debug.Log($"Stats Updated - Level: {level}, HP: {MaxHealth}, ATK: {AttackPower}, SPD: {MoveSpeed}, JUMP: {JumpForce}, CRIT: {CriticalChance}%");
     }
 
+    // Ranged weapon critical chance: base 3% + 0.5% per level (capped at 100%)
+    public float GetRangedCriticalChance()
+    {
+        if (playerStats == null) return 3f;
+        int level = CurrentLevel;
+        float chance = 3f + 0.5f * (level - 1);
+        return Mathf.Min(chance, 100f);
+    }
+
   public void OnLevelUp(int newLevel)
   {
     UpdateStatsFromLevel();
