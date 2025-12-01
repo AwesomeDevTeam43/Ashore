@@ -44,6 +44,15 @@ public class XP_Particle : MonoBehaviour
         IgnorePlayerCollision();
     }
 
+    private void Update()
+    {
+        if (hasLanded)
+        {
+            float newY = startPosition.y + Mathf.Sin((Time.time + timeOffset) * floatSpeed) * floatAmplitude;
+            transform.position = new Vector3(transform.position.x, newY, transform.position.z);
+        }
+    }
+
     private void EnsureColliders()
     {
         var colliders = GetComponents<Collider2D>();
@@ -134,6 +143,17 @@ public class XP_Particle : MonoBehaviour
             rb.gravityScale = 0f;
             rb.bodyType = RigidbodyType2D.Kinematic;
         }
+
+        // Disable physics collider and keep only trigger
+        if (physicsCollider != null)
+        {
+            physicsCollider.enabled = false;
+        }
+
+        // Set floating position
+        startPosition = transform.position;
+        startPosition.y += heightAboveGround;
+        transform.position = startPosition;
     }
 
     private void OnTriggerEnter2D(Collider2D other)

@@ -17,6 +17,9 @@ public class Chest : MonoBehaviour, ISaveable
     [SerializeField] private int woodReward = 3;
     [SerializeField] private int ropeReward = 3;
 
+    [Header("Spawn Settings")]
+    [SerializeField] private float spawnHeight = 1.5f; // Height above chest to spawn items
+
     private SpriteRenderer spriteRenderer;
     private Sprite closedSprite;
     private XP_System xP_System;
@@ -29,6 +32,7 @@ public class Chest : MonoBehaviour, ISaveable
     // reflection + action hook (non-invasive to Player_InputHandler)
     private InputAction playerInteractAction;
     private System.Action<InputAction.CallbackContext> interactCallback;
+    
     private void Awake()
     {
         player = GameObject.FindGameObjectWithTag("Player");
@@ -47,11 +51,6 @@ public class Chest : MonoBehaviour, ISaveable
     void Start()
     {
         UpdateChestVisual();
-    }
-
-    private void Update()
-    {
-
     }
 
     void OnTriggerEnter2D(Collider2D collision)
@@ -116,8 +115,21 @@ public class Chest : MonoBehaviour, ISaveable
         {
             isOpen = true;
             UpdateChestVisual();
-            xP_System.DropXP(transform.position, xpReward);
-            drop_Materials?.DropMaterial(stoneReward, woodReward, ropeReward);
+            
+            // Spawn position above the chest
+            Vector3 spawnPosition = transform.position + Vector3.up * spawnHeight;
+            
+            // Drop XP and materials from above the chest
+            xP_System.DropXP(spawnPosition, xpReward);
+            
+            // Temporarily move Drop_Materials to spawn position
+            if (drop_Materials != null)
+            {
+                Vector3 originalPos = drop_Materials.transform.position;
+                drop_Materials.transform.position = spawnPosition;
+                drop_Materials.DropMaterial(woodReward, stoneReward, ropeReward);
+                drop_Materials.transform.position = originalPos;
+            }
         }
     }
 
@@ -138,6 +150,10 @@ public class Chest : MonoBehaviour, ISaveable
     {
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, 1f);
+        
+        // Visualize spawn height
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(transform.position + Vector3.up * spawnHeight, 0.3f);
     }
 
     public object CaptureState()

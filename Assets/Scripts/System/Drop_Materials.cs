@@ -29,6 +29,15 @@ public class Drop_Materials : MonoBehaviour
         }
     }
 
+    // New overload that accepts a spawn position
+    public void DropMaterialAtPosition(int woodAmount, int stoneAmount, int ropeAmount, Vector3 position)
+    {
+        Vector3 originalPos = transform.position;
+        transform.position = position;
+        DropMaterial(woodAmount, stoneAmount, ropeAmount);
+        transform.position = originalPos;
+    }
+
     private void DropSingleMaterial(ItemData itemData)
     {
         if (itemData == null)

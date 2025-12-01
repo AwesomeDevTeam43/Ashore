@@ -4,6 +4,8 @@ public class Materials : MonoBehaviour
 {
     [SerializeField] private ItemData item;
     [SerializeField] private string playerTag = "Player";
+    [SerializeField] private LayerMask groundLayers = ~0;
+    [SerializeField] [Range(0.3f, 0.99f)] private float minGroundNormalY = 0.8f;
 
     [Header("Floating Settings")]
     [SerializeField] private float floatSpeed = 1f;
@@ -37,6 +39,8 @@ public class Materials : MonoBehaviour
         {
             rb.gravityScale = 1f;
             rb.bodyType = RigidbodyType2D.Dynamic;
+            rb.freezeRotation = true;
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
         }
 
         // Get or create the ground collision collider
@@ -46,11 +50,14 @@ public class Materials : MonoBehaviour
             groundCollider = gameObject.AddComponent<CircleCollider2D>();
         }
         groundCollider.isTrigger = false;
+        groundCollider.radius = 0.35f;
 
         // Create the trigger collider for player interaction
         triggerCollider = gameObject.AddComponent<CircleCollider2D>();
         triggerCollider.isTrigger = true;
         triggerCollider.radius = 0.6f;
+
+        IgnorePlayerCollision();
     }
 
     void Update()
@@ -62,17 +69,35 @@ public class Materials : MonoBehaviour
         }
     }
 
+    private void IgnorePlayerCollision()
+    {
+        if (groundCollider == null) return;
+
+        GameObject player = GameObject.FindGameObjectWithTag(playerTag);
+        if (player == null) return;
+
+        var playerColliders = player.GetComponentsInChildren<Collider2D>();
+        foreach (var playerCollider in playerColliders)
+        {
+            if (playerCollider == null) continue;
+            Physics2D.IgnoreCollision(groundCollider, playerCollider, true);
+        }
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        string layerName = LayerMask.LayerToName(collision.gameObject.layer);
+        if (hasLanded) return;
 
-        if (layerName != "Ground" && layerName != "MovingPlatform")
+        bool isGround = (groundLayers.value & (1 << collision.gameObject.layer)) != 0;
+        if (!isGround) return;
+
+        if (collision.relativeVelocity.y >= 0f)
             return;
 
         bool landedOnTop = false;
         foreach (var contact in collision.contacts)
         {
-            if (contact.normal.y > 0.3f)
+            if (contact.normal.y >= minGroundNormalY && Mathf.Abs(contact.normal.x) <= (1f - minGroundNormalY))
             {
                 landedOnTop = true;
                 break;
@@ -131,14 +156,6 @@ public class Materials : MonoBehaviour
         if (spriteRenderer != null && item != null && item.icon != null)
         {
             spriteRenderer.sprite = item.icon;
-        }
-        else if (item == null)
-        {
-            Debug.LogWarning($"Materials on {gameObject.name}: No ItemData assigned!");
-        }
-        else if (item.icon == null)
-        {
-            Debug.LogWarning($"Materials on {gameObject.name}: ItemData '{item.itemName}' has no icon!");
         }
     }
 
