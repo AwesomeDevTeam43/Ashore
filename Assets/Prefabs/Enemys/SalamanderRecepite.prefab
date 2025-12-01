@@ -366,9 +366,16 @@ MonoBehaviour:
   telegraphDuration: 0.3
   pulseWhileTelegraphing: 1
   pulseCycleTime: 0.15
-  hitParticlePrefab: {fileID: 0}
-  attackParticlePrefab: {fileID: 0}
-  deathParticlePrefab: {fileID: 0}
+  hitParticlePrefab: {fileID: 8862473740124630662, guid: 7361dfe2efe412f42960930dc68ad8e8, type: 3}
+  attackParticlePrefab: {fileID: 8862473740124630662, guid: 7361dfe2efe412f42960930dc68ad8e8, type: 3}
+  deathParticlePrefab: {fileID: 8862473740124630662, guid: 7361dfe2efe412f42960930dc68ad8e8, type: 3}
+  critHitParticlePrefab: {fileID: 8862473740124630662, guid: b13652ebaa31aec45b3bc6ec3b5f1577, type: 3}
+  criticalFeedbackEnabled: 1
+  critFlashColor: {r: 1, g: 0.9, b: 0.3, a: 1}
+  critFlashDuration: 0.15
+  critShakeIntensityMultiplier: 1.5
+  critShakeDurationMultiplier: 1.1
+  critParticlePrefab: {fileID: 8862473740124630662, guid: b13652ebaa31aec45b3bc6ec3b5f1577, type: 3}
 --- !u!1 &9040285423462698423
 GameObject:
   m_ObjectHideFlags: 0

@@ -73,7 +73,7 @@ public class Enemy_Health : MonoBehaviour
         }
     }
 
-    public void TakeDamage(int damage, DamageSourceType damageSource = DamageSourceType.PlayerMelee)
+    public void TakeDamage(int damage, DamageSourceType damageSource = DamageSourceType.PlayerMelee, bool isCritical = false, Vector2 hitPoint = default)
     {
         if (!damageable || hit || healthSystem == null || healthSystem.CurrentHealth <= 0) return;
 
@@ -95,9 +95,13 @@ public class Enemy_Health : MonoBehaviour
         hit = true;
         ApplyBufferedDamage(scaledDamage, minAllowed);
 
-        // ADICIONAR: Feedback visual ao tomar dano
+        // Visual feedback: spawn hit particle; if this was a critical hit, pass the flag so
+        // the feedback component can spawn the extra crit effect as well.
         if (combatFeedback != null)
-            combatFeedback.PlayHitFeedback(transform.position);
+        {
+            Vector2 point = hitPoint != default(Vector2) ? hitPoint : (Vector2)transform.position;
+            combatFeedback.PlayHitFeedback(point, isCritical);
+        }
 
         StartCoroutine(TurnOffHit());
     }

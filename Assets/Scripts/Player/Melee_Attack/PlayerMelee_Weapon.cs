@@ -185,7 +185,8 @@ public class MeleeWeapon : MonoBehaviour
             if (hp != null)
             {
                 int damage = CalculateDamage();
-                hp.TakeDamage(damage, Enemy_Health.DamageSourceType.PlayerMelee);
+                Vector2 hitPoint = attackOrigin != null ? (Vector2)attackOrigin.position : (Vector2)c.transform.position;
+                hp.TakeDamage(damage, Enemy_Health.DamageSourceType.PlayerMelee, lastAttackWasCritical, hitPoint);
                 enemiesHitThisAttack++;
             }
             

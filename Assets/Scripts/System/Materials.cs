@@ -66,27 +66,40 @@ public class Materials : MonoBehaviour
     {
         string layerName = LayerMask.LayerToName(collision.gameObject.layer);
 
-        if (layerName == "Ground" || layerName == "MovingPlatform")
+        if (layerName != "Ground" && layerName != "MovingPlatform")
+            return;
+
+        bool landedOnTop = false;
+        foreach (var contact in collision.contacts)
         {
-            hasLanded = true;
-
-            if (rb != null)
+            if (contact.normal.y > 0.3f)
             {
-                rb.gravityScale = 0f;
-                rb.linearVelocity = Vector2.zero;
-                rb.bodyType = RigidbodyType2D.Kinematic;
+                landedOnTop = true;
+                break;
             }
-
-            // Disable the ground collider and enable only trigger
-            if (groundCollider != null)
-            {
-                groundCollider.enabled = false;
-            }
-
-            startPosition = transform.position;
-            startPosition.y += heightAboveGround;
-            transform.position = startPosition;
         }
+
+        if (!landedOnTop)
+            return;
+
+        hasLanded = true;
+
+        if (rb != null)
+        {
+            rb.gravityScale = 0f;
+            rb.linearVelocity = Vector2.zero;
+            rb.bodyType = RigidbodyType2D.Kinematic;
+        }
+
+        // Disable the ground collider and enable only trigger
+        if (groundCollider != null)
+        {
+            groundCollider.enabled = false;
+        }
+
+        startPosition = transform.position;
+        startPosition.y += heightAboveGround;
+        transform.position = startPosition;
     }
 
     private void OnTriggerEnter2D(Collider2D other)

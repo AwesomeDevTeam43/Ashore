@@ -12,9 +12,11 @@ public class Projectile : MonoBehaviour
     [Header("Damage")]
     [FormerlySerializedAs("damage")]
     [SerializeField] private int baseDamage = 5;
+    [SerializeField] private float criticalMultiplier = 1.5f;
 
     private Vector2 moveDir = Vector2.right;
     private int currentDamage;
+    private bool isCritical = false;
 
     private void Start()
     {
@@ -32,11 +34,11 @@ public class Projectile : MonoBehaviour
         {
             if (hitInfo.collider.CompareTag("Enemy"))
             {
-                Debug.Log("Enemy must take damage");
                 var enemyHealth = hitInfo.collider.GetComponent<Enemy_Health>();
                 if (enemyHealth != null)
                 {
-                    enemyHealth.TakeDamage(currentDamage, Enemy_Health.DamageSourceType.PlayerRanged);
+                    Vector2 hitPoint = hitInfo.point;
+                    enemyHealth.TakeDamage(currentDamage, Enemy_Health.DamageSourceType.PlayerRanged, isCritical, hitPoint);
                 }
             }
             DestroyProjectile();
@@ -49,9 +51,14 @@ public class Projectile : MonoBehaviour
         moveDir = dir.normalized;
     }
 
-    public void SetDamage(int damageAmount)
+    public void SetDamage(int damageAmount, bool critical = false)
     {
+        isCritical = critical;
         currentDamage = Mathf.Max(1, damageAmount);
+        if (isCritical)
+        {
+            currentDamage = Mathf.RoundToInt(currentDamage * criticalMultiplier);
+        }
     }
 
     void DestroyProjectile()

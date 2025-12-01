@@ -69501,6 +69501,7 @@ GameObject:
   - component: {fileID: 1229059585}
   - component: {fileID: 1229059591}
   - component: {fileID: 1229059592}
+  - component: {fileID: 1229059593}
   m_Layer: 7
   m_Name: Final_Boss
   m_TagString: Enemy
@@ -69730,6 +69731,38 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1229059593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1229059583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f47f7893e5c4d3449cd8717b46d9707, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteRenderers: []
+  hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
+  hitFlashDuration: 0.1
+  shakeOnHit: 1
+  shakeIntensity: 0.15
+  shakeDuration: 0.2
+  attackTelegraphColor: {r: 1, g: 0.5, b: 0, a: 0.7}
+  telegraphDuration: 0.3
+  pulseWhileTelegraphing: 1
+  pulseCycleTime: 0.15
+  hitParticlePrefab: {fileID: 8862473740124630662, guid: 7361dfe2efe412f42960930dc68ad8e8, type: 3}
+  attackParticlePrefab: {fileID: 8862473740124630662, guid: 7361dfe2efe412f42960930dc68ad8e8, type: 3}
+  deathParticlePrefab: {fileID: 8862473740124630662, guid: 7361dfe2efe412f42960930dc68ad8e8, type: 3}
+  critHitParticlePrefab: {fileID: 8862473740124630662, guid: b13652ebaa31aec45b3bc6ec3b5f1577, type: 3}
+  criticalFeedbackEnabled: 1
+  critFlashColor: {r: 1, g: 0.9, b: 0.3, a: 1}
+  critFlashDuration: 0.15
+  critShakeIntensityMultiplier: 1.5
+  critShakeDurationMultiplier: 1.1
+  critParticlePrefab: {fileID: 8862473740124630662, guid: b13652ebaa31aec45b3bc6ec3b5f1577, type: 3}
 --- !u!1 &1234099980
 GameObject:
   m_ObjectHideFlags: 0

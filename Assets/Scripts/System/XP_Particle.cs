@@ -8,11 +8,18 @@ public class XP_Particle : MonoBehaviour
     [SerializeField] private float fallGravityScale = 2f;
     [SerializeField] private float physicsColliderRadius = 0.35f;
     [SerializeField] private float triggerRadius = 0.6f;
+    [SerializeField] [Range(0.3f, 0.99f)] private float minGroundNormalY = 0.8f;
+    [Header("Floating Settings")]
+    [SerializeField] private float floatSpeed = 1.2f;
+    [SerializeField] private float floatAmplitude = 0.25f;
+    [SerializeField] private float heightAboveGround = 0.35f;
 
     private Rigidbody2D rb;
     private Collider2D physicsCollider;
     private Collider2D triggerCollider;
     private bool hasLanded;
+    private Vector3 startPosition;
+    private float timeOffset;
 
     private void Awake()
     {
@@ -26,6 +33,8 @@ public class XP_Particle : MonoBehaviour
         rb.bodyType = RigidbodyType2D.Dynamic;
         rb.freezeRotation = true;
         rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
+        timeOffset = Random.Range(0f, 2f * Mathf.PI);
 
         EnsureColliders();
     }
@@ -100,6 +109,22 @@ public class XP_Particle : MonoBehaviour
 
         bool isGround = (groundLayers.value & (1 << collision.gameObject.layer)) != 0;
         if (!isGround) return;
+
+        if (collision.relativeVelocity.y >= 0f)
+            return;
+
+        bool landedOnTop = false;
+        foreach (var contact in collision.contacts)
+        {
+            if (contact.normal.y >= minGroundNormalY && Mathf.Abs(contact.normal.x) <= (1f - minGroundNormalY))
+            {
+                landedOnTop = true;
+                break;
+            }
+        }
+
+        if (!landedOnTop)
+            return;
 
         hasLanded = true;
 

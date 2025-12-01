@@ -49,18 +49,16 @@ public class Player_InputHandler : MonoBehaviour
     // Expose methods to enable/disable the entire player action map when UI is open
     public void DisablePlayerActions()
     {
-        if (playerControls == null) { Debug.LogWarning("[Player_InputHandler] DisablePlayerActions: playerControls is null"); return; }
+        if (playerControls == null) { return; }
         var map = playerControls.FindActionMap(actionMapName);
-        if (map != null) { map.Disable(); Debug.Log($"[Player_InputHandler] Disabled action map: {actionMapName}"); }
-        else { Debug.LogWarning($"[Player_InputHandler] Could not find action map: {actionMapName}"); }
+        if (map != null) { map.Disable(); }
     }
 
     public void EnablePlayerActions()
     {
-        if (playerControls == null) { Debug.LogWarning("[Player_InputHandler] EnablePlayerActions: playerControls is null"); return; }
+        if (playerControls == null) { return; }
         var map = playerControls.FindActionMap(actionMapName);
-        if (map != null) { map.Enable(); Debug.Log($"[Player_InputHandler] Enabled action map: {actionMapName}"); }
-        else { Debug.LogWarning($"[Player_InputHandler] Could not find action map: {actionMapName}"); }
+        if (map != null) { map.Enable(); }
     }
 
     [Header("8-Direction Inputs")]
@@ -97,8 +95,7 @@ public class Player_InputHandler : MonoBehaviour
     private void OnEnable()
     {
         var map = playerControls.FindActionMap(actionMapName);
-        if (map != null) { map.Enable(); Debug.Log($"[Player_InputHandler] OnEnable: Enabled action map {actionMapName}"); }
-        else { Debug.LogWarning($"[Player_InputHandler] OnEnable: Could not find action map {actionMapName}"); }
+        if (map != null) { map.Enable(); }
         currentControlScheme = defaultSchemeName;
         UIInputMode.OnSchemeChanged += HandleUISchemeChanged;
         HandleUISchemeChanged(UIInputMode.CurrentScheme);
@@ -107,16 +104,13 @@ public class Player_InputHandler : MonoBehaviour
     private void OnDisable()
     {
         var map = playerControls.FindActionMap(actionMapName);
-        if (map != null) { map.Disable(); Debug.Log($"[Player_InputHandler] OnDisable: Disabled action map {actionMapName}"); }
-        else { Debug.LogWarning($"[Player_InputHandler] OnDisable: Could not find action map {actionMapName}"); }
+        if (map != null) { map.Disable(); }
         UIInputMode.OnSchemeChanged -= HandleUISchemeChanged;
     }
 
     private void Awake()
     {
         InputActionMap mapReference = playerControls.FindActionMap(actionMapName);
-        if (mapReference == null) Debug.LogError($"[Player_InputHandler] Awake: Could not find action map {actionMapName}");
-        else Debug.Log($"[Player_InputHandler] Awake: Found action map {actionMapName}");
 
         movementAction = mapReference?.FindAction(movement);
         lookAction = mapReference?.FindAction(look);
@@ -126,7 +120,6 @@ public class Player_InputHandler : MonoBehaviour
         interactAction = mapReference?.FindAction(interact);
         inventoryAction = mapReference?.FindAction(inventory);
 
-        Debug.Log($"[Player_InputHandler] Awake: Actions - Move: {movementAction != null}, Look: {lookAction != null}, Jump: {jumpAction != null}, Attack: {attackAction != null}, RangeAttack: {rangeAttackAction != null}, Interact: {interactAction != null}, Inventory: {inventoryAction != null}");
         MakeInputEvents();
     }
 
@@ -135,7 +128,6 @@ public class Player_InputHandler : MonoBehaviour
         Handle8Directions();
         if (InventoryActionTriggered)
         {
-            Debug.Log("[Player_InputHandler] InventoryActionTriggered detected in Update");
             InventoryActionTriggered = false;
             EnforceInputMap();
         }
@@ -144,20 +136,18 @@ public class Player_InputHandler : MonoBehaviour
     private void EnforceInputMap()
     {
         var playerInput = GetComponent<PlayerInput>();
-        if (playerInput == null) { Debug.LogWarning("[Player_InputHandler] EnforceInputMap: PlayerInput is null"); return; }
+        if (playerInput == null) { return; }
         if (InventoryOpen)
         {
-            Debug.Log("[Player_InputHandler] EnforceInputMap: InventoryOpen, switching to UI map");
-            try { playerInput.actions.FindActionMap("Player").Disable(); Debug.Log("[Player_InputHandler] Disabled Player map"); } catch (Exception ex) { Debug.LogWarning($"[Player_InputHandler] Failed to disable Player map: {ex.Message}"); }
-            try { playerInput.actions.FindActionMap("UI").Enable(); Debug.Log("[Player_InputHandler] Enabled UI map"); } catch (Exception ex) { Debug.LogWarning($"[Player_InputHandler] Failed to enable UI map: {ex.Message}"); }
-            try { playerInput.SwitchCurrentActionMap("UI"); Debug.Log("[Player_InputHandler] Switched to UI map"); } catch (Exception ex) { Debug.LogWarning($"[Player_InputHandler] Failed to switch to UI map: {ex.Message}"); }
+            try { playerInput.actions.FindActionMap("Player").Disable(); } catch (Exception) { }
+            try { playerInput.actions.FindActionMap("UI").Enable(); } catch (Exception) { }
+            try { playerInput.SwitchCurrentActionMap("UI"); } catch (Exception) { }
         }
         else
         {
-            Debug.Log("[Player_InputHandler] EnforceInputMap: Inventory closed, switching to Player map");
-            try { playerInput.actions.FindActionMap("UI").Disable(); Debug.Log("[Player_InputHandler] Disabled UI map"); } catch (Exception ex) { Debug.LogWarning($"[Player_InputHandler] Failed to disable UI map: {ex.Message}"); }
-            try { playerInput.actions.FindActionMap("Player").Enable(); Debug.Log("[Player_InputHandler] Enabled Player map"); } catch (Exception ex) { Debug.LogWarning($"[Player_InputHandler] Failed to enable Player map: {ex.Message}"); }
-            try { playerInput.SwitchCurrentActionMap("Player"); Debug.Log("[Player_InputHandler] Switched to Player map"); } catch (Exception ex) { Debug.LogWarning($"[Player_InputHandler] Failed to switch to Player map: {ex.Message}"); }
+            try { playerInput.actions.FindActionMap("UI").Disable(); } catch (Exception) { }
+            try { playerInput.actions.FindActionMap("Player").Enable(); } catch (Exception) { }
+            try { playerInput.SwitchCurrentActionMap("Player"); } catch (Exception) { }
         }
     }
 
@@ -171,26 +161,26 @@ public class Player_InputHandler : MonoBehaviour
 
     private void MakeInputEvents()
     {
-        movementAction.performed += inputInfo => { MovementInput = inputInfo.ReadValue<Vector2>(); Debug.Log($"[Player_InputHandler] Movement performed: {MovementInput}"); UpdateControlScheme(inputInfo); };
-        movementAction.canceled += inputInfo => { MovementInput = Vector2.zero; Debug.Log("[Player_InputHandler] Movement canceled"); };
+        movementAction.performed += inputInfo => { MovementInput = inputInfo.ReadValue<Vector2>(); UpdateControlScheme(inputInfo); };
+        movementAction.canceled += inputInfo => { MovementInput = Vector2.zero; };
 
-        lookAction.performed += inputInfo => { LookInput = inputInfo.ReadValue<Vector2>(); Debug.Log($"[Player_InputHandler] Look performed: {LookInput}"); UpdateControlScheme(inputInfo); };
-        lookAction.canceled += inputInfo => { LookInput = Vector2.zero; Debug.Log("[Player_InputHandler] Look canceled"); };
+        lookAction.performed += inputInfo => { LookInput = inputInfo.ReadValue<Vector2>(); UpdateControlScheme(inputInfo); };
+        lookAction.canceled += inputInfo => { LookInput = Vector2.zero; };
 
-        jumpAction.performed += inputInfo => { JumpTriggered = true; Debug.Log("[Player_InputHandler] Jump performed"); UpdateControlScheme(inputInfo); };
-        jumpAction.canceled += inputInfo => { JumpTriggered = false; Debug.Log("[Player_InputHandler] Jump canceled"); };
+        jumpAction.performed += inputInfo => { JumpTriggered = true; UpdateControlScheme(inputInfo); };
+        jumpAction.canceled += inputInfo => { JumpTriggered = false; };
 
-        attackAction.performed += inputInfo => { AttackTriggered = true; Debug.Log("[Player_InputHandler] Attack performed"); UpdateControlScheme(inputInfo); };
-        attackAction.canceled += inputInfo => { AttackTriggered = false; Debug.Log("[Player_InputHandler] Attack canceled"); };
+        attackAction.performed += inputInfo => { AttackTriggered = true; UpdateControlScheme(inputInfo); };
+        attackAction.canceled += inputInfo => { AttackTriggered = false; };
 
-        rangeAttackAction.performed += inputInfo => { RangeAttackTriggered = true; Debug.Log("[Player_InputHandler] RangeAttack performed"); UpdateControlScheme(inputInfo); };
-        rangeAttackAction.canceled += inputInfo => { RangeAttackTriggered = false; Debug.Log("[Player_InputHandler] RangeAttack canceled"); };
+        rangeAttackAction.performed += inputInfo => { RangeAttackTriggered = true; UpdateControlScheme(inputInfo); };
+        rangeAttackAction.canceled += inputInfo => { RangeAttackTriggered = false; };
 
-        interactAction.performed += inputInfo => { InteractActionTriggered = true; Debug.Log("[Player_InputHandler] Interact performed"); UpdateControlScheme(inputInfo); };
-        interactAction.canceled += inputInfo => { InteractActionTriggered = false; Debug.Log("[Player_InputHandler] Interact canceled"); };
+        interactAction.performed += inputInfo => { InteractActionTriggered = true; UpdateControlScheme(inputInfo); };
+        interactAction.canceled += inputInfo => { InteractActionTriggered = false; };
 
-        inventoryAction.performed += inputInfo => { InventoryActionTriggered = true; Debug.Log("[Player_InputHandler] Inventory performed"); OnInventoryPressed?.Invoke(); UpdateControlScheme(inputInfo); };
-        inventoryAction.canceled += inputInfo => { InventoryActionTriggered = false; Debug.Log("[Player_InputHandler] Inventory canceled"); };
+        inventoryAction.performed += inputInfo => { InventoryActionTriggered = true; OnInventoryPressed?.Invoke(); UpdateControlScheme(inputInfo); };
+        inventoryAction.canceled += inputInfo => { InventoryActionTriggered = false; };
     }
 
     private void Handle8Directions()
@@ -364,7 +354,6 @@ public class Player_InputHandler : MonoBehaviour
             return;
         }
 
-        Debug.Log($"[Player_InputHandler] Control scheme changed: {currentControlScheme} -> {newScheme}");
         currentControlScheme = newScheme;
         OnControlSchemeChanged?.Invoke(currentControlScheme);
     }

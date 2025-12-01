@@ -401,6 +401,10 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 512
   coyoteTime: 0.15
+  place1: {fileID: 0}
+  place2: {fileID: 0}
+  place3: {fileID: 0}
+  place4: {fileID: 0}
 --- !u!114 &3981617874585788842
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -565,6 +569,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cooldownTime: 1
   meleeWeapon: {fileID: 5682699157367814936}
+  enableInputBuffer: 1
+  bufferTime: 0.15
+  audioSource: {fileID: 0}
+  swingSounds: []
 --- !u!114 &5682699157367814936
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -577,20 +585,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f8a8574eec22e94e8147a5031f6be6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultDamage: 20
   attackRadius: 1
   enemyLayer:
     serializedVersion: 2
     m_Bits: 128
+  criticalMultiplier: 1.5
   knockbackForce: 6
   knockbackDuration: 0.3
+  criticalKnockbackMultiplier: 1.5
   meleeEffectPrefab: {fileID: 1388199414278010597, guid: 0d4c2f106a06ce544b9681fb658011f5, type: 3}
+  criticalEffectPrefab: {fileID: 0}
   effectLifetime: 0.25
   attackOrigin: {fileID: 7345354211100391440}
   offsetRight: {x: 0.6, y: 0.1}
   offsetLeft: {x: -0.6, y: 0.1}
   offsetUp: {x: 0, y: 0.9}
   offsetDown: {x: 0, y: -0.9}
+  rightRadius: 1
+  leftRadius: 1
+  upRadius: 0.8
+  downRadius: 1.2
   axisThreshold: 0.5
   currentDir: 0
 --- !u!114 &5141185270747572182
@@ -605,7 +619,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a35502279d1951e468fb3815b1d66580, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  godMode: 1
+  godMode: 0
   playerStats: {fileID: 11400000, guid: bd35a466862b3c849af092f1d041e9c1, type: 2}
   IsAlive: 1
 --- !u!95 &7195073010775856911
