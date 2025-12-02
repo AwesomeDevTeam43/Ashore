@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 7203006818411415510}
   - component: {fileID: 8872292057630377456}
   - component: {fileID: -3343438842683711612}
+  - component: {fileID: -399882275242683362}
   m_Layer: 7
   m_Name: MiasmaGolem
   m_TagString: Enemy
@@ -300,3 +301,21 @@ MonoBehaviour:
   critShakeIntensityMultiplier: 1.5
   critShakeDurationMultiplier: 1.1
   critParticlePrefab: {fileID: 8862473740124630662, guid: b13652ebaa31aec45b3bc6ec3b5f1577, type: 3}
+--- !u!114 &-399882275242683362
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5384982542472265557}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f9ed525e1578a742b6bad854e6ee83a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  criticalStaggerDuration: 0.6
+  freezeVerticalVelocity: 0
+  animator: {fileID: 0}
+  staggerAnimatorSpeed: 0
+  normalAnimatorSpeed: 1
+  debugLogs: 1

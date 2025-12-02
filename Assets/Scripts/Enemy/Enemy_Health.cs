@@ -103,6 +103,16 @@ public class Enemy_Health : MonoBehaviour
             combatFeedback.PlayHitFeedback(point, isCritical);
         }
 
+        // Apply stagger on critical hits if the enemy has a stagger controller component.
+        if (isCritical)
+        {
+            var staggerCtrl = GetComponent<Enemy_StaggerController>();
+            if (staggerCtrl != null)
+            {
+                staggerCtrl.ApplyCriticalStagger();
+            }
+        }
+
         StartCoroutine(TurnOffHit());
     }
 

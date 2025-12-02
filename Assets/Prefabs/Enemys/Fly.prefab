@@ -104,6 +104,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -2253911629886400664, guid: 4443a681c5281b94b9ce6fa8cac0af50, type: 3}
       insertIndex: -1
       addedObject: {fileID: -6092658965342618595}
+    - targetCorrespondingSourceObject: {fileID: -2253911629886400664, guid: 4443a681c5281b94b9ce6fa8cac0af50, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2524302986642665520}
   m_SourcePrefab: {fileID: -8435245712485981826, guid: 4443a681c5281b94b9ce6fa8cac0af50, type: 3}
 --- !u!1 &1211247639234732159 stripped
 GameObject:
@@ -304,3 +307,21 @@ MonoBehaviour:
   critShakeIntensityMultiplier: 1.5
   critShakeDurationMultiplier: 1.1
   critParticlePrefab: {fileID: 8862473740124630662, guid: b13652ebaa31aec45b3bc6ec3b5f1577, type: 3}
+--- !u!114 &2524302986642665520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1211247639234732159}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f9ed525e1578a742b6bad854e6ee83a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  criticalStaggerDuration: 0.6
+  freezeVerticalVelocity: 0
+  animator: {fileID: 0}
+  staggerAnimatorSpeed: 0
+  normalAnimatorSpeed: 1
+  debugLogs: 1
