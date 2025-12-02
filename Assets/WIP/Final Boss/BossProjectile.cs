@@ -13,6 +13,10 @@ public class BossProjectile : MonoBehaviour
 	public float rotationSpeed = 720f; // degrees per second
 	public float rotationOffset = 0f; // tweak if sprite forward is not +X
 
+	[Header("Homing Activation")]
+	public float homingActivationDelay = 0f; // delay after curve before homing starts
+	public float stopCheckGrace = 0.02f; // grace time after homing starts before applying stop distance
+
 	[Header("Curve Entry")]
 	public bool curvedEntry = true;
 	public float curveDuration = 0.35f;
@@ -28,6 +32,11 @@ public class BossProjectile : MonoBehaviour
 	private bool curvePhaseActive = false;
 	private float curveTimer = 0f;
 	private int curveSide = 1;
+	private Vector2 moveDir = Vector2.right; // decoupled movement direction
+	private bool homingArmed = false;
+	private float homingArmedTimer = 0f;
+	private float homingActiveTimer = 0f;
+	private bool homingHasExitedStopRadius = false;
 
 	private void Awake()
 	{
@@ -48,7 +57,12 @@ public class BossProjectile : MonoBehaviour
 		curveTimer = 0f;
 		int fallbackSide = forcedCurveSide == 0 ? 1 : (forcedCurveSide > 0 ? 1 : -1);
 		curveSide = randomizeCurveSide ? (Random.value > 0.5f ? 1 : -1) : fallbackSide;
-		following = homing && !curvePhaseActive;
+		// Homing is explicitly disabled during curve and can be delayed after curve
+		homingArmed = !curvePhaseActive && homingActivationDelay <= 0f;
+		homingArmedTimer = 0f;
+		homingActiveTimer = 0f;
+		homingHasExitedStopRadius = false;
+		following = homing && homingArmed;
 		stopFollowDistance = stopDistance;
 
 		if (rb == null)
@@ -62,9 +76,10 @@ public class BossProjectile : MonoBehaviour
 		}
 
 		rb.gravityScale = 0f;
-		rb.linearVelocity = direction.normalized * currentSpeed;
+		moveDir = direction.sqrMagnitude > 0f ? direction.normalized : (Vector2)transform.right;
+		rb.linearVelocity = moveDir * currentSpeed;
 		// initial facing
-		float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg + rotationOffset;
+		float angle = Mathf.Atan2(moveDir.y, moveDir.x) * Mathf.Rad2Deg + rotationOffset;
 		transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 	}
 
@@ -76,8 +91,27 @@ public class BossProjectile : MonoBehaviour
 			return;
 		}
 
+		// After curve, arm homing with optional delay
+		if (!homingArmed && homing)
+		{
+			homingArmedTimer += Time.fixedDeltaTime;
+			if (homingArmedTimer >= homingActivationDelay)
+			{
+				homingArmed = true;
+				if (!following)
+				{
+					following = true;
+					homingActiveTimer = 0f;
+					homingHasExitedStopRadius = false;
+				}
+			}
+		}
+
 		if (!following) return;
 		if (player == null) return;
+
+		// Track how long homing has been active (used for stop grace)
+		homingActiveTimer += Time.fixedDeltaTime;
 
 		// Use the player's Collider2D center if available so homing aims to the collider center
 		Vector2 playerPos;
@@ -88,7 +122,11 @@ public class BossProjectile : MonoBehaviour
 			playerPos = player.transform.position;
 
 		float dist = Vector2.Distance(transform.position, playerPos);
-		if (dist <= stopFollowDistance)
+		// Track if we've ever been outside the stop radius since activation
+		if (dist > stopFollowDistance) homingHasExitedStopRadius = true;
+
+		// Only stop homing after we've first been outside since activation
+		if (homingActiveTimer >= stopCheckGrace && homingHasExitedStopRadius && dist <= stopFollowDistance)
 		{
 			following = false; // stop homing, keep last velocity/direction
 			return;
@@ -113,20 +151,42 @@ public class BossProjectile : MonoBehaviour
 		if (rb == null)
 		{
 			curvePhaseActive = false;
-			following = homing;
+			homingArmedTimer = 0f;
+			homingArmed = homingActivationDelay <= 0f;
+			if (homingArmed && homing)
+			{
+				following = true;
+				homingActiveTimer = 0f;
+				homingHasExitedStopRadius = false;
+			}
 			return;
 		}
 
 		curveTimer += Time.fixedDeltaTime;
 		float angleDelta = curveSide * curveAngularSpeed * Time.fixedDeltaTime;
-		float newAngle = transform.eulerAngles.z + angleDelta;
-		transform.rotation = Quaternion.AngleAxis(newAngle, Vector3.forward);
-		rb.linearVelocity = transform.right * currentSpeed;
+		float rad = angleDelta * Mathf.Deg2Rad;
+		float c = Mathf.Cos(rad);
+		float s = Mathf.Sin(rad);
+		var x = moveDir.x;
+		var y = moveDir.y;
+		moveDir = new Vector2(x * c - y * s, x * s + y * c).normalized;
+		rb.linearVelocity = moveDir * currentSpeed;
+
+		// Rotate the visual to match the decoupled direction
+		float visualAng = Mathf.Atan2(moveDir.y, moveDir.x) * Mathf.Rad2Deg + rotationOffset;
+		transform.rotation = Quaternion.AngleAxis(visualAng, Vector3.forward);
 
 		if (curveTimer >= curveDuration)
 		{
 			curvePhaseActive = false;
-			following = homing;
+			homingArmedTimer = 0f;
+			homingArmed = homingActivationDelay <= 0f;
+			if (homingArmed && homing)
+			{
+				following = true;
+				homingActiveTimer = 0f;
+				homingHasExitedStopRadius = false;
+			}
 		}
 	}
 

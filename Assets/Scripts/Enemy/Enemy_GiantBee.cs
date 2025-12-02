@@ -78,7 +78,6 @@ public class BeeEnemy : EnemyBase
       circle.radius = 0.25f;
       circle.isTrigger = false;
       col2D = circle;
-      Debug.LogWarning("BeeEnemy: No Collider2D found. Added CircleCollider2D automatically.");
     }
 
     player = GameObject.FindGameObjectWithTag("Player");
@@ -90,7 +89,6 @@ public class BeeEnemy : EnemyBase
 
     if (stats == null)
     {
-      Debug.LogWarning("BeeEnemy: stats (GiantBee_Stats) not assigned. This enemy will not run.");
       enabled = false;
       return;
     }
@@ -101,7 +99,6 @@ public class BeeEnemy : EnemyBase
     pathfinder.SetCache(true, 0.75f);
 
     spawnPosition = transform.position;
-    Debug.Log($"BeeEnemy.Start: clearance={GetClearance():F2}, nodeRadius={nodeRadius:F2}, collider={(col2D!=null?col2D.GetType().Name:"null")}");
 
     if (animator == null)
     {
@@ -163,14 +160,12 @@ public class BeeEnemy : EnemyBase
           float nudgeSpeed = Mathf.Max(desiredSpeed * 0.6f, 0.5f);
           desiredVelocity = nudge.normalized * nudgeSpeed;
           repathTimer = 0f;
-          Debug.Log($"Bee nudge applied: collider={hit.collider.name}, dist={hit.distance:F3}, normal={hit.normal}");
         }
         else
         {
           // Blocked ahead: stop and force a quick repath
           desiredVelocity = Vector2.zero;
           repathTimer = 0f;
-          Debug.Log($"Bee movement blocked ahead: collider={hit.collider.name}, dist={hit.distance:F3}");
         }
       }
     }
@@ -189,7 +184,6 @@ public class BeeEnemy : EnemyBase
           if (typedStats != null) pushSpeed = Mathf.Max(pushSpeed, typedStats.retreatSpeed * 0.4f);
           desiredVelocity = push.normalized * pushSpeed;
           repathTimer = 0f;
-          Debug.Log($"Bee overlap push: obstacle={oc.name}, push={push.normalized}, speed={pushSpeed:F2}");
         }
       }
     }
@@ -213,7 +207,6 @@ public class BeeEnemy : EnemyBase
           if (recoveryAttemptCount >= maxRecoveryAttempts)
           {
             recoveryAttemptCount = 0;
-            Debug.Log($"Bee recovery failed after {maxRecoveryAttempts} attempts — returning to Roaming");
             desiredVelocity = Vector2.zero;
             enemyState = EnemyState.Roaming;
           }
@@ -223,7 +216,6 @@ public class BeeEnemy : EnemyBase
             recoveryAttemptCount++;
             Vector2 altDir = Random.insideUnitCircle.normalized;
             retreatTargetPosition = transform.position + (Vector3)(altDir * (typedStats != null ? typedStats.retreatRange : 2f));
-            Debug.Log($"Bee stuck during retreat — forcing alternate retreat target {retreatTargetPosition} (attempt {recoveryAttemptCount})");
             FollowPathTowards(retreatTargetPosition, typedStats != null ? typedStats.retreatSpeed : 1f);
           }
         }
@@ -366,7 +358,6 @@ public class BeeEnemy : EnemyBase
     playerAttackPoint = GetPlayerFeetPosition();
     lungeTimer = 0f;
     enemyState = EnemyState.Lunging;
-    Debug.Log("Starting lunge towards player's feet!");
   }
 
   private Vector3 GetPlayerFeetPosition()
@@ -404,7 +395,6 @@ public class BeeEnemy : EnemyBase
     retreatTargetPosition = transform.position + (Vector3)retreatDir * typedStats.retreatRange;
     currentCooldown = typedStats.lungeCooldown;
     enemyState = EnemyState.Retreating;
-    Debug.Log("Lunge ended, retreating!");
     if (animator != null)
     {
       animator.SetBool(isLungingParam, false);
@@ -433,7 +423,6 @@ public class BeeEnemy : EnemyBase
       repathTimer = 0f; // force a fresh path next frame
       desiredVelocity = Vector2.zero;
       enemyState = EnemyState.Roaming;
-      Debug.Log($"Retreat complete: position={transform.position}, retreatTarget={retreatTargetPosition}, playerDist={playerDistance:F2}");
       if (animator != null)
       {
         animator.SetBool(isAttackingParam, false);
@@ -592,7 +581,6 @@ public class BeeEnemy : EnemyBase
 
   private void OnDrawGizmosSelected()
   {
-    // Draw grid bounds and current path for debugging
     Gizmos.color = new Color(0f, 1f, 1f, 0.25f);
     Vector2 center = Application.isPlaying && player != null
         ? (Vector2)((transform.position + player.transform.position) * 0.5f)
@@ -670,7 +658,6 @@ public class BeeEnemy : EnemyBase
   {
     if (enemyState == EnemyState.Lunging && collision.gameObject == player)
     {
-      Debug.Log("Stung the player! Retreating.");
       if (playerHealth != null)
       {
         playerHealth.TakeDamage((int)currentDamage);

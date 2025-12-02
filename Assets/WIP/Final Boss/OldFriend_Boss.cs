@@ -18,7 +18,6 @@ public class OldFriend_Boss : EnemyBase
     [SerializeField] private float injuredStopDuration = 10f;
     [SerializeField] private float injuredCoreUnlockDelay = 1f;
 
-    private Enemy_Health enemyHealth;
     private HealthSystem healthSystem;
     private Transform player;
     private Animator animator;
