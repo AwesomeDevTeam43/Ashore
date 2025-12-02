@@ -95,6 +95,7 @@ public class BeeEnemy : EnemyBase
     pathfinder.SetCache(true, 0.75f);
 
     spawnPosition = transform.position;
+    Debug.Log($"BeeEnemy.Start: clearance={GetClearance():F2}, nodeRadius={nodeRadius:F2}, collider={(col2D!=null?col2D.GetType().Name:"null")}");
 
     if (animator == null)
     {
@@ -136,19 +137,54 @@ public class BeeEnemy : EnemyBase
 
   private void FixedUpdate()
   {
-    // Pre-move collision query to prevent tunneling through Ground/MovingPlatform even at high speeds
+    // Pre-move collision query to prevent tunneling through Ground/MovingPlatform even at high speeds.
+    // If blocked we try a small nudge away from the contact normal (or from the overlapping collider)
+    // instead of always zeroing velocity — this helps avoid getting permanently stuck during retreat.
     float stepDist = desiredVelocity.magnitude * Time.fixedDeltaTime;
+    Vector2 origin = transform.position;
     if (stepDist > 0.0001f)
     {
-      Vector2 origin = transform.position;
       Vector2 dir = desiredVelocity.normalized;
       float rad = Mathf.Max(nodeRadius, GetClearance());
       var hit = Physics2D.CircleCast(origin, rad, dir, stepDist, obstacleMask);
       if (hit.collider != null)
       {
-        // Blocked this frame; stop and force a quick repath
-        desiredVelocity = Vector2.zero;
-        repathTimer = 0f;
+        float desiredSpeed = desiredVelocity.magnitude;
+        // If collision is extremely close (we're essentially overlapping), try to nudge away
+        if (hit.distance <= 0.02f)
+        {
+          Vector2 nudge = hit.normal;
+          float nudgeSpeed = Mathf.Max(desiredSpeed * 0.6f, 0.5f);
+          desiredVelocity = nudge.normalized * nudgeSpeed;
+          repathTimer = 0f;
+          Debug.Log($"Bee nudge applied: collider={hit.collider.name}, dist={hit.distance:F3}, normal={hit.normal}");
+        }
+        else
+        {
+          // Blocked ahead: stop and force a quick repath
+          desiredVelocity = Vector2.zero;
+          repathTimer = 0f;
+          Debug.Log($"Bee movement blocked ahead: collider={hit.collider.name}, dist={hit.distance:F3}");
+        }
+      }
+    }
+    else
+    {
+      // If we have no intended motion but are overlapping an obstacle (stuck), push outwards
+      float rad = Mathf.Max(nodeRadius, GetClearance());
+      var oc = Physics2D.OverlapCircle(origin, rad, obstacleMask);
+      if (oc != null)
+      {
+        Vector2 closest = oc.ClosestPoint(origin);
+        Vector2 push = (origin - closest);
+        if (push.sqrMagnitude > 0.0001f)
+        {
+          float pushSpeed = 0.5f;
+          if (typedStats != null) pushSpeed = Mathf.Max(pushSpeed, typedStats.retreatSpeed * 0.4f);
+          desiredVelocity = push.normalized * pushSpeed;
+          repathTimer = 0f;
+          Debug.Log($"Bee overlap push: obstacle={oc.name}, push={push.normalized}, speed={pushSpeed:F2}");
+        }
       }
     }
 
@@ -178,7 +214,7 @@ public class BeeEnemy : EnemyBase
   private void RoamBehavior(float playerDistance)
   {
     // Leash logic: chase even slightly outside detect radius up to a leash range, then go home
-    float leashRange = typedStats.playerDetect * 1.75f; // configurable multiplier
+    float leashRange = typedStats.playerDetect * 1.0f; // configurable multiplier (now 1.0 to match gizmo)
     float distFromSpawn = Vector3.Distance(transform.position, spawnPosition);
     bool withinLeash = playerDistance <= leashRange;
 
@@ -353,7 +389,7 @@ public class BeeEnemy : EnemyBase
       repathTimer = 0f; // force a fresh path next frame
       desiredVelocity = Vector2.zero;
       enemyState = EnemyState.Roaming;
-      Debug.Log("Retreat complete, back to roaming!");
+      Debug.Log($"Retreat complete: position={transform.position}, retreatTarget={retreatTargetPosition}, playerDist={playerDistance:F2}");
       if (animator != null)
       {
         animator.SetBool(isAttackingParam, false);
@@ -393,7 +429,7 @@ public class BeeEnemy : EnemyBase
         // Robust recovery attempts: enlarge grid and try different centers
         bool found = false;
         Vector2 originalSize = gridWorldSize;
-        Vector2 dirToTarget = (target - transform.position).normalized;
+        Vector2 dirToTarget = (target - transform.position).sqrMagnitude > 0.0001f ? (target - transform.position).normalized : Vector2.right;
 
         Vector2[] centers = new Vector2[]
         {
@@ -408,11 +444,7 @@ public class BeeEnemy : EnemyBase
         {
           if (found) break;
           Vector2 big = originalSize * sm;
-          if (NavGrid2D.Instance != null)
-          {
-            // If baked grid exists, just retry with the same; expanding doesn't apply to baked
-          }
-          else
+          if (NavGrid2D.Instance == null)
           {
             pathfinder.Configure(big, nodeRadius, obstacleMask);
             pathfinder.SetClearance(GetClearance());
@@ -421,29 +453,38 @@ public class BeeEnemy : EnemyBase
           // Try with base centers
           foreach (var c in centers)
           {
-            var p = NavGrid2D.Instance != null ? NavGrid2D.Instance.FindPath(transform.position, target) : pathfinder.FindPath(transform.position, target, c);
+            var p = NavGrid2D.Instance != null
+              ? NavGrid2D.Instance.FindPath(transform.position, target)
+              : pathfinder.FindPath(transform.position, target, c);
+
             if (p != null)
             {
-              gridWorldSize = big; // temporarily adopt
+              gridWorldSize = big;
               currentPath.AddRange(p);
               found = true;
               break;
             }
           }
-
           if (found) break;
 
-          // Try offset centers to encourage going around: perpendicular offsets
+          // Try a few offset centers around the midpoint to handle edge cases
+          float offsetDist = Mathf.Max(1f, Mathf.Min(big.x, big.y) * 0.25f);
           Vector2 perp = new Vector2(-dirToTarget.y, dirToTarget.x);
-          Vector2 off = perp * (Mathf.Min(big.x, big.y) * 0.25f);
+          Vector2 mid = (Vector2)((transform.position + target) * 0.5f);
           Vector2[] offsetCenters = new Vector2[]
           {
-            (Vector2)((transform.position + target) * 0.5f) + off,
-            (Vector2)((transform.position + target) * 0.5f) - off
+            mid + dirToTarget * offsetDist,
+            mid - dirToTarget * offsetDist,
+            mid + perp * offsetDist,
+            mid - perp * offsetDist,
           };
+
           foreach (var c in offsetCenters)
           {
-            var p = NavGrid2D.Instance != null ? NavGrid2D.Instance.FindPath(transform.position, target) : pathfinder.FindPath(transform.position, target, c);
+            var p = NavGrid2D.Instance != null
+              ? NavGrid2D.Instance.FindPath(transform.position, target)
+              : pathfinder.FindPath(transform.position, target, c);
+
             if (p != null)
             {
               gridWorldSize = big;
@@ -604,7 +645,14 @@ public class BeeEnemy : EnemyBase
     if (ts == null) return;
 
     Gizmos.color = Color.yellow;
+    // Draw the player detect radius (explicit) and the leash radius the AI actually uses.
     Gizmos.DrawWireSphere(transform.position, ts.playerDetect);
+    float leashRange = ts.playerDetect * 1.0f; // multiplier kept in sync with AI logic
+    if (!Mathf.Approximately(leashRange, ts.playerDetect))
+    {
+      Gizmos.color = new Color(1f, 0.8f, 0.2f, 0.35f);
+      Gizmos.DrawWireSphere(transform.position, leashRange);
+    }
 
     Gizmos.color = Color.red;
     Gizmos.DrawWireSphere(transform.position, ts.lungeRange);
