@@ -2,11 +2,14 @@ using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Enemy_Health))]
+[RequireComponent(typeof(GuidComponent))]
+[RequireComponent(typeof(PersistentKillable))]
 public class ShieldedCore : MonoBehaviour
 {
 	public int coreMaxHealth = 2;
 
 	private Enemy_Health enemyHealth;
+    private HealthSystem healthSystem;
 	private SpriteRenderer[] spriteRenderers;
 	private Color[] originalColors;
 
@@ -21,6 +24,18 @@ public class ShieldedCore : MonoBehaviour
 		{
 			enemyHealth.Initialize(coreMaxHealth, 0, 0, 0, 0, 0f, 0f);
 		}
+
+		var guid = GetComponent<GuidComponent>();
+		if (guid != null && string.IsNullOrEmpty(guid.GetGuid()))
+		{
+			Debug.LogWarning($"ShieldedCore '{name}' has empty GUID. Please generate a GUID in the editor for persistence.", this);
+		}
+
+        healthSystem = GetComponent<HealthSystem>();
+        if (healthSystem != null)
+        {
+            healthSystem.OnHealthChanged += OnCoreHealthChanged;
+        }
 
 		// cache sprite renderers to change color when protected
 		spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);
@@ -74,6 +89,21 @@ public class ShieldedCore : MonoBehaviour
 
 	private void OnDestroy()
 	{
+		if (healthSystem != null)
+			healthSystem.OnHealthChanged -= OnCoreHealthChanged;
+		// In case of hard destroy (fallback), still notify
 		OnCoreDestroyed?.Invoke(this);
+	}
+
+	private void OnCoreHealthChanged(int current, int max)
+	{
+		if (current <= 0)
+		{
+			// Notify listeners immediately when core reaches zero
+			OnCoreDestroyed?.Invoke(this);
+			// Ensure the core remains non-interactive/hidden if persistence is used
+			var pk = GetComponent<PersistentKillable>();
+			if (pk != null) pk.MarkDead();
+		}
 	}
 }

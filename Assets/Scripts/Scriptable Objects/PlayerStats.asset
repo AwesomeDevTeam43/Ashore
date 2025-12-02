@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: PlayerStats
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStats
+  baseHealth: 10
+  baseAttackPower: 1
+  baseMoveSpeed: 5
+  baseJumpForce: 15
+  baseCriticalChance: 10
+  healthUpgradePerLevel: 1
+  attackPowerUpgradePerLevel: 1
+  moveSpeedUpgradePerLevel: 0.5
+  jumpForceUpgradePerLevel: 0.5
+  criticalChanceUpgradePerLevel: 2
+  level1XpAmount: 20
+  xpGrowthMultiplier: 1.35

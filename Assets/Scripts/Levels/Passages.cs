@@ -2,7 +2,8 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class Passages : MonoBehaviour
+[RequireComponent(typeof(GuidComponent))]
+public class Passages : MonoBehaviour, ISaveable
 {
     [Header("Upward Movement")]
     [Tooltip("How many world units upward the object should travel when the event fires.")]
@@ -27,15 +28,23 @@ public class Passages : MonoBehaviour
     public UnityEvent onMoveLeft;
 
     [Header("Cleanup")]
-    [Tooltip("Destroy this GameObject once a move completes.")]
-    [SerializeField] private bool destroyAfterMove;
+    [Tooltip("If true, after opening the passage, visuals/colliders are disabled to unblock the path (but the object stays for persistence).")]
+    [SerializeField] private bool hideAfterMove = false;
 
     private Coroutine moveRoutine;
+    private bool hasOpened = false;
+    private Vector3 initialPosition;
 
     private void Awake()
     {
         onMoveUp ??= new UnityEvent();
         onMoveLeft ??= new UnityEvent();
+        initialPosition = transform.position;
+        var guid = GetComponent<GuidComponent>();
+        if (guid != null && string.IsNullOrEmpty(guid.GetGuid()))
+        {
+            Debug.LogWarning($"Passages '{name}' has empty GUID. Please generate a GUID in the editor for persistence.", this);
+        }
     }
 
     private void OnEnable()
@@ -98,9 +107,61 @@ public class Passages : MonoBehaviour
         transform.position = end;
         moveRoutine = null;
 
-        if (destroyAfterMove)
+        hasOpened = true;
+        if (hideAfterMove)
         {
-            Destroy(gameObject);
+            HideBlockingGeometry();
         }
+    }
+
+    private void HideBlockingGeometry()
+    {
+        var cols = GetComponentsInChildren<Collider2D>(true);
+        foreach (var c in cols) c.enabled = false;
+
+        var rens = GetComponentsInChildren<Renderer>(true);
+        foreach (var r in rens) r.enabled = false;
+    }
+
+    public object CaptureState()
+    {
+        return new PassagesState
+        {
+            opened = hasOpened,
+            x = transform.position.x,
+            y = transform.position.y,
+            z = transform.position.z,
+            hidden = hideAfterMove && (hasOpened || HasHiddenVisuals())
+        };
+    }
+
+    public void RestoreState(object state)
+    {
+        if (state is PassagesState ps)
+        {
+            hasOpened = ps.opened;
+            if (hasOpened)
+            {
+                transform.position = new Vector3(ps.x, ps.y, ps.z);
+                if (ps.hidden)
+                {
+                    HideBlockingGeometry();
+                }
+            }
+        }
+    }
+
+    private bool HasHiddenVisuals()
+    {
+        var r = GetComponentInChildren<Renderer>(true);
+        return r != null && !r.enabled;
+    }
+
+    [System.Serializable]
+    private class PassagesState
+    {
+        public bool opened;
+        public float x, y, z;
+        public bool hidden;
     }
 }

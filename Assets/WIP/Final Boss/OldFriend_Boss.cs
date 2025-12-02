@@ -5,8 +5,19 @@ using UnityEngine;
 
 [RequireComponent(typeof(Enemy_Health))]
 [RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(GuidComponent))]
+[RequireComponent(typeof(PersistentKillable))]
 public class OldFriend_Boss : EnemyBase
 {
+        protected override void Awake()
+        {
+            base.Awake();
+            var guid = GetComponent<GuidComponent>();
+            if (guid != null && string.IsNullOrEmpty(guid.GetGuid()))
+            {
+                Debug.LogWarning($"OldFriend_Boss '{name}' has empty GUID. Please generate a GUID in the editor for persistence.", this);
+            }
+        }
     private FinalBoss_Stats TypedStats => stats as FinalBoss_Stats;
 
     [Header("References")]

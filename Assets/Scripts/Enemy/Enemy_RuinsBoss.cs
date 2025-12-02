@@ -3,8 +3,19 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Enemy_Health))]
+[RequireComponent(typeof(GuidComponent))]
+[RequireComponent(typeof(PersistentKillable))]
 public class Enemy_RuinsBoss : EnemyBase
 {
+        protected override void Awake()
+        {
+            base.Awake();
+            var guid = GetComponent<GuidComponent>();
+            if (guid != null && string.IsNullOrEmpty(guid.GetGuid()))
+            {
+                Debug.LogWarning($"Enemy_RuinsBoss '{name}' has empty GUID. Please generate a GUID in the editor for persistence.", this);
+            }
+        }
     public RuinBoss_Stats typedStats;
     private Transform player;
     private Rigidbody2D rb;

@@ -2067,6 +2067,8 @@ GameObject:
   - component: {fileID: 64498102}
   - component: {fileID: 64498103}
   - component: {fileID: 64498104}
+  - component: {fileID: 64498106}
+  - component: {fileID: 64498105}
   m_Layer: 7
   m_Name: Miasma Core (2)
   m_TagString: Enemy
@@ -2223,6 +2225,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95e62ce075d021a24abd39845ecc4840, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &64498105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 64498098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d49f3f484739aaf47a9c4839b7af34d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hideRenderersOnDeath: 1
+  disableCollidersOnDeath: 1
+  disableRigidbodiesOnDeath: 1
+  componentsToDisableOnDeath: []
+  objectsToHideOnDeath: []
+  isDead: 0
+--- !u!114 &64498106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 64498098}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5712449afb6cdea4dba591dad71e995d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 6750b17b-e168-4ace-87c1-08d9e79b6b3b
 --- !u!1 &66696923
 GameObject:
   m_ObjectHideFlags: 0
@@ -9689,6 +9722,8 @@ GameObject:
   - component: {fileID: 499709806}
   - component: {fileID: 499709807}
   - component: {fileID: 499709808}
+  - component: {fileID: 499709810}
+  - component: {fileID: 499709809}
   m_Layer: 7
   m_Name: Miasma Core (3)
   m_TagString: Enemy
@@ -9845,6 +9880,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95e62ce075d021a24abd39845ecc4840, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &499709809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 499709802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d49f3f484739aaf47a9c4839b7af34d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hideRenderersOnDeath: 1
+  disableCollidersOnDeath: 1
+  disableRigidbodiesOnDeath: 1
+  componentsToDisableOnDeath: []
+  objectsToHideOnDeath: []
+  isDead: 0
+--- !u!114 &499709810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 499709802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5712449afb6cdea4dba591dad71e995d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 20f31830-5988-4a5b-becf-3d4537a94304
 --- !u!1 &501283754
 GameObject:
   m_ObjectHideFlags: 0
@@ -17594,6 +17660,8 @@ GameObject:
   - component: {fileID: 868224172}
   - component: {fileID: 868224173}
   - component: {fileID: 868224174}
+  - component: {fileID: 868224176}
+  - component: {fileID: 868224175}
   m_Layer: 7
   m_Name: Miasma Core (1)
   m_TagString: Enemy
@@ -17750,6 +17818,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95e62ce075d021a24abd39845ecc4840, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &868224175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 868224168}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d49f3f484739aaf47a9c4839b7af34d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hideRenderersOnDeath: 1
+  disableCollidersOnDeath: 1
+  disableRigidbodiesOnDeath: 1
+  componentsToDisableOnDeath: []
+  objectsToHideOnDeath: []
+  isDead: 0
+--- !u!114 &868224176
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 868224168}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5712449afb6cdea4dba591dad71e995d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: 5e9da35d-0148-4640-9191-9c8b1476dd36
 --- !u!1 &870466701
 GameObject:
   m_ObjectHideFlags: 0
@@ -19839,6 +19938,7 @@ GameObject:
   - component: {fileID: 990319756}
   - component: {fileID: 990319755}
   - component: {fileID: 990319757}
+  - component: {fileID: 990319758}
   m_Layer: 6
   m_Name: Door
   m_TagString: Untagged
@@ -20032,7 +20132,20 @@ MonoBehaviour:
   onMoveLeft:
     m_PersistentCalls:
       m_Calls: []
-  destroyAfterMove: 0
+  hideAfterMove: 0
+--- !u!114 &990319758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 990319753}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5712449afb6cdea4dba591dad71e995d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: cccd9921-7696-44e8-bac2-572d1bed301f
 --- !u!1 &991971529
 GameObject:
   m_ObjectHideFlags: 0
@@ -69502,6 +69615,8 @@ GameObject:
   - component: {fileID: 1229059591}
   - component: {fileID: 1229059592}
   - component: {fileID: 1229059593}
+  - component: {fileID: 1229059595}
+  - component: {fileID: 1229059594}
   m_Layer: 7
   m_Name: Final_Boss
   m_TagString: Enemy
@@ -69763,6 +69878,37 @@ MonoBehaviour:
   critShakeIntensityMultiplier: 1.5
   critShakeDurationMultiplier: 1.1
   critParticlePrefab: {fileID: 8862473740124630662, guid: b13652ebaa31aec45b3bc6ec3b5f1577, type: 3}
+--- !u!114 &1229059594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1229059583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d49f3f484739aaf47a9c4839b7af34d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hideRenderersOnDeath: 1
+  disableCollidersOnDeath: 1
+  disableRigidbodiesOnDeath: 1
+  componentsToDisableOnDeath: []
+  objectsToHideOnDeath: []
+  isDead: 0
+--- !u!114 &1229059595
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1229059583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5712449afb6cdea4dba591dad71e995d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueId: d6fe3db1-2f40-4638-9cfc-87a314fab6e8
 --- !u!1 &1234099980
 GameObject:
   m_ObjectHideFlags: 0

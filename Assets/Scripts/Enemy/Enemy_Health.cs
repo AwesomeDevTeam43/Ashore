@@ -127,6 +127,13 @@ public class Enemy_Health : MonoBehaviour
     {
         if (currentHealth <= 0)
         {
+            // If a PersistentKillable is present, mark dead and skip destruction
+            var pk = GetComponent<PersistentKillable>();
+            if (pk != null)
+            {
+                pk.MarkDead();
+            }
+
             if (xP_System != null)
             {
                 xP_System.DropXP(transform.position, xpOnDeath);
@@ -147,7 +154,11 @@ public class Enemy_Health : MonoBehaviour
                 drop_Equipment.Drop();
             }
 
-            Destroy(gameObject);
+            if (pk == null)
+            {
+                // Default behavior: destroy non-persistent enemies
+                Destroy(gameObject);
+            }
         }
     }
 
