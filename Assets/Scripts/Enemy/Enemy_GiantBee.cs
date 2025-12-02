@@ -17,6 +17,8 @@ public class BeeEnemy : EnemyBase
   [Header("Recovery")]
   [SerializeField] private float stuckVelocityThreshold = 0.05f;
   [SerializeField] private float stuckTimeThreshold = 0.8f;
+  [SerializeField] private int maxRecoveryAttempts = 5;
+  private int recoveryAttemptCount = 0;
   private float stuckTimer = 0f;
 
   private Vector3 retreatTargetPosition;
@@ -207,16 +209,29 @@ public class BeeEnemy : EnemyBase
         {
           stuckTimer = 0f;
           repathTimer = 0f;
-          // pick an alternative retreat target in a random direction at retreatRange
-          Vector2 altDir = Random.insideUnitCircle.normalized;
-          retreatTargetPosition = transform.position + (Vector3)(altDir * (typedStats != null ? typedStats.retreatRange : 2f));
-          Debug.Log($"Bee stuck during retreat — forcing alternate retreat target {retreatTargetPosition}");
-          FollowPathTowards(retreatTargetPosition, typedStats != null ? typedStats.retreatSpeed : 1f);
+          // If we've already tried too many recovery attempts, give up and go back to roaming
+          if (recoveryAttemptCount >= maxRecoveryAttempts)
+          {
+            recoveryAttemptCount = 0;
+            Debug.Log($"Bee recovery failed after {maxRecoveryAttempts} attempts — returning to Roaming");
+            desiredVelocity = Vector2.zero;
+            enemyState = EnemyState.Roaming;
+          }
+          else
+          {
+            // pick an alternative retreat target in a random direction at retreatRange
+            recoveryAttemptCount++;
+            Vector2 altDir = Random.insideUnitCircle.normalized;
+            retreatTargetPosition = transform.position + (Vector3)(altDir * (typedStats != null ? typedStats.retreatRange : 2f));
+            Debug.Log($"Bee stuck during retreat — forcing alternate retreat target {retreatTargetPosition} (attempt {recoveryAttemptCount})");
+            FollowPathTowards(retreatTargetPosition, typedStats != null ? typedStats.retreatSpeed : 1f);
+          }
         }
       }
       else
       {
         stuckTimer = 0f;
+        recoveryAttemptCount = 0;
       }
     }
   }
