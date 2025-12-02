@@ -14,6 +14,10 @@ public class BeeEnemy : EnemyBase
 
   private float currentCooldown;
   private float lungeTimer;
+  [Header("Recovery")]
+  [SerializeField] private float stuckVelocityThreshold = 0.05f;
+  [SerializeField] private float stuckTimeThreshold = 0.8f;
+  private float stuckTimer = 0f;
 
   private Vector3 retreatTargetPosition;
   private Vector3 playerAttackPoint;
@@ -190,6 +194,31 @@ public class BeeEnemy : EnemyBase
 
     // Apply velocity in physics step
     rb.linearVelocity = desiredVelocity;
+
+    // Stuck detection/recovery: if we're retreating and barely moving for a while,
+    // attempt a recovery by choosing an alternate retreat target and forcing a repath.
+    if (enemyState == EnemyState.Retreating)
+    {
+      float speed = rb.linearVelocity.magnitude;
+      if (speed < stuckVelocityThreshold && desiredVelocity.magnitude < stuckVelocityThreshold)
+      {
+        stuckTimer += Time.fixedDeltaTime;
+        if (stuckTimer >= stuckTimeThreshold)
+        {
+          stuckTimer = 0f;
+          repathTimer = 0f;
+          // pick an alternative retreat target in a random direction at retreatRange
+          Vector2 altDir = Random.insideUnitCircle.normalized;
+          retreatTargetPosition = transform.position + (Vector3)(altDir * (typedStats != null ? typedStats.retreatRange : 2f));
+          Debug.Log($"Bee stuck during retreat — forcing alternate retreat target {retreatTargetPosition}");
+          FollowPathTowards(retreatTargetPosition, typedStats != null ? typedStats.retreatSpeed : 1f);
+        }
+      }
+      else
+      {
+        stuckTimer = 0f;
+      }
+    }
   }
 
   private void StateMachine(float playerDistance)
