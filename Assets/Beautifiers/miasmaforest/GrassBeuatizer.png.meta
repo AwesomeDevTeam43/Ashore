@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 8f84ab5626eb7f54186670fa3118b260
+guid: a511a83c3e2b03849990e2db536ba663
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4163335305421878340
-    second: RockBeautifier_0
+      213: 2357537640822802444
+    second: GrassBeuatizer_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 16
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -100,23 +100,89 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: RockBeautifier_0
+      name: GrassBeuatizer_0
       rect:
         serializedVersion: 2
-        x: 3
+        x: 0
         y: 0
-        width: 23
-        height: 11
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 16
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.21875}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4447388e66327c930800000000000000
-      internalID: 4163335305421878340
+      spriteID: c080bd95ef7a7b020800000000000000
+      internalID: 2357537640822802444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassBeuatizer_1
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 0
+        width: 16
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.21875}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 77d213b419d8da24994ee67aca9acb45
+      internalID: 1568437091
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassBeuatizer_2
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 16
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.21875}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 67e17f9cfbc324f4a8d62a377cdc8d93
+      internalID: -1688686884
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassBeuatizer_3
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 0
+        width: 16
+        height: 64
+      alignment: 9
+      pivot: {x: 0.5, y: 0.21875}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3397eae7b7c0004db655aef36f15639
+      internalID: -1869035498
       vertices: []
       indices: 
       edges: []
@@ -125,7 +191,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 9b3c5f660971d1c4892f2e2684206494
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +201,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      RockBeautifier_0: 4163335305421878340
+      GrassBeuatizer_0: 2357537640822802444
+      GrassBeuatizer_1: 1568437091
+      GrassBeuatizer_2: -1688686884
+      GrassBeuatizer_3: -1869035498
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
