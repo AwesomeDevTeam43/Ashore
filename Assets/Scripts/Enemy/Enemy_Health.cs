@@ -95,6 +95,13 @@ public class Enemy_Health : MonoBehaviour
         hit = true;
         ApplyBufferedDamage(scaledDamage, minAllowed);
 
+        // Play hit sound via EnemyBase, if present
+        var baseComp = GetComponent<EnemyBase>();
+        if (baseComp != null)
+        {
+            baseComp.PlayHitSound();
+        }
+
         // Visual feedback: spawn hit particle; if this was a critical hit, pass the flag so
         // the feedback component can spawn the extra crit effect as well.
         if (combatFeedback != null)
@@ -127,6 +134,12 @@ public class Enemy_Health : MonoBehaviour
     {
         if (currentHealth <= 0)
         {
+            // Play death sound before any destruction logic
+            var baseComp = GetComponent<EnemyBase>();
+            if (baseComp != null)
+            {
+                baseComp.PlayDeathSound();
+            }
             // If a PersistentKillable is present, mark dead and skip destruction
             var pk = GetComponent<PersistentKillable>();
             if (pk != null)

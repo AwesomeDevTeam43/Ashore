@@ -15,9 +15,20 @@ public abstract class EnemyBase : MonoBehaviour
     
     protected Enemy_Health enemyHealth; // Tornar protected para classes filhas usarem
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip hitSound;
+    [SerializeField] private float hitVolume = 1f;
+    [SerializeField] private AudioClip deathSound;
+    [SerializeField] private float deathVolume = 1f;
+
     protected virtual void Awake() // Mudar para protected virtual
     {
         enemyHealth = GetComponent<Enemy_Health>();
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+        }
     }
 
     public virtual void SetStats(Enemy_Stats s)
@@ -93,4 +104,53 @@ public abstract class EnemyBase : MonoBehaviour
     }
 
     public int GetLevel() => currentLevel;
+
+    /// <summary>
+    /// Plays the configured hit sound, if available. Safe to call from damage handlers.
+    /// </summary>
+    public virtual void PlayHitSound()
+    {
+        if (hitSound == null)
+        {
+            return;
+        }
+        // Prefer one-shot to avoid interrupting looping sources
+        if (audioSource != null)
+        {
+            audioSource.PlayOneShot(hitSound, Mathf.Clamp01(hitVolume));
+        }
+        else
+        {
+            // Fallback: create a temporary AudioSource to play the clip
+            var temp = gameObject.AddComponent<AudioSource>();
+            temp.playOnAwake = false;
+            temp.spatialBlend = 0f; // 2D by default; adjust if needed
+            temp.volume = Mathf.Clamp01(hitVolume);
+            temp.clip = hitSound;
+            temp.Play();
+            Destroy(temp, hitSound.length + 0.05f);
+        }
+    }
+
+    /// <summary>
+    /// Plays the configured death sound immediately. Uses a detached temporary AudioSource
+    /// so the sound continues even if the enemy GameObject is destroyed.
+    /// </summary>
+    public virtual void PlayDeathSound()
+    {
+        if (deathSound == null)
+        {
+            return;
+        }
+        // Create an ephemeral GO to host the one-shot so destruction of the enemy doesn't cut audio
+        var host = new GameObject($"{name}_DeathSound");
+        host.transform.position = transform.position;
+        var src = host.AddComponent<AudioSource>();
+        src.playOnAwake = false;
+        src.spatialBlend = 0f; // 2D by default; set to 1f for 3D
+        src.volume = Mathf.Clamp01(deathVolume);
+        src.clip = deathSound;
+        src.Play();
+        Object.Destroy(host, deathSound.length + 0.1f);
+    }
 }
