@@ -13,11 +13,18 @@ MonoBehaviour:
   m_Name: FinalBoss_Stats
   m_EditorClassIdentifier: 
   maxHealth: 10
+  damage: 1
   xpOnDeath: 30
-  dropA: 0
-  dropB: 0
-  dropC: 0
+  woodDrop: 0
+  stoneDrop: 0
+  ropeDrop: 0
   baseScale: {x: 1, y: 1, z: 1}
+  meleeResistance: 0
+  rangedResistance: 0
+  hitSound: {fileID: 8300000, guid: 10fae70ba0739bc4399d41ddbe7037da, type: 3}
+  hitVolume: 1
+  deathSound: {fileID: 8300000, guid: 10fae70ba0739bc4399d41ddbe7037da, type: 3}
+  deathVolume: 1
   projectileDamage: 1
   baseFireInterval: 2
   projectileSpeed: 6

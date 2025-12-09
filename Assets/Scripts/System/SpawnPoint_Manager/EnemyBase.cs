@@ -17,10 +17,6 @@ public abstract class EnemyBase : MonoBehaviour
 
     [Header("Audio")]
     [SerializeField] private AudioSource audioSource;
-    [SerializeField] private AudioClip hitSound;
-    [SerializeField] private float hitVolume = 1f;
-    [SerializeField] private AudioClip deathSound;
-    [SerializeField] private float deathVolume = 1f;
 
     protected virtual void Awake() // Mudar para protected virtual
     {
@@ -110,14 +106,16 @@ public abstract class EnemyBase : MonoBehaviour
     /// </summary>
     public virtual void PlayHitSound()
     {
-        if (hitSound == null)
+        var clip = stats != null ? stats.hitSound : null;
+        float vol = stats != null ? stats.hitVolume : 1f;
+        if (clip == null)
         {
             return;
         }
         // Prefer one-shot to avoid interrupting looping sources
         if (audioSource != null)
         {
-            audioSource.PlayOneShot(hitSound, Mathf.Clamp01(hitVolume));
+            audioSource.PlayOneShot(clip, Mathf.Clamp01(vol));
         }
         else
         {
@@ -125,10 +123,10 @@ public abstract class EnemyBase : MonoBehaviour
             var temp = gameObject.AddComponent<AudioSource>();
             temp.playOnAwake = false;
             temp.spatialBlend = 0f; // 2D by default; adjust if needed
-            temp.volume = Mathf.Clamp01(hitVolume);
-            temp.clip = hitSound;
+            temp.volume = Mathf.Clamp01(vol);
+            temp.clip = clip;
             temp.Play();
-            Destroy(temp, hitSound.length + 0.05f);
+            Destroy(temp, clip.length + 0.05f);
         }
     }
 
@@ -138,7 +136,9 @@ public abstract class EnemyBase : MonoBehaviour
     /// </summary>
     public virtual void PlayDeathSound()
     {
-        if (deathSound == null)
+        var clip = stats != null ? stats.deathSound : null;
+        float vol = stats != null ? stats.deathVolume : 1f;
+        if (clip == null)
         {
             return;
         }
@@ -148,9 +148,9 @@ public abstract class EnemyBase : MonoBehaviour
         var src = host.AddComponent<AudioSource>();
         src.playOnAwake = false;
         src.spatialBlend = 0f; // 2D by default; set to 1f for 3D
-        src.volume = Mathf.Clamp01(deathVolume);
-        src.clip = deathSound;
+        src.volume = Mathf.Clamp01(vol);
+        src.clip = clip;
         src.Play();
-        Object.Destroy(host, deathSound.length + 0.1f);
+        Object.Destroy(host, clip.length + 0.1f);
     }
 }

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: MiasmaBloom_Stats 1
   m_EditorClassIdentifier: 
   maxHealth: 10
+  damage: 1
   xpOnDeath: 3
   woodDrop: 2
   stoneDrop: 0
@@ -20,6 +21,10 @@ MonoBehaviour:
   baseScale: {x: 1.5, y: 1.5, z: 1}
   meleeResistance: 0
   rangedResistance: 0
+  hitSound: {fileID: 8300000, guid: 10fae70ba0739bc4399d41ddbe7037da, type: 3}
+  hitVolume: 1
+  deathSound: {fileID: 8300000, guid: 10fae70ba0739bc4399d41ddbe7037da, type: 3}
+  deathVolume: 1
   playerDetect: 3
   attackRange: 2.5
   attackDelay: 0.6

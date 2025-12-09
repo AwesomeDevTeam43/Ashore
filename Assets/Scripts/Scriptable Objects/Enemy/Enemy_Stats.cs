@@ -25,4 +25,14 @@ public abstract class Enemy_Stats : ScriptableObject
     public float meleeResistance = 0f;
     [Range(0f, 1f), Tooltip("Percent of incoming ranged damage to reduce (0 = none, 1 = immune).")]
     public float rangedResistance = 0f;
+
+    [Header("Audio")]
+    [Tooltip("Sound to play when the enemy is hit.")]
+    public AudioClip hitSound;
+    [Range(0f, 1f), Tooltip("Volume multiplier for hit sound.")]
+    public float hitVolume = 1f;
+    [Tooltip("Sound to play when the enemy dies.")]
+    public AudioClip deathSound;
+    [Range(0f, 1f), Tooltip("Volume multiplier for death sound.")]
+    public float deathVolume = 1f;
 }

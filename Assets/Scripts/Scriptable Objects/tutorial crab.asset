@@ -13,11 +13,18 @@ MonoBehaviour:
   m_Name: tutorial crab
   m_EditorClassIdentifier: 
   maxHealth: 5
+  damage: 1
   xpOnDeath: 3
-  dropA: 5
-  dropB: 2
-  dropC: 3
+  woodDrop: 5
+  stoneDrop: 2
+  ropeDrop: 3
   baseScale: {x: 1, y: 1, z: 1}
+  meleeResistance: 0
+  rangedResistance: 0
+  hitSound: {fileID: 8300000, guid: 10fae70ba0739bc4399d41ddbe7037da, type: 3}
+  hitVolume: 1
+  deathSound: {fileID: 8300000, guid: 10fae70ba0739bc4399d41ddbe7037da, type: 3}
+  deathVolume: 1
   speed: 2
   followPlayerRange: 5
   attackRange: 2
