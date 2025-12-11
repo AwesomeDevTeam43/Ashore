@@ -24,6 +24,12 @@ public class BossDataLogger : MonoBehaviour
     [Tooltip("Path to save CSV file (relative to project root)")]
     public string csvFilePath = "ml/boss_training_data.csv";
 
+    [Header("Auto-Save Settings")]
+[Tooltip("Auto-save interval in seconds (0 to disable)")]
+public float autoSaveInterval = 30f;
+
+private float lastSaveTime = 0f;
+
     // Buffer for storing logged data entries
     private List<string> dataBuffer = new List<string>();
     
@@ -76,10 +82,28 @@ public class BossDataLogger : MonoBehaviour
 
     private void Update()
     {
-        if (!enableLogging) return;
+    if (! enableLogging) return;
 
-        // Detect animator state changes to log actions
-        DetectAndLogAction();
+    // Press F5 to manually save data at any time
+    if (Input.GetKeyDown(KeyCode.F6))
+    {
+        Debug.Log("BossDataLogger: Manual save triggered!");
+        WriteDataToFile();
+    }
+
+        if (autoSaveInterval > 0 && Time. time - lastSaveTime >= autoSaveInterval)
+    {
+        if (dataBuffer.Count > 0)
+        {
+            Debug.Log("BossDataLogger: Auto-saving.. .");
+            WriteDataToFile();
+            dataBuffer.Clear();  // Clear buffer after saving
+            lastSaveTime = Time.time;
+        }
+    }
+
+    // Detect animator state changes to log actions
+    DetectAndLogAction();
     }
 
     /// <summary>
@@ -99,20 +123,23 @@ public class BossDataLogger : MonoBehaviour
             LogGameState(currentState);
             lastAnimatorState = currentState;
         }
+
+        
     }
 
     /// <summary>
     /// Gets a readable name from the animator state
     /// </summary>
-    private string GetStateName(AnimatorStateInfo stateInfo)
-    {
-        if (stateInfo.IsName("Boss_Attack")) return "Attack";
-        if (stateInfo.IsName("Boss_Combo")) return "Combo";
-        if (stateInfo.IsName("Boss_Laser")) return "Laser";
-        if (stateInfo.IsName("Boss_Run")) return "Chase";
-        if (stateInfo.IsName("Boss_Idle")) return "Idle";
-        return "Unknown";
-    }
+private string GetStateName(AnimatorStateInfo stateInfo)
+{
+    // Updated to match actual animator state names
+    if (stateInfo. IsName("BossAttack")) return "Attack";
+    if (stateInfo.IsName("AttackCombo")) return "Combo";
+    if (stateInfo. IsName("lasershoot")) return "Laser";
+    if (stateInfo. IsName("BossIdle")) return "Idle";
+    if (stateInfo. IsName("IntroTest")) return "Idle";  // Treat intro as idle
+    return "Unknown";
+}
 
     /// <summary>
     /// Checks if the state is an action we want to log

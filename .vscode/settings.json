@@ -8,5 +8,8 @@
         "**/*.meta": true,
         "**/*.asset": true
     },
-    "dotnet.defaultSolution": "Ashore.sln"
+    "dotnet.defaultSolution": "Ashore.sln",
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda",
+    "python-envs.pythonProjects": []
 }
