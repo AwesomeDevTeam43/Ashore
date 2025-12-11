@@ -43,6 +43,7 @@ public class BossBattleSimulator : MonoBehaviour
     private const float CLOSE_RANGE_THRESHOLD = 2.5f;
     private const float MEDIUM_RANGE_THRESHOLD = 5.0f;
     private const float LASER_IDLE_THRESHOLD = 5.0f;
+    private const float NEVER_ATTACKED_TIME = 999f;
 
     // Component references
     private HealthSystem bossHealthSystem;
@@ -179,6 +180,13 @@ public class BossBattleSimulator : MonoBehaviour
         }
     }
 
+    float CalculateTimeSinceLastAttack()
+    {
+        return float.IsNegativeInfinity(bossScript.lastAttackTime) 
+            ? NEVER_ATTACKED_TIME 
+            : Time.time - bossScript.lastAttackTime;
+    }
+
     void MakeBossDecision()
     {
         // Gather game state
@@ -187,9 +195,7 @@ public class BossBattleSimulator : MonoBehaviour
         float playerHealthPct = (float)playerHealthSystem.CurrentHealth / playerHealthSystem.MaxHealth;
         bool isPhase2 = bossAnimator.GetBool("Phase2");
         bool canUseLaser = bossScript.canUseLaser;
-        float timeSinceLastAttack = float.IsNegativeInfinity(bossScript.lastAttackTime) 
-            ? 999f 
-            : Time.time - bossScript.lastAttackTime;
+        float timeSinceLastAttack = CalculateTimeSinceLastAttack();
 
         string action;
 
@@ -282,9 +288,7 @@ public class BossBattleSimulator : MonoBehaviour
 
             case "Laser":
                 // Use consistent logic: check if laser is available based on AI decision criteria
-                float timeSinceAttack = float.IsNegativeInfinity(bossScript.lastAttackTime) 
-                    ? 999f 
-                    : Time.time - bossScript.lastAttackTime;
+                float timeSinceAttack = CalculateTimeSinceLastAttack();
                 if (bossScript.canUseLaser || timeSinceAttack >= LASER_IDLE_THRESHOLD)
                 {
                     bossAnimator.SetTrigger("Laser");

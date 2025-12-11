@@ -36,7 +36,7 @@ def determine_action(distance_to_player, boss_health_pct, player_health_pct,
         str: Action name ("Attack", "Combo", or "Laser")
     """
     # Phase 1: ONLY Attack
-    if is_phase2 == 0:
+    if not is_phase2:
         return "Attack"
     
     # Phase 2 logic
