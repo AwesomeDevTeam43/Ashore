@@ -280,6 +280,8 @@ Output Layer (4 classes: Attack, Combo, Idle, Laser)
 Softmax → Predicted Action
 ```
 
+**Note**: The Python training script (`train_boss_ai.py`) automatically determines the number of output classes from the training data using LabelEncoder. The default parameter `output_size=5` in the code is only used if not specified - the actual model will have 4 outputs if your training data contains 4 action types.
+
 **Input Features** (must be in this exact order):
 1. `distance_to_player` - Distance between boss and player
 2. `boss_health_pct` - Boss health as percentage (0.0-1.0)

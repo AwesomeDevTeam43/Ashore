@@ -65,7 +65,7 @@ public class BossAIBrain : MonoBehaviour
     private float lastDecisionTime = 0f;
     private bool isWaitingForActionComplete = false;
     private string currentAction = "";
-    private float[] lastConfidences = new float[4]; // Store confidence for each action
+    private float[] lastConfidences; // Store confidence for each action
 
     // Public properties
     public bool AIEnabled => _isModelLoaded && worker != null;
@@ -91,6 +91,9 @@ public class BossAIBrain : MonoBehaviour
             _status = "ERROR: Missing Components";
             return;
         }
+
+        // Initialize confidence array based on action count
+        lastConfidences = new float[actionLabels.Length];
 
         // Load model
         if (modelAsset != null)
@@ -199,8 +202,16 @@ public class BossAIBrain : MonoBehaviour
             // Get output
             Tensor outputTensor = worker.PeekOutput();
             
+            // Validate output tensor size matches expected action count
+            if (outputTensor.length != actionLabels.Length)
+            {
+                Debug.LogError($"🤖 BossAIBrain: Model output size ({outputTensor.length}) doesn't match expected action count ({actionLabels.Length}). " +
+                              "Please retrain the model with the correct number of actions.");
+                return;
+            }
+            
             // Store confidences for HUD display
-            for (int i = 0; i < Mathf.Min(actionLabels.Length, outputTensor.length); i++)
+            for (int i = 0; i < actionLabels.Length; i++)
             {
                 lastConfidences[i] = outputTensor[i];
             }
