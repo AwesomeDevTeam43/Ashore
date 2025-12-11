@@ -130,16 +130,17 @@ private float lastSaveTime = 0f;
     /// <summary>
     /// Gets a readable name from the animator state
     /// </summary>
-private string GetStateName(AnimatorStateInfo stateInfo)
-{
-    // Updated to match actual animator state names
-    if (stateInfo. IsName("BossAttack")) return "Attack";
-    if (stateInfo.IsName("AttackCombo")) return "Combo";
-    if (stateInfo. IsName("lasershoot")) return "Laser";
-    if (stateInfo. IsName("BossIdle")) return "Idle";
-    if (stateInfo. IsName("IntroTest")) return "Idle"; // Treat intro as idle
-    return "Unknown";
-}
+    private string GetStateName(AnimatorStateInfo stateInfo)
+    {
+        // Updated to match actual animator state names
+        if (stateInfo.IsName("BossAttack")) return "Attack";
+        if (stateInfo.IsName("AttackCombo")) return "Combo";
+        if (stateInfo.IsName("BeamAttack")) return "Laser";  // Fixed: was "lasershoot", correct name is "BeamAttack"
+        if (stateInfo.IsName("BossIdle")) return "Idle";
+        if (stateInfo.IsName("BossWalk")) return "Chase";    // Added: walking/chasing state
+        if (stateInfo.IsName("IntroTest")) return "Idle";    // Treat intro as idle
+        return "Unknown";
+    }
 
     /// <summary>
     /// Checks if the state is an action we want to log
