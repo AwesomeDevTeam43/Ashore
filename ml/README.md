@@ -8,7 +8,7 @@ The Boss AI system consists of three main components:
 
 1. **Data Logger (Unity)**: Captures gameplay data during boss fights
 2. **Training Script (Python)**: Trains a neural network on the captured data
-3. **AI Controller (Unity)**: Uses the trained model to make real-time decisions
+3. **AI Brain (Unity)**: Centralized AI controller that takes 100% control when enabled
 
 ## System Architecture
 
@@ -19,8 +19,18 @@ Gameplay → BossDataLogger.cs → boss_training_data.csv
                                         ↓
                                   boss_ai.onnx
                                         ↓
-                              BossAIController.cs → Boss Actions
+                              BossAIBrain.cs → Boss Actions
+                                        ↑
+                              BossAIStateNotifier.cs (attached to all animator states)
 ```
+
+## Key Components
+
+- **BossAIBrain.cs**: Centralized AI controller that runs in `Update()`, makes decisions every 0.5s, and directly controls the animator
+- **BossAIStateNotifier.cs**: StateMachineBehaviour attached to all boss animator states to notify the AI when animations complete
+- **Boss_RunIdle.cs**: Modified to check if AI is enabled and skip all logic when AI Brain is in control
+- **BossDataLogger.cs**: Captures gameplay data for training
+- **train_boss_ai.py**: Python script that trains the neural network
 
 ## Getting Started
 
@@ -117,17 +127,16 @@ Example output:
 ```
 ACTION CLASS MAPPING FOR UNITY
 ==================================================
-Copy this to your BossAIController.cs:
+Copy this to your BossAIBrain.cs:
 
-private string[] actionLabels = new string[] {
-    "Attack",
-    "Chase",
-    "Combo",
-    "Idle",
-    "Laser",
-};
+private readonly string[] actionLabels = { "Attack", "Combo", "Idle", "Laser" };
+
+NOTE: Action labels MUST be in alphabetical order to match Python's LabelEncoder!
 ==================================================
 ```
+
+**IMPORTANT**: The action labels are now: **Attack, Combo, Idle, Laser** (4 actions, alphabetical order).
+The "Chase" action has been removed - chasing behavior is handled as part of the "Idle" state.
 
 ### Training Parameters
 
@@ -148,51 +157,114 @@ You can adjust these in `train_boss_ai.py`:
    - Drag `boss_ai.onnx` into Unity's Assets folder (e.g., `Assets/ML/boss_ai.onnx`)
    - Unity will automatically convert it to an NNModel asset
 
-### Setting up the AI Controller
+### Setting up the Centralized AI Brain
 
-1. **Add BossAIController component to the Boss GameObject**:
+1. **Add BossAIBrain component to the Boss GameObject**:
    - Select the Boss GameObject
-   - Click "Add Component" and search for "Boss AI Controller"
+   - Click "Add Component" and search for "Boss AI Brain"
 
-2. **Configure the component**:
+2. **Configure the AI Brain component**:
    - `Model Asset`: Drag the imported NNModel asset here
    - `Player`: Assign the Player GameObject
-   - `Debug Mode`: Enable to see AI decisions in the console
+   - `Decision Interval`: Leave at 0.5 (AI makes decisions every 0.5 seconds)
+   - `Attack Range`: Leave at 2.0 (distance threshold for attacks)
+   - `Show On Screen Debug`: Enable to see AI status HUD in-game
+   - `Debug Mode`: Enable to see AI decisions with 🤖 emoji in the console
 
-3. **Update action labels** (if needed):
-   - Open `BossAIController.cs`
-   - Copy the action labels from the training script output
-   - Replace the `actionLabels` array in the script
+3. **Add BossAIStateNotifier to ALL boss animator states**:
+   - Open the Boss Animator Controller
+   - For EACH state (Attack, Combo, Laser, Idle, etc.):
+     - Click on the state
+     - In Inspector, click "Add Behaviour"
+     - Select "Boss AI State Notifier"
+   - This notifies the AI Brain when animations finish
 
-### Enabling AI Mode
+4. **Verify action labels** (should already be correct):
+   - Open `BossAIBrain.cs`
+   - Verify: `private readonly string[] actionLabels = { "Attack", "Combo", "Idle", "Laser" };`
+   - Labels MUST be in alphabetical order!
 
-1. **Configure Boss_RunIdle behavior**:
-   - Select the Boss GameObject
-   - Find the Boss_RunIdle state in the Animator Controller
-   - In the Inspector, find the Boss_RunIdle script properties
-   - Check the `Use AI` checkbox
+5. **Old components (optional cleanup)**:
+   - The old `BossAIController.cs` is no longer used and can be removed/disabled
+   - `Boss_RunIdle.cs` now automatically detects and defers to the AI Brain
 
-2. **Test the AI**:
-   - Enter Play Mode
-   - The boss will now use AI decisions instead of random actions
-   - Watch the console for debug messages (if debug mode is enabled)
+### Testing the AI Brain
+
+1. **Enter Play Mode**:
+   - You should see a startup banner in the console:
+   ```
+   ========================================
+        🤖 BOSS AI BRAIN ACTIVATED 🤖
+   ========================================
+        Model: boss_ai
+        Actions: Attack, Combo, Idle, Laser
+        AI is now in FULL CONTROL!
+        Random logic is DISABLED!
+   ========================================
+   ```
+
+2. **Watch the AI work**:
+   - If `showOnScreenDebug` is enabled, you'll see an on-screen HUD showing:
+     - AI status (Active/Disabled)
+     - Model name
+     - Last decision with confidence percentage
+     - Total decisions made
+     - Confidence bars for each action
+   - If `debugMode` is enabled, you'll see console logs with 🤖 emoji:
+     ```
+     🤖 [AI Decision #1] Attack (Confidence: 72%) | Dist:3.2 BossHP:100% PlayerHP:80% ...
+     🤖 [AI Execute] ATTACK
+     🤖 [AI Action Complete] Attack
+     ```
+
+3. **AI is now in control**:
+   - The boss will use ONLY AI decisions (no random logic)
+   - Boss_RunIdle automatically skips its logic when AI is enabled
+   - The AI Brain handles movement, decision-making, and action execution
 
 ## How It Works
 
-### Decision Flow
+### Centralized AI Brain Decision Flow
 
-When the boss enters the Run/Idle state:
+The new **BossAIBrain** runs independently in `Update()` and takes 100% control:
 
-1. **AI Mode Enabled**:
-   - Boss_RunIdle calls `BossAIController.GetAIDecision()`
-   - AI Controller gathers current game state features
-   - Creates input tensor from features
-   - Runs inference through the neural network
-   - Returns predicted action (e.g., "Combo", "Laser")
-   - Boss_RunIdle executes the predicted action
+1. **Every frame (Update)**:
+   - Check if it's time to make a decision (every 0.5 seconds by default)
+   - Check if waiting for current action to complete
+   - If idle, handle movement towards player
 
-2. **AI Mode Disabled** (fallback):
-   - Uses original random behavior (~33% Combo, ~33% Laser, ~33% Chase)
+2. **When making a decision**:
+   - Gather 6 game state features:
+     - `distance_to_player`
+     - `boss_health_pct`
+     - `player_health_pct`
+     - `is_phase2` (0 or 1)
+     - `can_use_laser` (0 or 1)
+     - `time_since_last_attack`
+   - Create input tensor (1, 6)
+   - Run inference through the neural network
+   - Get predicted action (argmax of output)
+   - Log decision with 🤖 emoji
+   - Execute action by controlling animator
+   - Wait for action to complete
+
+3. **Action execution**:
+   - Directly trigger animator states: Attack, Combo, Laser, or Idle
+   - Validate prerequisites (e.g., laser availability, attack range)
+   - Handle movement during idle state
+   - Set `isWaitingForActionComplete = true`
+
+4. **Action completion**:
+   - BossAIStateNotifier on each animator state calls `OnActionComplete()`
+   - AI Brain sets `isWaitingForActionComplete = false`
+   - Ready to make next decision
+
+5. **Boss_RunIdle behavior**:
+   - Checks if `BossAIBrain.AIEnabled` is true
+   - If true: immediately returns (AI Brain handles everything)
+   - If false: uses fallback random behavior (~33% Combo, ~33% Laser, ~33% Chase)
+
+This ensures **zero conflict** between the AI Brain and state machine behaviors.
 
 ### Neural Network Architecture
 
@@ -203,10 +275,24 @@ Hidden Layer 1 (32 neurons + ReLU)
     ↓
 Hidden Layer 2 (32 neurons + ReLU)
     ↓
-Output Layer (5 classes)
+Output Layer (4 classes: Attack, Combo, Idle, Laser)
     ↓
 Softmax → Predicted Action
 ```
+
+**Input Features** (must be in this exact order):
+1. `distance_to_player` - Distance between boss and player
+2. `boss_health_pct` - Boss health as percentage (0.0-1.0)
+3. `player_health_pct` - Player health as percentage (0.0-1.0)
+4. `is_phase2` - Whether boss is in phase 2 (0 or 1)
+5. `can_use_laser` - Whether laser is available (0 or 1)
+6. `time_since_last_attack` - Seconds since last attack (999 if never attacked)
+
+**Output Classes** (alphabetical order - CRITICAL!):
+1. Attack
+2. Combo
+3. Idle
+4. Laser
 
 ## Troubleshooting
 
@@ -230,7 +316,26 @@ Softmax → Predicted Action
 **Solution**:
 - Verify Unity Barracuda package is installed
 - Check that the ONNX file was imported correctly (should show as NNModel)
-- Ensure the model asset is assigned in BossAIController
+- Ensure the model asset is assigned in BossAIBrain
+- Check console for 🤖 startup banner - if missing, model didn't load
+- Verify model file is not corrupted
+
+### Issue: AI not making decisions
+
+**Solution**:
+- Check that BossAIBrain component is attached to Boss GameObject
+- Verify all required references are assigned (Player, model asset)
+- Enable `debugMode` to see decision logs
+- Check Inspector read-only fields: `_status` should be "Active", `_isModelLoaded` should be true
+- Verify BossAIStateNotifier is attached to ALL animator states
+
+### Issue: Boss still using random behavior
+
+**Solution**:
+- Check that BossAIBrain.AIEnabled is true (visible in Inspector)
+- Verify model loaded successfully (check console for startup banner)
+- Ensure Boss_RunIdle is detecting the AI Brain (should log "AI Brain is in control")
+- Check that all required components exist: HealthSystem, Boss script, Animator
 
 ### Issue: AI makes poor decisions
 
@@ -245,9 +350,50 @@ Softmax → Predicted Action
 **Solution**:
 - Ensure ONNX export uses opset version 11 or lower
 - Check that input tensor shape matches model expectations (1, 6)
-- Verify action labels array matches the training output exactly
+- Verify action labels array is exactly: `{ "Attack", "Combo", "Idle", "Laser" }` in alphabetical order
+- Check that feature order matches training data (6 features in correct order)
+- Verify NEVER_ATTACKED_TIME constant is 999f in both BossAIBrain and BossDataLogger
+
+### Issue: Actions not completing / AI stuck
+
+**Solution**:
+- Verify BossAIStateNotifier is attached to ALL animator states
+- Check that OnStateExit is being called (can add debug logs)
+- Ensure animator transitions are working correctly
+- Check that `isWaitingForActionComplete` is being reset (visible in debugger)
 
 ## Advanced Usage
+
+### On-Screen Debug HUD
+
+When `showOnScreenDebug` is enabled in BossAIBrain, you'll see a real-time HUD showing:
+
+- **AI Status**: Active, Disabled, or Error state
+- **Model Name**: The name of the loaded ONNX model
+- **Last Decision**: Most recent action with confidence percentage
+- **Total Decisions**: Counter of all decisions made
+- **Confidence Bars**: Visual bars showing confidence for each action
+  - Green: >50% confidence
+  - Yellow: 30-50% confidence
+  - Red: <30% confidence
+
+This provides clear visual feedback that the ONNX model is running and making decisions.
+
+### Console Logging
+
+When `debugMode` is enabled, all AI activity is logged with the 🤖 emoji for easy identification:
+
+```
+🤖 [AI Decision #1] Attack (Confidence: 72%) | Dist:3.2 BossHP:100% PlayerHP:80% Phase2:0 Laser:1 TimeSince:5.2
+🤖 [AI Execute] ATTACK
+🤖 [AI Action Complete] Attack
+```
+
+This makes it easy to:
+- Verify the model is running
+- Debug decision-making patterns
+- Understand why specific actions were chosen
+- Track AI performance over time
 
 ### Collecting Better Training Data
 
@@ -268,26 +414,20 @@ You can experiment with:
 - **Learning rate**: Lower for more stable training, higher for faster convergence
 - **Architecture**: Add more hidden layers or different activation functions
 
-### Hybrid Approach
+### Hybrid Approach (Not Recommended with BossAIBrain)
 
-You can implement a hybrid system that:
-- Uses AI for strategic decisions (Combo/Laser timing)
-- Falls back to random for exploration
-- Adds randomness to AI decisions for unpredictability
+The new BossAIBrain is designed for 100% AI control. However, if you want to disable the AI and use random behavior:
 
-Example in Boss_RunIdle.cs:
-```csharp
-// 80% AI decision, 20% random
-if (Random.value < 0.8f && useAI && aiController.IsReady())
-{
-    string aiDecision = aiController.GetAIDecision();
-    ExecuteAction(animator, aiDecision);
-}
-else
-{
-    ExecuteRandomAction(animator);
-}
-```
+1. **Remove or disable BossAIBrain component**:
+   - This will cause Boss_RunIdle to fall back to random behavior
+   - Boss_RunIdle automatically detects when AI is disabled
+
+2. **Adjust decision interval** for more/less frequent decisions:
+   - Change `decisionInterval` in BossAIBrain (default: 0.5 seconds)
+   - Lower values = more reactive AI
+   - Higher values = more deliberate/strategic AI
+
+**Note**: The centralized architecture is designed to avoid the hybrid approach issues that existed in the old mixed AI/random system. It's recommended to use 100% AI or 100% random, not a mix.
 
 ## Performance Considerations
 
