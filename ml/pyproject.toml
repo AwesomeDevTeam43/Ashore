@@ -1,0 +1,17 @@
+# pyproject.toml
+
+[project]
+name = "ml-project"
+version = "0.1.0"
+description = "Machine Learning Project with PyTorch"
+dependencies = [
+    "torch>=2.8.0",
+    "torchvision>=0.23.0",
+]
+
+[tool.uv]
+
+[[tool.uv.source]] # Notice the singular 'source' here (array of tables)
+# This defines a new source that only applies to 'torch' and 'torchvision'
+index = "https://download.pytorch.org/whl/cu126"
+packages = ["torch", "torchvision"]
