@@ -93,7 +93,7 @@ public class Boss_RunIdle : StateMachineBehaviour
         boss.LookAtPlayer(player);
 
         Vector2 target = new Vector2(player.position.x, rb.position.y);
-        Vector2 newPos = Vector2.MoveTowards(rb.position, target, 3 * Time.deltaTime);
+        Vector2 newPos = Vector2.MoveTowards(rb.position, target, 3 * Time.fixedDeltaTime);
         
         rb.MovePosition(newPos);
 

@@ -158,8 +158,13 @@ public class BossAIBrain : MonoBehaviour
             MakeDecision();
             lastDecisionTime = Time.time;
         }
+    }
 
-        // Handle movement in idle state
+    private void FixedUpdate()
+    {
+        if (!AIEnabled) return;
+
+        // Handle movement in idle state (use FixedUpdate for physics-based movement)
         if (currentAction == "Idle" || currentAction == "")
         {
             HandleMovement();
@@ -307,6 +312,7 @@ public class BossAIBrain : MonoBehaviour
 
     /// <summary>
     /// Handles boss movement towards player (used during Idle state)
+    /// Called from FixedUpdate for physics-based movement
     /// </summary>
     private void HandleMovement()
     {
@@ -315,9 +321,9 @@ public class BossAIBrain : MonoBehaviour
         // Look at player
         bossScript.LookAtPlayer(player.transform);
 
-        // Move towards player (use Time.deltaTime since we're in Update)
+        // Move towards player (use Time.fixedDeltaTime since we're in FixedUpdate)
         Vector2 target = new Vector2(player.transform.position.x, rb.position.y);
-        Vector2 newPos = Vector2.MoveTowards(rb.position, target, 3 * Time.deltaTime);
+        Vector2 newPos = Vector2.MoveTowards(rb.position, target, 3 * Time.fixedDeltaTime);
         rb.MovePosition(newPos);
     }
 
