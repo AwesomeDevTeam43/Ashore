@@ -106,3 +106,4 @@ ml/boss_ai.onnx
 ml/*.pth
 ml/*.pt
 ml/__pycache__/
+ml/uv.lock
