@@ -7,7 +7,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: BossIdle
+  m_Name: BossWalk
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -141,7 +141,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: d4276e7c715cd644b8fb2c57db449632, type: 2}
+  m_Motion: {fileID: 7400000, guid: c9904ad09e49fd443a47fb0aa70b224e, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -176,7 +176,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: lasershoot
+  m_Name: BeamAttack
   m_Speed: 0.4
   m_CycleOffset: 0
   m_Transitions:
@@ -267,8 +267,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ebef23f776cff64d97134c5d0d90bea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 3
   attackRange: 2
+  useAI: 0
 --- !u!1101 &2177246854308265847
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
