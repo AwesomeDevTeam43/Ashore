@@ -369,8 +369,8 @@ public class BossAIBrain : MonoBehaviour
         features[4] = bossScript.canUseLaser ? 1f : 0f;
         
         // Feature 5: time_since_last_attack
-        // Boss.cs initializes lastAttackTime to -Mathf.Infinity
-        if (float.IsNegativeInfinity(bossScript.lastAttackTime) || bossScript.lastAttackTime == -Mathf.Infinity)
+        // Boss.cs initializes lastAttackTime to -Mathf.Infinity, which equals float.NegativeInfinity
+        if (float.IsNegativeInfinity(bossScript.lastAttackTime))
         {
             features[5] = NEVER_ATTACKED_TIME;
         }
