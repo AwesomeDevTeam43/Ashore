@@ -167,21 +167,22 @@ private string GetStateName(AnimatorStateInfo stateInfo)
         float timeSinceLastAttack = CalculateTimeSinceLastAttack();
 
         // Create CSV row
-        string csvRow = string.Format("{0:F2},{1:F3},{2:F3},{3},{4},{5:F2},{6}",
-            distanceToPlayer,
-            bossHealthPct,
-            playerHealthPct,
-            isPhase2,
-            canUseLaser,
-            timeSinceLastAttack,
-            action);
+    string csvRow = string.Format(System.Globalization.CultureInfo.InvariantCulture,
+    "{0:F2},{1:F3},{2:F3},{3},{4},{5:F2},{6}",
+    distanceToPlayer,
+    bossHealthPct,
+    playerHealthPct,
+    isPhase2,
+    canUseLaser,
+    timeSinceLastAttack,
+    action);
 
         // Add to buffer
         dataBuffer.Add(csvRow);
         
         Debug.Log($"BossDataLogger: Logged {action} - Distance: {distanceToPlayer:F2}, BossHP: {bossHealthPct:F2}, PlayerHP: {playerHealthPct:F2}");
     }
-
+    
     private float CalculateDistanceToPlayer()
     {
         if (boss == null || player == null) return 0f;
