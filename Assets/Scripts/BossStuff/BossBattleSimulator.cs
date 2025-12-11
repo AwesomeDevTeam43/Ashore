@@ -39,6 +39,11 @@ public class BossBattleSimulator : MonoBehaviour
     [Tooltip("Path to save CSV file (relative to project root)")]
     public string csvFilePath = "ml/boss_training_data.csv";
 
+    // AI behavior constants (must match Python training script)
+    private const float CLOSE_RANGE_THRESHOLD = 2.5f;
+    private const float MEDIUM_RANGE_THRESHOLD = 5.0f;
+    private const float LASER_IDLE_THRESHOLD = 5.0f;
+
     // Component references
     private HealthSystem bossHealthSystem;
     private HealthSystem playerHealthSystem;
@@ -215,16 +220,16 @@ public class BossBattleSimulator : MonoBehaviour
         }
 
         // Phase 2 logic
-        bool laserAvailable = canUseLaser || timeSinceLastAttack >= 5.0f;
+        bool laserAvailable = canUseLaser || timeSinceLastAttack >= LASER_IDLE_THRESHOLD;
 
         // Close range: prefer Attack
-        if (distance < 2.5f)
+        if (distance < CLOSE_RANGE_THRESHOLD)
         {
             return "Attack";
         }
 
         // Medium range: prefer Combo
-        if (distance < 5.0f)
+        if (distance < MEDIUM_RANGE_THRESHOLD)
         {
             return "Combo";
         }

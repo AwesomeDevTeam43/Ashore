@@ -14,6 +14,12 @@ from skl2onnx import convert_sklearn
 from skl2onnx.common.data_types import FloatTensorType
 
 
+# AI behavior constants (must match Unity C# BossBattleSimulator)
+CLOSE_RANGE_THRESHOLD = 2.5
+MEDIUM_RANGE_THRESHOLD = 5.0
+LASER_IDLE_THRESHOLD = 5.0
+
+
 def determine_action(distance_to_player, boss_health_pct, player_health_pct, 
                      is_phase2, can_use_laser, time_since_last_attack):
     """
@@ -35,14 +41,14 @@ def determine_action(distance_to_player, boss_health_pct, player_health_pct,
     
     # Phase 2 logic
     # Laser available conditions: can_use_laser OR idle for 5+ seconds
-    laser_available = can_use_laser == 1.0 or time_since_last_attack >= 5.0
+    laser_available = can_use_laser == 1.0 or time_since_last_attack >= LASER_IDLE_THRESHOLD
     
     # Close range: prefer Attack
-    if distance_to_player < 2.5:
+    if distance_to_player < CLOSE_RANGE_THRESHOLD:
         return "Attack"
     
     # Medium range (2.5 - 5.0): prefer Combo
-    if distance_to_player < 5.0:
+    if distance_to_player < MEDIUM_RANGE_THRESHOLD:
         return "Combo"
     
     # Long range: prefer Laser if available, otherwise Combo
