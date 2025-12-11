@@ -204,9 +204,6 @@ public class BossAIBrain : MonoBehaviour
             int predictedClass = GetArgMax(outputTensor);
             _modelConfidence = outputTensor[predictedClass];
             
-            // Dispose input tensor
-            inputTensor.Dispose();
-            
             // Get action label
             if (predictedClass >= 0 && predictedClass < actionLabels.Length)
             {
@@ -233,6 +230,10 @@ public class BossAIBrain : MonoBehaviour
         catch (System.Exception e)
         {
             Debug.LogError($"🤖 BossAIBrain: Inference failed: {e.Message}");
+        }
+        finally
+        {
+            // Always dispose input tensor
             inputTensor.Dispose();
         }
     }
@@ -314,9 +315,9 @@ public class BossAIBrain : MonoBehaviour
         // Look at player
         bossScript.LookAtPlayer(player.transform);
 
-        // Move towards player
+        // Move towards player (use Time.deltaTime since we're in Update)
         Vector2 target = new Vector2(player.transform.position.x, rb.position.y);
-        Vector2 newPos = Vector2.MoveTowards(rb.position, target, 3 * Time.fixedDeltaTime);
+        Vector2 newPos = Vector2.MoveTowards(rb.position, target, 3 * Time.deltaTime);
         rb.MovePosition(newPos);
     }
 
@@ -368,7 +369,8 @@ public class BossAIBrain : MonoBehaviour
         features[4] = bossScript.canUseLaser ? 1f : 0f;
         
         // Feature 5: time_since_last_attack
-        if (float.IsNegativeInfinity(bossScript.lastAttackTime))
+        // Boss.cs initializes lastAttackTime to -Mathf.Infinity
+        if (float.IsNegativeInfinity(bossScript.lastAttackTime) || bossScript.lastAttackTime == -Mathf.Infinity)
         {
             features[5] = NEVER_ATTACKED_TIME;
         }
