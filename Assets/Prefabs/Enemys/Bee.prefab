@@ -84,7 +84,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 6537847821585180195, guid: de7020d94b4d0f940977a369005eec62, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -111,6 +111,10 @@ MonoBehaviour:
   stats: {fileID: 11400000, guid: 6cd5ce0ad94975c468742e32ec259006, type: 2}
   currentLevel: 1
   damageVariance: 0.1
+  audioSource: {fileID: 0}
+  stuckVelocityThreshold: 0.05
+  stuckTimeThreshold: 0.8
+  maxRecoveryAttempts: 5
   animator: {fileID: 0}
   isAttackingParam: isAttacking
   isLungingParam: isLunging
