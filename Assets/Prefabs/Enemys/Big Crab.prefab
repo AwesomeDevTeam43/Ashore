@@ -138,6 +138,11 @@ MonoBehaviour:
   stats: {fileID: 0}
   currentLevel: 1
   damageVariance: 0.1
+  audioSource: {fileID: 0}
+  hitSound: {fileID: 8300000, guid: 10fae70ba0739bc4399d41ddbe7037da, type: 3}
+  hitVolume: 1
+  deathSound: {fileID: 8300000, guid: 10fae70ba0739bc4399d41ddbe7037da, type: 3}
+  deathVolume: 1
   typedStats: {fileID: 0}
   walkBoolName: isWalking
   attackTriggerName: Attack

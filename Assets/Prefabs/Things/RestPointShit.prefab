@@ -65,6 +65,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3491847467146088585}
+  - {fileID: 6456325027897350648}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &5649339675190846772
@@ -180,9 +181,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8dfdbbb8ff0f0849a397c0556cc0b42, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spriteRenderer: {fileID: 5649339675190846772}
-  unlitSprite: {fileID: -1913347067976085879, guid: 15d10164ee015c246aa91d9806c535fb, type: 3}
-  litSprite: {fileID: 8210454418194263521, guid: 39d41c41f7b8fc5448dc8e35509670a6, type: 3}
+  fireParticlePrefab: {fileID: 3411356017071256080, guid: 9d8a21e4f5886184789b2188d4b8a6c8, type: 3}
+  particleSpawnPoint: {fileID: 6456325027897350648}
   returnPoint: {fileID: 3491847467146088585}
   enableInteractActivation: 1
   guidComponent: {fileID: -3568142314728436910}
@@ -199,3 +199,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   uniqueId: a07e087d-c721-4891-9a99-0b20e9876768
+--- !u!1 &6829303358586667575
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6456325027897350648}
+  m_Layer: 12
+  m_Name: VFX Origin
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6456325027897350648
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6829303358586667575}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.162, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7613159537970694452}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

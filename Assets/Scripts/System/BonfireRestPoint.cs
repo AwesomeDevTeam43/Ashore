@@ -2,15 +2,18 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // A reusable rest point that heals the player and acts as a return/save point.
-// On first activation it switches to a "lit" sprite and stays lit across saves/loads.
+// On first activation it spawns a particle system and stays lit across saves/loads.
 // Requires a GuidComponent so its lit state can be persisted by SaveSystem.
 [RequireComponent(typeof(Collider2D))]
 public class BonfireRestPoint : MonoBehaviour, ISaveable
 {
     [Header("Visual")]
-    [SerializeField] private SpriteRenderer spriteRenderer;
-    [SerializeField] private Sprite unlitSprite;
-    [SerializeField] private Sprite litSprite;
+    [Tooltip("Particle system prefab to spawn when the bonfire is lit.")]
+    [SerializeField] private ParticleSystem fireParticlePrefab;
+    [Tooltip("Transform position where the particle system will spawn. If null, uses this object's position.")]
+    [SerializeField] private Transform particleSpawnPoint;
+
+    private ParticleSystem spawnedParticleInstance;
 
     [Header("Behavior")]
     [Tooltip("Optional return point override. If null, the bonfire's own transform is used.")]
@@ -27,8 +30,6 @@ public class BonfireRestPoint : MonoBehaviour, ISaveable
 
     private void Reset()
     {
-        // Auto-wire sprite renderer
-        if (spriteRenderer == null) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         // Try to ensure trigger
         var col = GetComponent<Collider2D>();
         if (col != null) col.isTrigger = true;
@@ -38,7 +39,6 @@ public class BonfireRestPoint : MonoBehaviour, ISaveable
 
     private void Awake()
     {
-        if (spriteRenderer == null) spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         if (guidComponent == null) guidComponent = GetComponent<GuidComponent>();
         ApplyVisual();
     }
@@ -151,11 +151,19 @@ public class BonfireRestPoint : MonoBehaviour, ISaveable
 
     private void ApplyVisual()
     {
-        if (spriteRenderer == null) return;
-        if (isLit && litSprite != null)
-            spriteRenderer.sprite = litSprite;
-        else if (!isLit && unlitSprite != null)
-            spriteRenderer.sprite = unlitSprite;
+        if (isLit && fireParticlePrefab != null && spawnedParticleInstance == null)
+        {
+            // Spawn and play the particle system at the designated transform or fallback to this object's position
+            Vector3 spawnPosition = particleSpawnPoint != null ? particleSpawnPoint.position : transform.position;
+            spawnedParticleInstance = Instantiate(fireParticlePrefab, spawnPosition, fireParticlePrefab.transform.rotation, transform);
+            spawnedParticleInstance.Play();
+        }
+        else if (!isLit && spawnedParticleInstance != null)
+        {
+            // Destroy the particle system if bonfire is no longer lit
+            Destroy(spawnedParticleInstance.gameObject);
+            spawnedParticleInstance = null;
+        }
     }
 
     // ISaveable implementation
