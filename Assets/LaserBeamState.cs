@@ -7,6 +7,10 @@ public class LaserBeamState : StateMachineBehaviour
     {
         Debug.Log($"LaserBeamState: OnStateEnter for '{animator.gameObject.name}'. stateInfo.shortNameHash={stateInfo.shortNameHash}");
         animator.ResetTrigger("Laser");
+        
+        BossDataLogger logger = animator.GetComponent<BossDataLogger>();
+        if (logger != null) logger.LogAction("Laser");
+        
         // Optionally, you could call SpawnLaserAndHold here if you prefer state-driven spawning:
         // var boss = animator.GetComponent<Boss>(); if (boss != null) boss.SpawnLaserAndHold();
     }
