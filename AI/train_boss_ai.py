@@ -36,12 +36,12 @@ def determine_action(distance_to_player, boss_health_pct, player_health_pct,
         str: Action name ("Attack", "Combo", or "Laser")
     """
     # Phase 1: ONLY Attack
-    if is_phase2 == 0.0:
+    if is_phase2 == 0:
         return "Attack"
     
     # Phase 2 logic
     # Laser available conditions: can_use_laser OR idle for 5+ seconds
-    laser_available = can_use_laser == 1.0 or time_since_last_attack >= LASER_IDLE_THRESHOLD
+    laser_available = can_use_laser == 1 or time_since_last_attack >= LASER_IDLE_THRESHOLD
     
     # Close range: prefer Attack
     if distance_to_player < CLOSE_RANGE_THRESHOLD:

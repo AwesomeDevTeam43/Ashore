@@ -258,7 +258,7 @@ public class BossBattleSimulator : MonoBehaviour
             List<string> validActions = new List<string> { "Attack", "Combo" };
 
             // Add Laser if available
-            if (canUseLaser || timeSinceLastAttack >= 5.0f)
+            if (canUseLaser || timeSinceLastAttack >= LASER_IDLE_THRESHOLD)
             {
                 validActions.Add("Laser");
             }
@@ -281,7 +281,11 @@ public class BossBattleSimulator : MonoBehaviour
                 break;
 
             case "Laser":
-                if (bossScript.canUseLaser || bossScript.HasBeenIdleLongEnough())
+                // Use consistent logic: check if laser is available based on AI decision criteria
+                float timeSinceAttack = float.IsNegativeInfinity(bossScript.lastAttackTime) 
+                    ? 999f 
+                    : Time.time - bossScript.lastAttackTime;
+                if (bossScript.canUseLaser || timeSinceAttack >= LASER_IDLE_THRESHOLD)
                 {
                     bossAnimator.SetTrigger("Laser");
                     bossScript.canUseLaser = false;
