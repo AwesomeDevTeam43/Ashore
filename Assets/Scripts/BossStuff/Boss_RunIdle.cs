@@ -10,52 +10,37 @@ public class Boss_RunIdle : StateMachineBehaviour
     // Track whether we've already triggered a special action (Combo/Laser) during this state entry
     private bool specialTriggeredThisEntry = false;
     
-    [Header("AI Configuration")]
-    [Tooltip("Enable AI-based decision making instead of random behavior")]
-    [SerializeField] private bool useAI = false;
+    private BossAIBrain aiBrain;
     
-    private BossAIController aiController;
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         player = GameObject.FindGameObjectWithTag("Player").transform;
         rb = animator.GetComponent<Rigidbody2D>();
         boss = animator.GetComponent<Boss>();
         
-        // Get AI controller if using AI mode
-        if (useAI && aiController == null)
+        // Get reference to AI brain if not already cached
+        if (aiBrain == null)
         {
-            aiController = animator.GetComponent<BossAIController>();
+            aiBrain = animator.GetComponent<BossAIBrain>();
+        }
+
+        // Check if AI Brain is in control
+        if (aiBrain != null && aiBrain.AIEnabled)
+        {
+            // AI Brain is in full control - skip all local logic
+            Debug.Log("Boss_RunIdle: AI Brain is in control - skipping local logic");
+            return;
         }
 
         // reset per-entry flag
         specialTriggeredThisEntry = false;
 
-        // Use AI decision if enabled and available, otherwise use random behavior
-        if (useAI && aiController != null && aiController.IsReady())
-        {
-            // Get AI decision
-            string aiDecision = aiController.GetAIDecision();
-            
-            if (aiDecision != null)
-            {
-                Debug.Log($"Boss_RunIdle: AI decision -> {aiDecision}");
-                ExecuteAction(animator, aiDecision);
-            }
-            else
-            {
-                Debug.LogWarning("Boss_RunIdle: AI decision failed, falling back to random behavior");
-                ExecuteRandomAction(animator);
-            }
-        }
-        else
-        {
-            // Use original random behavior
-            ExecuteRandomAction(animator);
-        }
+        // Use fallback random behavior (AI is disabled or not present)
+        ExecuteRandomAction(animator);
     }
     
     /// <summary>
-    /// Executes the original random action selection
+    /// Executes the original random action selection (used when AI is disabled)
     /// </summary>
     private void ExecuteRandomAction(Animator animator)
     {
@@ -94,62 +79,22 @@ public class Boss_RunIdle : StateMachineBehaviour
             animator.SetTrigger("yes");
         }
     }
-    
-    /// <summary>
-    /// Executes an action based on AI decision
-    /// </summary>
-    private void ExecuteAction(Animator animator, string action)
-    {
-        switch (action)
-        {
-            case "Combo":
-                animator.ResetTrigger("Combo");
-                animator.SetTrigger("Combo");
-                specialTriggeredThisEntry = true;
-                break;
-                
-            case "Laser":
-                // Trigger Laser if allowed OR if the boss has been idle long enough
-                if (boss != null && (boss.canUseLaser || boss.HasBeenIdleLongEnough()))
-                {
-                    animator.SetTrigger("Laser");
-                    boss.canUseLaser = false;
-                    boss.NotifyLaserUsed();
-                    specialTriggeredThisEntry = true;
-                }
-                else
-                {
-                    Debug.Log("Boss_RunIdle: AI requested Laser but it's not available");
-                    // Fall back to chase behavior
-                    animator.ResetTrigger("Combo");
-                    animator.SetTrigger("yes");
-                }
-                break;
-                
-            case "Chase":
-            case "Idle":
-            case "Attack":
-                // These are handled by the OnStateUpdate (chase/attack) or just stay in idle
-                animator.ResetTrigger("Combo");
-                animator.SetTrigger("yes");
-                break;
-                
-            default:
-                Debug.LogWarning($"Boss_RunIdle: Unknown AI action '{action}', using default behavior");
-                animator.ResetTrigger("Combo");
-                animator.SetTrigger("yes");
-                break;
-        }
-    }
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
+        // Check if AI Brain is in control
+        if (aiBrain != null && aiBrain.AIEnabled)
+        {
+            // AI Brain handles everything - skip all local logic
+            return;
+        }
+
+        // Fallback behavior when AI is disabled
         boss.LookAtPlayer(player);
 
         Vector2 target = new Vector2(player.position.x, rb.position.y);
         Vector2 newPos = Vector2.MoveTowards(rb.position, target, 3 * Time.fixedDeltaTime);
         
-
         rb.MovePosition(newPos);
 
         if (Vector2.Distance(player.position, rb.position) <= attackRange)
