@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 7047558257190154228}
   - component: {fileID: 2077492606873816259}
   - component: {fileID: 6220141772026002381}
+  - component: {fileID: 6088695784050849370}
   m_Layer: 7
   m_Name: BossTest
   m_TagString: Enemy
@@ -248,6 +249,21 @@ MonoBehaviour:
   critShakeIntensityMultiplier: 1.5
   critShakeDurationMultiplier: 1.1
   critParticlePrefab: {fileID: 8862473740124630662, guid: b13652ebaa31aec45b3bc6ec3b5f1577, type: 3}
+--- !u!114 &6088695784050849370
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1843977217408722471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d8f2b3c0e9a5f84b2d7f1a4c6e8b9d0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  modelAsset: {fileID: 5022602860645237092, guid: 4f4c6ea641f59624281adc0ca6c41c71, type: 3}
+  player: {fileID: 0}
+  debugMode: 0
 --- !u!1 &6855634289121989859
 GameObject:
   m_ObjectHideFlags: 0

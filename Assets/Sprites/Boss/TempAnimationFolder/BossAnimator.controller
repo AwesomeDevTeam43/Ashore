@@ -268,7 +268,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   attackRange: 2
-  useAI: 0
+  useAI: 1
 --- !u!1101 &2177246854308265847
 AnimatorStateTransition:
   m_ObjectHideFlags: 1
