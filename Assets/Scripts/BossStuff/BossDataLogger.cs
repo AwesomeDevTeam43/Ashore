@@ -133,11 +133,11 @@ private float lastSaveTime = 0f;
 private string GetStateName(AnimatorStateInfo stateInfo)
 {
     // Updated to match actual animator state names
-    if (stateInfo.IsName("BossAttack")) return "Attack";
+    if (stateInfo. IsName("BossAttack")) return "Attack";
     if (stateInfo.IsName("AttackCombo")) return "Combo";
-    if (stateInfo.IsName("lasershoot")) return "Laser";
-    if (stateInfo.IsName("BossIdle")) return "Idle";
-    if (stateInfo.IsName("IntroTest")) return "Idle";  // Treat intro as idle
+    if (stateInfo. IsName("lasershoot")) return "Laser";
+    if (stateInfo. IsName("BossIdle")) return "Idle";
+    if (stateInfo. IsName("IntroTest")) return "Idle"; // Treat intro as idle
     return "Unknown";
 }
 
