@@ -29,6 +29,9 @@ public class BossAIController : MonoBehaviour
         "Idle",
         "Laser"
     };
+    
+    // Constant for indicating boss has never attacked (must match BossDataLogger)
+    private const float NEVER_ATTACKED_TIME = 999f;
 
     // Barracuda runtime components
     private IWorker worker;
@@ -124,8 +127,8 @@ public class BossAIController : MonoBehaviour
             return null;
         }
 
-        // Create input tensor
-        Tensor inputTensor = new Tensor(1, 6, features);
+        // Create input tensor with correct constructor
+        Tensor inputTensor = new Tensor(new TensorShape(1, 6), features);
         
         try
         {
@@ -203,7 +206,7 @@ public class BossAIController : MonoBehaviour
         // Feature 5: time_since_last_attack
         if (float.IsNegativeInfinity(bossScript.lastAttackTime))
         {
-            features[5] = 999f; // Large value if never attacked
+            features[5] = NEVER_ATTACKED_TIME;
         }
         else
         {

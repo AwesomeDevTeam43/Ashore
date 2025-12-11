@@ -197,7 +197,7 @@ def export_to_onnx(model, output_path, input_size=6):
         dummy_input,
         output_path,
         export_params=True,
-        opset_version=11,  # Barracuda supports up to opset 11
+        opset_version=11,  # Using opset 11 for broad Barracuda compatibility (supports up to 15)
         do_constant_folding=True,
         input_names=['input'],
         output_names=['output'],

@@ -38,6 +38,9 @@ public class BossDataLogger : MonoBehaviour
 
     // Track last known state for detecting state changes
     private string lastAnimatorState = "";
+    
+    // Constant for indicating boss has never attacked
+    private const float NEVER_ATTACKED_TIME = 999f;
 
     private void Start()
     {
@@ -185,7 +188,7 @@ public class BossDataLogger : MonoBehaviour
         // If lastAttackTime is -Infinity, the boss hasn't attacked yet
         if (float.IsNegativeInfinity(bossScript.lastAttackTime))
         {
-            return 999f; // Large value to indicate "never attacked"
+            return NEVER_ATTACKED_TIME;
         }
         
         return Time.time - bossScript.lastAttackTime;
