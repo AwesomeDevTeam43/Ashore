@@ -30,6 +30,9 @@ public class BossAIBrain : MonoBehaviour
     [Tooltip("Attack range threshold")]
     public float attackRange = 2f;
 
+    [Tooltip("Movement speed when chasing player")]
+    public float moveSpeed = 3f;
+
     [Header("Debug Settings")]
     [Tooltip("Show on-screen debug HUD")]
     public bool showOnScreenDebug = true;
@@ -49,6 +52,9 @@ public class BossAIBrain : MonoBehaviour
 
     // Constant for indicating boss has never attacked (must match BossDataLogger)
     private const float NEVER_ATTACKED_TIME = 999f;
+    
+    // Number of input features for the model
+    private const int FEATURE_COUNT = 6;
 
     // Barracuda runtime components
     private IWorker worker;
@@ -68,7 +74,9 @@ public class BossAIBrain : MonoBehaviour
     private float[] lastConfidences; // Store confidence for each action
 
     // Public properties
-    public bool AIEnabled => _isModelLoaded && worker != null;
+    public bool AIEnabled => _isModelLoaded && worker != null && 
+                             bossHealthSystem != null && playerHealthSystem != null && 
+                             bossScript != null && bossAnimator != null && player != null;
     public string CurrentAIAction => currentAction;
 
     private void Start()
@@ -192,7 +200,7 @@ public class BossAIBrain : MonoBehaviour
         }
 
         // Create input tensor
-        Tensor inputTensor = new Tensor(new TensorShape(1, 6), features);
+        Tensor inputTensor = new Tensor(new TensorShape(1, features.Length), features);
         
         try
         {
@@ -334,7 +342,7 @@ public class BossAIBrain : MonoBehaviour
 
         // Move towards player (use Time.fixedDeltaTime since we're in FixedUpdate)
         Vector2 target = new Vector2(player.transform.position.x, rb.position.y);
-        Vector2 newPos = Vector2.MoveTowards(rb.position, target, 3 * Time.fixedDeltaTime);
+        Vector2 newPos = Vector2.MoveTowards(rb.position, target, moveSpeed * Time.fixedDeltaTime);
         rb.MovePosition(newPos);
     }
 
@@ -364,7 +372,7 @@ public class BossAIBrain : MonoBehaviour
             return null;
         }
 
-        float[] features = new float[6];
+        float[] features = new float[FEATURE_COUNT];
         
         // Feature 0: distance_to_player
         features[0] = Vector3.Distance(transform.position, player.transform.position);
