@@ -660,7 +660,7 @@ public class BeeEnemy : EnemyBase
     {
       if (playerHealth != null)
       {
-        playerHealth.TakeDamage((int)currentDamage);
+        playerHealth.TakeDamage((int)currentDamage, gameObject);
         
         // ADICIONAR: Feedback de ataque bem-sucedido
         if (combatFeedback != null)

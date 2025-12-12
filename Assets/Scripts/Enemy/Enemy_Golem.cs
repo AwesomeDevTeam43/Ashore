@@ -378,7 +378,7 @@ public class Enemy_Golem : EnemyBase
             var hs = h.GetComponent<HealthSystem>() ?? h.GetComponentInParent<HealthSystem>();
             if (hs != null)
             {
-                hs.TakeDamage((int)currentDamage);
+                hs.TakeDamage((int)currentDamage, gameObject);
                 
                 // ADICIONAR: Feedback no ponto de impacto
                 if (combatFeedback != null)

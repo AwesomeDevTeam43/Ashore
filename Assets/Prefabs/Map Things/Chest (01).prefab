@@ -108,6 +108,7 @@ MonoBehaviour:
   stoneReward: 3
   woodReward: 3
   ropeReward: 3
+  spawnHeight: 1.5
 --- !u!61 &-4843128180931224427
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -182,4 +183,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5712449afb6cdea4dba591dad71e995d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uniqueId: 
+  uniqueId: 2b306642-dc99-44a9-8b87-735de2512c37
+  hasGeneratedId: 1

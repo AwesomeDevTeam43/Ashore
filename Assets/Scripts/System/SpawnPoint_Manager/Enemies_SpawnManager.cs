@@ -94,4 +94,27 @@ public class Enemies_SpawnManager : MonoBehaviour
         if (index < 0 || index >= spawnPoints.Length) return;
         SpawnAt(spawnPoints[index]);
     }
+    
+    /// <summary>
+    /// Respawns all enemies by resetting spawn points and triggering spawn.
+    /// Called by GeneticDebugController.
+    /// </summary>
+    public void RespawnAll()
+    {
+        if (spawnPoints == null)
+        {
+            spawnPoints = GetComponentsInChildren<EnemySpawnPoint>(includeInactive: true);
+        }
+        
+        Debug.Log($"[SpawnManager] RespawnAll: {spawnPoints.Length} spawn points");
+        
+        foreach (var sp in spawnPoints)
+        {
+            if (sp != null && sp.enemyPrefab != null)
+            {
+                sp.hasSpawned = false;
+                SpawnAt(sp);
+            }
+        }
+    }
 }

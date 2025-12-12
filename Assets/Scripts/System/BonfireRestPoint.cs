@@ -131,7 +131,7 @@ public class BonfireRestPoint : MonoBehaviour, ISaveable
             if (GlobalGeneticEvolver.Instance != null)
             {
                 GlobalGeneticEvolver.Instance.OnRestPoint();
-                GlobalGeneticEvolver.Instance.ResetPlayerDeaths();
+                GlobalGeneticEvolver.Instance.ResetPlayerDeathCounter();
             }
 
             // Save game (persists bonfire state and player data)

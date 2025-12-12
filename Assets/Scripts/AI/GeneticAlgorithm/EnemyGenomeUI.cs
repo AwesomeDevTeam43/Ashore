@@ -1,31 +1,41 @@
 using UnityEngine;
 
 /// <summary>
-/// UI flutuante que mostra as stats genéticas por cima do inimigo.
-/// Adiciona automaticamente ao inimigo junto com o EnemyFitnessTracker.
+/// Floating UI that shows genetic stats above each enemy.
+/// Automatically added to enemies with EnemyFitnessTracker.
+/// Toggle visibility with keybind (see GeneticDebugController).
 /// </summary>
 public class EnemyGenomeUI : MonoBehaviour
 {
     [Header("Display Settings")]
     [SerializeField] private bool showUI = true;
     [SerializeField] private Vector3 offset = new Vector3(0, 2f, 0);
-    [SerializeField] private float maxDistance = 20f;
+    [SerializeField] private float maxDistance = 25f;
+    [SerializeField] private bool showDetailedView = true;
     
     [Header("Visual Settings")]
-    [SerializeField] private Color backgroundColor = new Color(0, 0, 0, 0.8f);
+    [SerializeField] private Color backgroundColor = new Color(0, 0, 0, 0.85f);
     [SerializeField] private Color textColor = Color.white;
-    [SerializeField] private Color geneBarColor = Color.cyan;
+    [SerializeField] private Color headerColor = new Color(0.3f, 1f, 0.3f);
+    [SerializeField] private Color speciesColor = new Color(1f, 0.8f, 0.2f);
     [SerializeField] private int fontSize = 10;
+    
+    // Static toggle for all instances
+    private static bool globalShowUI = true;
     
     private EnemyFitnessTracker fitnessTracker;
     private Camera mainCamera;
     private GUIStyle boxStyle;
     private GUIStyle labelStyle;
     private GUIStyle headerStyle;
+    private GUIStyle speciesStyle;
+    private GUIStyle compactStyle;
     private Texture2D backgroundTexture;
     private Texture2D barBackgroundTexture;
-    private Texture2D barFillTexture;
     private bool stylesInitialized = false;
+    
+    // Cached textures for gene bars to avoid per-frame allocation
+    private Texture2D[] cachedBarTextures;
     
     private void Awake()
     {
@@ -45,14 +55,24 @@ public class EnemyGenomeUI : MonoBehaviour
     {
         if (stylesInitialized) return;
         
-        // Cria texturas
+        // Create textures
         backgroundTexture = MakeTexture(2, 2, backgroundColor);
         barBackgroundTexture = MakeTexture(2, 2, new Color(0.2f, 0.2f, 0.2f, 0.9f));
-        barFillTexture = MakeTexture(2, 2, geneBarColor);
+        
+        // Pre-create bar textures for each gene type
+        cachedBarTextures = new Texture2D[]
+        {
+            MakeTexture(2, 2, Color.red),      // HP
+            MakeTexture(2, 2, new Color(0.3f, 0.5f, 1f)),  // DMG
+            MakeTexture(2, 2, Color.cyan),     // SPD
+            MakeTexture(2, 2, Color.yellow),   // ATK
+            MakeTexture(2, 2, Color.magenta),  // AGR
+            MakeTexture(2, 2, Color.green),    // RES
+        };
         
         boxStyle = new GUIStyle(GUI.skin.box);
         boxStyle.normal.background = backgroundTexture;
-        boxStyle.padding = new RectOffset(5, 5, 5, 5);
+        boxStyle.padding = new RectOffset(6, 6, 6, 6);
         
         labelStyle = new GUIStyle(GUI.skin.label);
         labelStyle.fontSize = fontSize;
@@ -61,8 +81,18 @@ public class EnemyGenomeUI : MonoBehaviour
         
         headerStyle = new GUIStyle(labelStyle);
         headerStyle.fontStyle = FontStyle.Bold;
-        headerStyle.normal.textColor = new Color(0.3f, 1f, 0.3f);
+        headerStyle.normal.textColor = headerColor;
         headerStyle.alignment = TextAnchor.MiddleCenter;
+        
+        speciesStyle = new GUIStyle(labelStyle);
+        speciesStyle.fontStyle = FontStyle.Bold;
+        speciesStyle.fontSize = fontSize + 1;
+        speciesStyle.normal.textColor = speciesColor;
+        speciesStyle.alignment = TextAnchor.MiddleCenter;
+        
+        compactStyle = new GUIStyle(labelStyle);
+        compactStyle.fontSize = fontSize - 1;
+        compactStyle.normal.textColor = new Color(0.8f, 0.8f, 0.8f);
         
         stylesInitialized = true;
     }
@@ -82,65 +112,113 @@ public class EnemyGenomeUI : MonoBehaviour
     
     private void OnGUI()
     {
-        if (!showUI || fitnessTracker == null || fitnessTracker.Genome == null) return;
+        if (!showUI || !globalShowUI || fitnessTracker == null || fitnessTracker.Genome == null) return;
         if (mainCamera == null) mainCamera = Camera.main;
         if (mainCamera == null) return;
         
-        // Verifica distância da câmara
+        // Check distance from camera
         float distance = Vector3.Distance(mainCamera.transform.position, transform.position);
         if (distance > maxDistance) return;
         
-        // Converte posição world para screen
+        // Convert world to screen position
         Vector3 worldPos = transform.position + offset;
         Vector3 screenPos = mainCamera.WorldToScreenPoint(worldPos);
         
-        // Verifica se está atrás da câmara
+        // Check if behind camera
         if (screenPos.z < 0) return;
         
         InitStyles();
         
-        // Converte para coordenadas GUI (Y invertido)
+        // Convert to GUI coordinates (Y inverted)
         float guiY = Screen.height - screenPos.y;
         
-        // Dimensões do painel
-        float panelWidth = 140;
-        float panelHeight = 130;
-        float x = screenPos.x - panelWidth / 2;
+        var genome = fitnessTracker.Genome;
+        var species = fitnessTracker.Species;
+        int generation = GlobalGeneticEvolver.Instance?.GetGeneration(species) ?? 0;
+        
+        if (showDetailedView)
+        {
+            DrawDetailedPanel(screenPos.x, guiY, genome, species, generation);
+        }
+        else
+        {
+            DrawCompactPanel(screenPos.x, guiY, genome, species, generation);
+        }
+    }
+    
+    private void DrawDetailedPanel(float screenX, float guiY, EnemyGenome genome, EnemySpecies species, int generation)
+    {
+        // Panel dimensions
+        float panelWidth = 160;
+        float panelHeight = 175;
+        float x = screenX - panelWidth / 2;
         float y = guiY - panelHeight;
         
-        // Garante que fica dentro do ecrã
+        // Keep on screen
         x = Mathf.Clamp(x, 5, Screen.width - panelWidth - 5);
         y = Mathf.Clamp(y, 5, Screen.height - panelHeight - 5);
         
-        // Desenha o painel
+        // Draw panel background
         GUI.Box(new Rect(x, y, panelWidth, panelHeight), "", boxStyle);
         
-        var genome = fitnessTracker.Genome;
         float lineY = y + 5;
         float lineHeight = 14;
         float barHeight = 8;
-        float labelWidth = 50;
-        float barWidth = panelWidth - labelWidth - 25;
+        float labelWidth = 45;
+        float barWidth = panelWidth - labelWidth - 30;
         
-        // Header
-        GUI.Label(new Rect(x, lineY, panelWidth, lineHeight + 2), "🧬 GENOME", headerStyle);
+        // Species name header
+        string speciesName = EnemySpeciesHelper.GetDisplayName(species);
+        GUI.Label(new Rect(x, lineY, panelWidth, lineHeight + 2), speciesName, speciesStyle);
+        lineY += lineHeight + 2;
+        
+        // Generation and Power Level
+        float powerLevel = genome.GetPowerLevel();
+        string powerColor = powerLevel < 0.4f ? "<color=#88ff88>" : powerLevel < 0.7f ? "<color=#ffff88>" : "<color=#ff8888>";
+        GUI.Label(new Rect(x + 5, lineY, panelWidth - 10, lineHeight), 
+            $"Gen {generation}  |  Power: {powerLevel:P0}", compactStyle);
         lineY += lineHeight + 4;
         
-        // Genes como barras
-        DrawGeneBar(x + 5, ref lineY, "HP", genome.healthGene, labelWidth, barWidth, barHeight, Color.red);
-        DrawGeneBar(x + 5, ref lineY, "DMG", genome.damageGene, labelWidth, barWidth, barHeight, Color.blue);
-        DrawGeneBar(x + 5, ref lineY, "SPD", genome.movementSpeedGene, labelWidth, barWidth, barHeight, Color.cyan);
-        DrawGeneBar(x + 5, ref lineY, "ATK", genome.attackSpeedGene, labelWidth, barWidth, barHeight, Color.yellow);
-        DrawGeneBar(x + 5, ref lineY, "AGR", genome.aggressivenessGene, labelWidth, barWidth, barHeight, Color.magenta);
-        DrawGeneBar(x + 5, ref lineY, "RES", (genome.meleeResistanceGene + genome.rangedResistanceGene) / 2f, labelWidth, barWidth, barHeight, Color.green);
+        // Gene bars with cached textures
+        DrawGeneBarCached(x + 5, ref lineY, "HP", genome.healthGene, labelWidth, barWidth, barHeight, 0);
+        DrawGeneBarCached(x + 5, ref lineY, "DMG", genome.damageGene, labelWidth, barWidth, barHeight, 1);
+        DrawGeneBarCached(x + 5, ref lineY, "SPD", genome.movementSpeedGene, labelWidth, barWidth, barHeight, 2);
+        DrawGeneBarCached(x + 5, ref lineY, "ATK", genome.attackSpeedGene, labelWidth, barWidth, barHeight, 3);
+        DrawGeneBarCached(x + 5, ref lineY, "AGR", genome.aggressivenessGene, labelWidth, barWidth, barHeight, 4);
+        DrawGeneBarCached(x + 5, ref lineY, "RES", (genome.meleeResistanceGene + genome.rangedResistanceGene) / 2f, labelWidth, barWidth, barHeight, 5);
         
-        // Fitness atual
-        lineY += 2;
+        lineY += 4;
+        
+        // Current combat stats
         GUI.Label(new Rect(x + 5, lineY, panelWidth - 10, lineHeight), 
-            $"Fitness: {fitnessTracker.DamageDealtToPlayer:F1}", labelStyle);
+            $"DMG Dealt: {fitnessTracker.DamageDealtToPlayer:F0}", labelStyle);
+        lineY += lineHeight;
+        
+        GUI.Label(new Rect(x + 5, lineY, panelWidth - 10, lineHeight), 
+            $"Alive: {fitnessTracker.SurvivalTime:F1}s", labelStyle);
     }
     
-    private void DrawGeneBar(float x, ref float y, string label, float value, float labelWidth, float barWidth, float barHeight, Color barColor)
+    private void DrawCompactPanel(float screenX, float guiY, EnemyGenome genome, EnemySpecies species, int generation)
+    {
+        float panelWidth = 100;
+        float panelHeight = 45;
+        float x = screenX - panelWidth / 2;
+        float y = guiY - panelHeight;
+        
+        x = Mathf.Clamp(x, 5, Screen.width - panelWidth - 5);
+        y = Mathf.Clamp(y, 5, Screen.height - panelHeight - 5);
+        
+        GUI.Box(new Rect(x, y, panelWidth, panelHeight), "", boxStyle);
+        
+        string speciesName = EnemySpeciesHelper.GetDisplayName(species);
+        float powerLevel = genome.GetPowerLevel();
+        
+        GUI.Label(new Rect(x, y + 5, panelWidth, 14), speciesName, speciesStyle);
+        GUI.Label(new Rect(x + 5, y + 22, panelWidth - 10, 14), 
+            $"G{generation} | {powerLevel:P0}", compactStyle);
+    }
+    
+    private void DrawGeneBarCached(float x, ref float y, string label, float value, float labelWidth, float barWidth, float barHeight, int textureIndex)
     {
         // Label
         GUI.Label(new Rect(x, y, labelWidth, 14), label, labelStyle);
@@ -148,26 +226,35 @@ public class EnemyGenomeUI : MonoBehaviour
         // Background bar
         GUI.DrawTexture(new Rect(x + labelWidth, y + 3, barWidth, barHeight), barBackgroundTexture);
         
-        // Filled bar
-        Texture2D fillTex = MakeTexture(2, 2, barColor);
-        GUI.DrawTexture(new Rect(x + labelWidth, y + 3, barWidth * value, barHeight), fillTex);
+        // Filled bar using cached texture
+        if (cachedBarTextures != null && textureIndex < cachedBarTextures.Length)
+        {
+            GUI.DrawTexture(new Rect(x + labelWidth, y + 3, barWidth * Mathf.Clamp01(value), barHeight), cachedBarTextures[textureIndex]);
+        }
         
         // Value text
-        GUI.Label(new Rect(x + labelWidth + barWidth + 2, y, 25, 14), $"{value:F1}", labelStyle);
+        GUI.Label(new Rect(x + labelWidth + barWidth + 2, y, 30, 14), $"{value:F2}", labelStyle);
         
         y += 14;
     }
     
     private void OnDestroy()
     {
-        // Limpa texturas
+        // Clean up textures
         if (backgroundTexture != null) Destroy(backgroundTexture);
         if (barBackgroundTexture != null) Destroy(barBackgroundTexture);
-        if (barFillTexture != null) Destroy(barFillTexture);
+        
+        if (cachedBarTextures != null)
+        {
+            foreach (var tex in cachedBarTextures)
+            {
+                if (tex != null) Destroy(tex);
+            }
+        }
     }
     
     /// <summary>
-    /// Toggle da UI
+    /// Toggle UI visibility for this instance
     /// </summary>
     public void ToggleUI()
     {
@@ -175,10 +262,39 @@ public class EnemyGenomeUI : MonoBehaviour
     }
     
     /// <summary>
-    /// Define se a UI está visível
+    /// Set UI visibility for this instance
     /// </summary>
     public void SetVisible(bool visible)
     {
         showUI = visible;
     }
+    
+    /// <summary>
+    /// Toggle global UI visibility for all instances
+    /// </summary>
+    public static void ToggleAllUI()
+    {
+        globalShowUI = !globalShowUI;
+    }
+    
+    /// <summary>
+    /// Set global UI visibility for all instances
+    /// </summary>
+    public static void SetAllVisible(bool visible)
+    {
+        globalShowUI = visible;
+    }
+    
+    /// <summary>
+    /// Toggle between detailed and compact view for this instance
+    /// </summary>
+    public void ToggleDetailedView()
+    {
+        showDetailedView = !showDetailedView;
+    }
+    
+    /// <summary>
+    /// Check if global UI is visible
+    /// </summary>
+    public static bool IsGlobalUIVisible => globalShowUI;
 }

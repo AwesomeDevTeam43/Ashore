@@ -115,12 +115,19 @@ public static class SaveSystem
 
     public static void RestoreWorldState(PlayerData data)
     {
-    var saveableEntities = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).OfType<ISaveable>();
+        if (data == null || data.worldData == null) return;
+        
+        var saveableEntities = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).OfType<ISaveable>();
 
         foreach (var saveable in saveableEntities)
         {
             var guidComponent = (saveable as MonoBehaviour).GetComponent<GuidComponent>();
-            if (guidComponent != null && data.worldData.TryGetValue(guidComponent.GetGuid(), out object savedState))
+            if (guidComponent == null) continue;
+            
+            string guid = guidComponent.GetGuid();
+            if (string.IsNullOrEmpty(guid)) continue;
+            
+            if (data.worldData.TryGetValue(guid, out object savedState))
             {
                 saveable.RestoreState(savedState);
             }

@@ -173,7 +173,7 @@ public class VenomShooting : EnemyBase
             if (player.TryGetComponent<HealthSystem>(out var ph) || (ph = player.GetComponentInParent<HealthSystem>()) != null)
             {
                 if (currentDamage <= 0) Debug.LogWarning("VenomShooting: currentDamage <= 0");
-                ph.TakeDamage((int)currentDamage);
+                ph.TakeDamage((int)currentDamage, gameObject);
                 Debug.Log("Serpent Bite! Player hit.");
             }
             else

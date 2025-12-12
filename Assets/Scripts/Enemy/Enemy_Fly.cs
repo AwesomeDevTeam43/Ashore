@@ -127,7 +127,7 @@ public class Enemy_Fly : EnemyBase
 
             if (playerHealth != null)
             {
-                playerHealth.TakeDamage(typedStats.collisionDamage);
+                playerHealth.TakeDamage(typedStats.collisionDamage, gameObject);
                 damageTimer = typedStats.damageInterval;
             }
         }

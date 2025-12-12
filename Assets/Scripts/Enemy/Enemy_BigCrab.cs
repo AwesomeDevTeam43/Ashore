@@ -257,7 +257,7 @@ public class BigCrab : EnemyBase
       if (typedStats.biteDamage <= 0) Debug.LogWarning("Enemy: biteDamage <= 0");
 
       // Usar currentDamage ao invés de biteDamage para aplicar o dano escalado
-      playerHealth.TakeDamage((int)currentDamage);
+      playerHealth.TakeDamage((int)currentDamage, gameObject);
       if (playerRb != null)
       {
         StartCoroutine(ApplyPlayerKnockback(playerRb, player));

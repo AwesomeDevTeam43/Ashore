@@ -160,7 +160,7 @@ public class Enemy_MiasmaBloom : EnemyBase
 
             if (playerHealth != null)
             {
-                playerHealth.TakeDamage((int)currentDamage);
+                playerHealth.TakeDamage((int)currentDamage, gameObject);
             }
             else
             {

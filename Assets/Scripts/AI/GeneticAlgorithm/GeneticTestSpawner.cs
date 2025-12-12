@@ -52,10 +52,10 @@ public class GeneticTestSpawner : MonoBehaviour
     
     private void Start()
     {
-        // Verifica se o GeneticEnemyEvolver existe
-        if (GeneticEnemyEvolver.Instance == null)
+        // Verifica se o GlobalGeneticEvolver existe
+        if (GlobalGeneticEvolver.Instance == null)
         {
-            Debug.LogError("🧪 [TestSpawner] GeneticEnemyEvolver não encontrado! Adiciona-o à cena.");
+            Debug.LogError("🧪 [TestSpawner] GlobalGeneticEvolver não encontrado! Adiciona-o à cena.");
             return;
         }
         

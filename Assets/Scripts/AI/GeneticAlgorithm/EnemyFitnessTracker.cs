@@ -1,17 +1,31 @@
 using UnityEngine;
 
 /// <summary>
-/// Componente que rastreia o desempenho de um inimigo individual.
-/// Anexar a cada inimigo para registrar fitness quando morrer.
+/// Component that tracks an individual enemy's performance for the genetic algorithm.
+/// Attach to each enemy to enable genetic evolution tracking.
+/// 
+/// FEATURES:
+/// - Auto-detects species from Enemy_Stats
+/// - Tracks damage dealt (via explicit registration, not proximity)
+/// - Tracks survival time
+/// - Reports to GlobalGeneticEvolver on death
+/// - Applies genome stats to the enemy
+/// 
+/// DAMAGE ATTRIBUTION:
+/// - Enemies MUST call RegisterDamageDealt() when they deal damage
+/// - This ensures only the actual attacker gets fitness credit
+/// - The old proximity-based system was inaccurate
 /// </summary>
 [RequireComponent(typeof(Enemy_Health))]
 public class EnemyFitnessTracker : MonoBehaviour
 {
     [Header("Tracking Status (Read-Only)")]
+    [SerializeField] private EnemySpecies _species = EnemySpecies.Unknown;
     [SerializeField] private float _damageDealtToPlayer = 0f;
     [SerializeField] private float _spawnTime;
     [SerializeField] private bool _isTracking = false;
     [SerializeField] private bool _wasKilledByPlayer = false;
+    [SerializeField] private int _currentGeneration = 0;
     
     [Header("Debug")]
     [SerializeField] private bool showDebugInfo = false;
@@ -20,62 +34,50 @@ public class EnemyFitnessTracker : MonoBehaviour
     [SerializeField] private bool showGenomeUI = true;
     
     [Header("Zone Difficulty")]
-    [Tooltip("Multiplicador de dificuldade da zona (opcional)")]
+    [Tooltip("Zone difficulty multiplier (optional)")]
     [SerializeField] private ZoneDifficulty zoneDifficulty;
     
-    // Referências
+    // References
     private EnemyGenome genome;
     private EnemyGenomeUI genomeUI;
     private Enemy_Health enemyHealth;
-    private HealthSystem playerHealthSystem;
+    private HealthSystem enemyHealthSystem;
     private int instanceId;
     
-    // Cache para detectar dano ao jogador
-    private int lastKnownPlayerHealth;
+    // ==================== PUBLIC PROPERTIES ====================
     
     /// <summary>
-    /// O genoma atribuído a este inimigo
+    /// The genome assigned to this enemy.
     /// </summary>
     public EnemyGenome Genome => genome;
     
     /// <summary>
-    /// Dano total causado ao jogador
+    /// The species of this enemy.
+    /// </summary>
+    public EnemySpecies Species => _species;
+    
+    /// <summary>
+    /// Total damage dealt to player.
     /// </summary>
     public float DamageDealtToPlayer => _damageDealtToPlayer;
     
     /// <summary>
-    /// Tempo de vida desde o spawn
+    /// Time since spawn.
     /// </summary>
     public float SurvivalTime => Time.time - _spawnTime;
-    // Referência ao HealthSystem do inimigo
-    private HealthSystem enemyHealthSystem;
+    
+    // ==================== UNITY LIFECYCLE ====================
     
     private void Awake()
     {
         enemyHealth = GetComponent<Enemy_Health>();
+        enemyHealthSystem = GetComponent<HealthSystem>();
         instanceId = GetInstanceID();
         
-        // Subscribe to health changed event for accurate kill detection
-        enemyHealthSystem = GetComponent<HealthSystem>();
+        // Subscribe to health events for death detection
         if (enemyHealthSystem != null)
         {
             enemyHealthSystem.OnHealthChanged += OnEnemyHealthChanged;
-        }
-    }
-    
-    /// <summary>
-    /// Called when enemy health changes - detects death
-    /// </summary>
-    private void OnEnemyHealthChanged(int currentHealth, int maxHealth)
-    {
-        if (currentHealth <= 0 && !_wasKilledByPlayer)
-        {
-            _wasKilledByPlayer = true;
-            
-            if (showDebugInfo)
-            {
-                Debug.Log($"🧬 [{name}] Killed by player!");
-            }
         }
     }
     
@@ -83,43 +85,40 @@ public class EnemyFitnessTracker : MonoBehaviour
     {
         _spawnTime = Time.time;
         
-        // Encontra o jogador
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
+        // Detect species from EnemyBase stats
+        var enemyBase = GetComponent<EnemyBase>();
+        if (enemyBase != null && enemyBase.stats != null)
         {
-            playerHealthSystem = player.GetComponent<HealthSystem>();
-            if (playerHealthSystem != null)
-            {
-                lastKnownPlayerHealth = playerHealthSystem.CurrentHealth;
-            }
-        }
-        
-        // Obtém genoma do sistema GLOBAL
-        float zoneMult = zoneDifficulty != null ? zoneDifficulty.difficultyMultiplier : 1f;
-        
-        // Prioridade: GlobalGeneticEvolver > GeneticEnemyEvolver (legacy)
-        if (GlobalGeneticEvolver.Instance != null)
-        {
-            genome = GlobalGeneticEvolver.Instance.GetGenome(instanceId, zoneMult);
-            _isTracking = true;
+            _species = EnemySpeciesHelper.GetSpeciesFromStats(enemyBase.stats);
             
             if (showDebugInfo)
             {
-                Debug.Log($"🧬 [{name}] Got genome (Gen {GlobalGeneticEvolver.Instance.Generation}, Zone×{zoneMult})");
+                Debug.Log($"🧬 [{name}] Detected species: {EnemySpeciesHelper.GetDisplayName(_species)}");
             }
         }
-        else if (GeneticEnemyEvolver.Instance != null)
+        else
         {
-            genome = GeneticEnemyEvolver.Instance.GetGenomeForNewEnemy(instanceId);
-            _isTracking = true;
+            Debug.LogWarning($"🧬 [{name}] Could not detect species - no EnemyBase or stats found");
         }
         
-        if (_isTracking && genome != null)
+        // Get genome from global evolver
+        if (GlobalGeneticEvolver.Instance != null && EnemySpeciesHelper.ShouldEvolve(_species))
         {
-            // Aplica os genes ao inimigo
+            float zoneMult = zoneDifficulty != null ? zoneDifficulty.difficultyMultiplier : 1f;
+            
+            genome = GlobalGeneticEvolver.Instance.GetGenome(instanceId, _species, zoneMult);
+            _isTracking = true;
+            _currentGeneration = GlobalGeneticEvolver.Instance.GetGeneration(_species);
+            
+            if (showDebugInfo)
+            {
+                Debug.Log($"🧬 [{name}] Got genome (Gen {_currentGeneration}, Species: {EnemySpeciesHelper.GetDisplayName(_species)}, Zone×{zoneMult})");
+            }
+            
+            // Apply genome to enemy stats
             ApplyGenomeToEnemy();
             
-            // Adiciona UI se ativado
+            // Add UI if enabled
             if (showGenomeUI)
             {
                 genomeUI = GetComponent<EnemyGenomeUI>();
@@ -133,43 +132,9 @@ public class EnemyFitnessTracker : MonoBehaviour
         {
             if (showDebugInfo)
             {
-                Debug.LogWarning($"🧬 [{name}] No genetic system found. Using default stats.");
+                Debug.Log($"🧬 [{name}] No genetic system found or species doesn't evolve. Using default stats.");
             }
         }
-    }
-    
-    private void Update()
-    {
-        if (!_isTracking || playerHealthSystem == null) return;
-        
-        // Detecta dano causado ao jogador
-        int currentPlayerHealth = playerHealthSystem.CurrentHealth;
-        if (currentPlayerHealth < lastKnownPlayerHealth)
-        {
-            int damageDone = lastKnownPlayerHealth - currentPlayerHealth;
-            
-            // Verifica se este inimigo provavelmente causou o dano
-            // (simplificação: qualquer inimigo próximo ao jogador recebe crédito parcial)
-            GameObject player = playerHealthSystem.gameObject;
-            float distanceToPlayer = Vector2.Distance(transform.position, player.transform.position);
-            
-            // Se está próximo o suficiente para ter causado dano
-            if (distanceToPlayer < 5f)
-            {
-                float creditMultiplier = Mathf.Clamp01(1f - (distanceToPlayer / 5f));
-                float creditedDamage = damageDone * creditMultiplier;
-                _damageDealtToPlayer += creditedDamage;
-                
-                // Notifica o evolver sobre dano ao jogador
-                GeneticEnemyEvolver.Instance?.RegisterPlayerDamageTaken(Mathf.RoundToInt(creditedDamage));
-                
-                if (showDebugInfo)
-                {
-                    Debug.Log($"🧬 [{name}] Credited with {creditedDamage:F1} damage (distance: {distanceToPlayer:F1})");
-                }
-            }
-        }
-        lastKnownPlayerHealth = currentPlayerHealth;
     }
     
     private void OnDestroy()
@@ -180,46 +145,119 @@ public class EnemyFitnessTracker : MonoBehaviour
             enemyHealthSystem.OnHealthChanged -= OnEnemyHealthChanged;
         }
         
-        if (!_isTracking || genome == null) return;
-        
-        // Only count as killed if health reached 0
-        // (scene changes destroy objects without triggering health change to 0)
+        if (!_isTracking || genome == null)
+            return;
         
         if (showDebugInfo)
         {
-            Debug.Log($"🧬 [{name}] Destroyed. Killed by player: {_wasKilledByPlayer}");
+            Debug.Log($"🧬 [{name}] Destroyed. Killed by player: {_wasKilledByPlayer}, Damage dealt: {_damageDealtToPlayer:F1}");
         }
         
-        // Regista no sistema GLOBAL
+        // Report to global evolver
         if (GlobalGeneticEvolver.Instance != null)
         {
             GlobalGeneticEvolver.Instance.RegisterKill(
                 instanceId,
-                _damageDealtToPlayer,
-                SurvivalTime,
-                _wasKilledByPlayer
-            );
-        }
-        // Fallback para sistema legacy
-        else if (GeneticEnemyEvolver.Instance != null)
-        {
-            GeneticEnemyEvolver.Instance.RegisterEnemyDeath(
-                instanceId,
-                _damageDealtToPlayer,
                 SurvivalTime,
                 _wasKilledByPlayer
             );
         }
     }
     
+    // ==================== EVENT HANDLERS ====================
+    
     /// <summary>
-    /// Aplica os genes do genoma aos stats do inimigo
+    /// Called when enemy health changes - detects death.
+    /// </summary>
+    private void OnEnemyHealthChanged(int currentHealth, int maxHealth)
+    {
+        if (currentHealth <= 0 && !_wasKilledByPlayer)
+        {
+            _wasKilledByPlayer = true;
+            
+            if (showDebugInfo)
+            {
+                Debug.Log($"🧬 [{name}] Killed by player! Final damage dealt: {_damageDealtToPlayer:F1}");
+            }
+        }
+    }
+    
+    // ==================== PUBLIC METHODS ====================
+    
+    /// <summary>
+    /// MUST BE CALLED when this enemy deals damage to the player.
+    /// This is the ONLY way to get accurate fitness tracking.
+    /// 
+    /// Call this from your enemy attack scripts when damage is confirmed.
+    /// </summary>
+    /// <param name="damage">Amount of damage dealt</param>
+    public void RegisterDamageDealt(float damage)
+    {
+        if (!_isTracking || genome == null)
+            return;
+        
+        _damageDealtToPlayer += damage;
+        genome.damageDealtThisLife += damage;
+        
+        // Also notify global evolver for real-time tracking
+        if (GlobalGeneticEvolver.Instance != null)
+        {
+            GlobalGeneticEvolver.Instance.RegisterDamageDealt(instanceId, damage);
+        }
+        
+        if (showDebugInfo)
+        {
+            Debug.Log($"🧬 [{name}] Dealt {damage} damage to player. Total: {_damageDealtToPlayer:F1}");
+        }
+    }
+    
+    /// <summary>
+    /// Gets the scaled damage from the genome.
+    /// Use this instead of base damage for attacks.
+    /// </summary>
+    public float GetScaledDamage(float baseDamage)
+    {
+        if (genome == null) return baseDamage;
+        return genome.GetScaledDamage(baseDamage);
+    }
+    
+    /// <summary>
+    /// Gets the scaled movement speed from the genome.
+    /// </summary>
+    public float GetScaledMovementSpeed(float baseSpeed)
+    {
+        if (genome == null) return baseSpeed;
+        return genome.GetScaledMovementSpeed(baseSpeed);
+    }
+    
+    /// <summary>
+    /// Gets the scaled attack interval from the genome.
+    /// </summary>
+    public float GetScaledAttackInterval(float baseInterval)
+    {
+        if (genome == null) return baseInterval;
+        return genome.GetScaledAttackInterval(baseInterval);
+    }
+    
+    /// <summary>
+    /// Gets the scaled aggression range from the genome.
+    /// </summary>
+    public float GetScaledAggressionRange(float baseRange)
+    {
+        if (genome == null) return baseRange;
+        return genome.GetScaledAggressionRange(baseRange);
+    }
+    
+    // ==================== INTERNAL ====================
+    
+    /// <summary>
+    /// Applies the genome to enemy stats.
     /// </summary>
     private void ApplyGenomeToEnemy()
     {
         if (genome == null) return;
         
-        // Obtém referências
+        // Get references
         var enemyBase = GetComponent<EnemyBase>();
         if (enemyBase == null || enemyBase.stats == null)
         {
@@ -232,13 +270,12 @@ public class EnemyFitnessTracker : MonoBehaviour
         
         var stats = enemyBase.stats;
         
-        // Calcula valores escalados baseados no genoma
+        // Calculate scaled values from genome
         int scaledHealth = genome.GetScaledHealth(stats.maxHealth);
-        float scaledDamage = genome.GetScaledDamage(stats.damage);
         float scaledMeleeRes = Mathf.Max(stats.meleeResistance, genome.GetScaledMeleeResistance());
         float scaledRangedRes = Mathf.Max(stats.rangedResistance, genome.GetScaledRangedResistance());
         
-        // Aplica ao Enemy_Health através do método Initialize
+        // Apply to Enemy_Health
         if (enemyHealth != null)
         {
             enemyHealth.Initialize(
@@ -252,65 +289,32 @@ public class EnemyFitnessTracker : MonoBehaviour
             );
         }
         
-        // Atualiza o dano no EnemyBase (via reflection ou campo público se disponível)
-        // Por agora, armazenamos no tracker para uso posterior
-        _scaledDamage = scaledDamage;
-        
         if (showDebugInfo)
         {
+            float scaledDamage = genome.GetScaledDamage(stats.damage);
             Debug.Log($"🧬 [{name}] Applied genome: HP={scaledHealth}, DMG={scaledDamage:F1}, MeleeRes={scaledMeleeRes:F2}, RangedRes={scaledRangedRes:F2}");
         }
     }
     
-    // Armazena dano escalado para uso por outros componentes
-    private float _scaledDamage;
+    // ==================== DEBUG ====================
     
-    /// <summary>
-    /// Obtém o dano escalado pelo genoma
-    /// </summary>
-    public float GetScaledDamage(float baseDamage)
+#if UNITY_EDITOR
+    [ContextMenu("Log Genome Info")]
+    private void LogGenomeInfo()
     {
-        if (genome == null) return baseDamage;
-        return genome.GetScaledDamage(baseDamage);
-    }
-    
-    /// <summary>
-    /// Obtém a velocidade de movimento escalada pelo genoma
-    /// </summary>
-    public float GetScaledMovementSpeed(float baseSpeed)
-    {
-        if (genome == null) return baseSpeed;
-        return genome.GetScaledMovementSpeed(baseSpeed);
-    }
-    
-    /// <summary>
-    /// Obtém o intervalo de ataque escalado pelo genoma
-    /// </summary>
-    public float GetScaledAttackInterval(float baseInterval)
-    {
-        if (genome == null) return baseInterval;
-        return genome.GetScaledAttackInterval(baseInterval);
-    }
-    
-    /// <summary>
-    /// Obtém o alcance de agressão escalado pelo genoma
-    /// </summary>
-    public float GetScaledAggressionRange(float baseRange)
-    {
-        if (genome == null) return baseRange;
-        return genome.GetScaledAggressionRange(baseRange);
-    }
-    
-    /// <summary>
-    /// Registra dano causado manualmente (chamar quando o inimigo ataca)
-    /// </summary>
-    public void RegisterDamageDealt(float damage)
-    {
-        _damageDealtToPlayer += damage;
-        
-        if (showDebugInfo)
+        if (genome == null)
         {
-            Debug.Log($"🧬 [{name}] Manually registered {damage} damage. Total: {_damageDealtToPlayer:F1}");
+            Debug.Log($"🧬 [{name}] No genome assigned");
+            return;
         }
+        
+        Debug.Log($"🧬 [{name}] Genome Info:");
+        Debug.Log($"  Species: {EnemySpeciesHelper.GetDisplayName(_species)}");
+        Debug.Log($"  Generation: {_currentGeneration}");
+        Debug.Log($"  Power Level: {genome.GetPowerLevel():F2}");
+        Debug.Log($"  {genome}");
+        Debug.Log($"  Damage Dealt This Life: {_damageDealtToPlayer:F1}");
+        Debug.Log($"  Survival Time: {SurvivalTime:F1}s");
     }
+#endif
 }

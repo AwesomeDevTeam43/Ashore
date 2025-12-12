@@ -335,9 +335,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5276c1359ff482e468222e98f6761241, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _species: 0
   _damageDealtToPlayer: 0
   _spawnTime: 0
   _isTracking: 0
+  _wasKilledByPlayer: 0
+  _currentGeneration: 0
   showDebugInfo: 0
   showGenomeUI: 1
   zoneDifficulty: {fileID: 0}

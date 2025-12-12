@@ -1,0 +1,16 @@
+{
+  "feature_names": [
+    "dist_to_player",
+    "vertical_delta",
+    "has_los",
+    "player_health_ratio",
+    "enemy_health_ratio",
+    "cooldown"
+  ],
+  "action_mapping": {
+    "0": "Roaming",
+    "1": "AttackWindup",
+    "2": "Lunging",
+    "3": "Retreating"
+  }
+}

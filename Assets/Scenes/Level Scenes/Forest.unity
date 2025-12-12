@@ -10355,6 +10355,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6418534031175381300, guid: 05e6b2f5a0b634d479c90007d84af510, type: 3}
+      propertyPath: uniqueId
+      value: 7162a820-a524-429c-9b01-7fded605eb37
+      objectReference: {fileID: 0}
     - target: {fileID: 7232273395968245146, guid: 05e6b2f5a0b634d479c90007d84af510, type: 3}
       propertyPath: m_Size.y
       value: 1.4109758
@@ -23727,6 +23731,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6418534031175381300, guid: 05e6b2f5a0b634d479c90007d84af510, type: 3}
+      propertyPath: uniqueId
+      value: 95741e80-db26-4f12-95de-5e027fd26208
+      objectReference: {fileID: 0}
     - target: {fileID: 7232273395968245146, guid: 05e6b2f5a0b634d479c90007d84af510, type: 3}
       propertyPath: m_Size.y
       value: 1.4109758
@@ -26213,6 +26221,10 @@ PrefabInstance:
     - target: {fileID: 6009097667004774497, guid: 05e6b2f5a0b634d479c90007d84af510, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6418534031175381300, guid: 05e6b2f5a0b634d479c90007d84af510, type: 3}
+      propertyPath: uniqueId
+      value: 21c784e2-dba7-4931-ac0e-0c0b993a7f32
       objectReference: {fileID: 0}
     - target: {fileID: 7232273395968245146, guid: 05e6b2f5a0b634d479c90007d84af510, type: 3}
       propertyPath: m_Size.y
@@ -31814,6 +31826,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1863736544}
   - component: {fileID: 1863736543}
+  - component: {fileID: 1863736545}
   m_Layer: 0
   m_Name: GlobalGeneticEvolver
   m_TagString: Untagged
@@ -31840,17 +31853,25 @@ MonoBehaviour:
   mutationRate: 0.15
   mutationStrength: 0.2
   crossoverRate: 0.7
-  generationScaling: 1.02
+  absoluteMaxDifficulty: 2.5
   maxGeneValue: 0.9
+  generationScaling: 1.02
+  maxScalingGeneration: 50
   adaptiveDifficulty: 1
-  adaptiveStrength: 0.2
+  deathsBeforeReduction: 3
+  deathPenaltyStrength: 0.1
+  killsBeforeIncrease: 20
+  dominationBonusStrength: 0.05
+  useTargetDifficulty: 0
+  targetFitness: 50
   persistProgress: 1
+  saveFileName: genetic_evolution_save.json
   debugMode: 1
-  _generation: 0
+  logEveryKill: 0
   _totalKills: 0
-  _killsSinceEvolution: 0
-  _averageFitness: 0
   _playerDeaths: 0
+  _killsSinceLastDeath: 0
+  _currentDifficultyModifier: 1
 --- !u!4 &1863736544
 Transform:
   m_ObjectHideFlags: 0
@@ -31866,6 +31887,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1863736545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1863736542}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17928b0f7cbf4424d886dd2623b396f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showUI: 1
+  toggleKey: 103
+  showDetailedStats: 1
+  xPos: 10
+  yPos: 10
 --- !u!1 &1870985336
 GameObject:
   m_ObjectHideFlags: 0

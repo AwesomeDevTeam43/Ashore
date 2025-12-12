@@ -366,7 +366,7 @@ public class Enemy_Salamander : EnemyBase
         var hs = FindHealth(h.transform);
         if (hs != null)
         {
-          hs.TakeDamage((int)currentDamage);
+          hs.TakeDamage((int)currentDamage, gameObject);
           damaged = true;
           break;
         }
@@ -379,7 +379,7 @@ public class Enemy_Salamander : EnemyBase
       {
         Vector2 source = bitePoint != null ? (Vector2)bitePoint.position : (Vector2)transform.position;
         float dist2D = Vector2.Distance(source, player.position);
-        if (dist2D <= BiteRange * 1.1f) hs.TakeDamage((int)currentDamage);
+        if (dist2D <= BiteRange * 1.1f) hs.TakeDamage((int)currentDamage, gameObject);
       }
     }
   }
