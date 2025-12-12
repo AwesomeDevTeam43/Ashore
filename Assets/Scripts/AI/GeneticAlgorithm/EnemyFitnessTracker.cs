@@ -194,6 +194,21 @@ public class EnemyFitnessTracker : MonoBehaviour
     // ==================== PUBLIC METHODS ====================
     
     /// <summary>
+    /// Forces this enemy to be counted as "killed by player" for evolution purposes.
+    /// Use this in training arenas when the enemy survives but the round ends.
+    /// This ensures the genome gets fitness credit.
+    /// </summary>
+    public void ForceKillCredit()
+    {
+        _wasKilledByPlayer = true;
+        
+        if (showDebugInfo)
+        {
+            Debug.Log($"🧬 [{name}] Force kill credit applied. Damage dealt: {_damageDealtToPlayer:F1}");
+        }
+    }
+    
+    /// <summary>
     /// MUST BE CALLED when this enemy deals damage to the player.
     /// This is the ONLY way to get accurate fitness tracking.
     /// 

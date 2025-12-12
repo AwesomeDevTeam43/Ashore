@@ -10,7 +10,7 @@ public class EnemyGenomeUI : MonoBehaviour
     [Header("Display Settings")]
     [SerializeField] private bool showUI = true;
     [SerializeField] private Vector3 offset = new Vector3(0, 2f, 0);
-    [SerializeField] private float maxDistance = 25f;
+    [SerializeField] private float maxDistance = 100f;
     [SerializeField] private bool showDetailedView = true;
     
     [Header("Visual Settings")]

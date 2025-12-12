@@ -48,10 +48,10 @@ public class GlobalGeneticEvolver : MonoBehaviour
     
     [Header("Genetic Operators")]
     [Tooltip("Chance for each gene to mutate (0-0.5)")]
-    [SerializeField, Range(0f, 0.5f)] private float mutationRate = 0.15f;
+    [SerializeField, Range(0f, 0.5f)] private float mutationRate = 0.35f;
     
-    [Tooltip("Maximum change when a gene mutates (0-0.3)")]
-    [SerializeField, Range(0f, 0.3f)] private float mutationStrength = 0.2f;
+    [Tooltip("Maximum change when a gene mutates (0-0.5)")]
+    [SerializeField, Range(0f, 0.5f)] private float mutationStrength = 0.4f;
     
     [Tooltip("Chance to use crossover vs cloning (0-1)")]
     [SerializeField, Range(0f, 1f)] private float crossoverRate = 0.7f;
@@ -61,10 +61,10 @@ public class GlobalGeneticEvolver : MonoBehaviour
     [SerializeField, Range(1.5f, 4f)] private float absoluteMaxDifficulty = 2.5f;
     
     [Tooltip("Maximum value any single gene can reach (0.5-1)")]
-    [SerializeField, Range(0.5f, 1f)] private float maxGeneValue = 0.85f;
+    [SerializeField, Range(0.5f, 1f)] private float maxGeneValue = 0.95f;
     
     [Tooltip("Per-generation difficulty increase (1.0 = none, 1.02 = +2%). Set to 1.0 to disable.")]
-    [SerializeField, Range(1f, 1.05f)] private float generationScaling = 1.01f;
+    [SerializeField, Range(1f, 1.1f)] private float generationScaling = 1.03f;
     
     [Tooltip("Maximum generation for scaling (caps progression)")]
     [SerializeField] private int maxScalingGeneration = 50;
