@@ -19665,7 +19665,7 @@ Transform:
   m_GameObject: {fileID: 1074514740}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 7.19, y: -27.42, z: -10}
+  m_LocalPosition: {x: 39.19, y: -38.42, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -31086,11 +31086,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8023695755857493568, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 7.19
+      value: 39.19
       objectReference: {fileID: 0}
     - target: {fileID: 8023695755857493568, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -27.42
+      value: -38.42
       objectReference: {fileID: 0}
     - target: {fileID: 8023695755857493568, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
       propertyPath: m_LocalPosition.z
@@ -31804,6 +31804,68 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &1863736542
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1863736544}
+  - component: {fileID: 1863736543}
+  m_Layer: 0
+  m_Name: GlobalGeneticEvolver
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1863736543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1863736542}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6b6cc36f91b19844958cff17ed71347, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  populationSize: 20
+  evolveTriggerCount: 5
+  eliteCount: 4
+  tournamentSize: 3
+  mutationRate: 0.15
+  mutationStrength: 0.2
+  crossoverRate: 0.7
+  generationScaling: 1.02
+  maxGeneValue: 0.9
+  adaptiveDifficulty: 1
+  adaptiveStrength: 0.2
+  persistProgress: 1
+  debugMode: 1
+  _generation: 0
+  _totalKills: 0
+  _killsSinceEvolution: 0
+  _averageFitness: 0
+  _playerDeaths: 0
+--- !u!4 &1863736544
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1863736542}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.0422555, y: -34.90611, z: 0.066928945}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1870985336
 GameObject:
   m_ObjectHideFlags: 0
@@ -40714,3 +40776,4 @@ SceneRoots:
   - {fileID: 1154998139}
   - {fileID: 1628415118}
   - {fileID: 709862179}
+  - {fileID: 1863736544}

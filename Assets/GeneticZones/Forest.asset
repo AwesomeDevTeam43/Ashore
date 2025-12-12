@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c25258d08890a5d459651fb08a5dd565, type: 3}
   m_Name: Forest
   m_EditorClassIdentifier: 
-  zoneId: default
-  displayName: forest
+  zoneId: forest
+  displayName: Forest
   baseHealthMultiplier: 1
   baseDamageMultiplier: 1
   baseSpeedMultiplier: 1
-  baseAggressiveness: 0.3
-  minGeneValue: 0
-  maxGeneValue: 1
+  baseAggressiveness: 0.4
+  minGeneValue: 0.1
+  maxGeneValue: 0.7
   evolutionRate: 1
-  evolveTriggerCount: 10
+  evolveTriggerCount: 8
   mutationRate: 0.15
   adaptiveDifficulty: 1
   adaptiveStrength: 0.3

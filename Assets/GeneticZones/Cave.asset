@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c25258d08890a5d459651fb08a5dd565, type: 3}
   m_Name: Cave
   m_EditorClassIdentifier: 
-  zoneId: default
-  displayName: forest
+  zoneId: cave
+  displayName: Cave
   baseHealthMultiplier: 1
   baseDamageMultiplier: 1
   baseSpeedMultiplier: 1

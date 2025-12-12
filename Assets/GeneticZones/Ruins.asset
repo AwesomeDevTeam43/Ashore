@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c25258d08890a5d459651fb08a5dd565, type: 3}
   m_Name: Ruins
   m_EditorClassIdentifier: 
-  zoneId: default
-  displayName: forest
-  baseHealthMultiplier: 1
-  baseDamageMultiplier: 1
-  baseSpeedMultiplier: 1
-  baseAggressiveness: 0.3
-  minGeneValue: 0
-  maxGeneValue: 1
+  zoneId: ruins
+  displayName: Ruins
+  baseHealthMultiplier: 2
+  baseDamageMultiplier: 2
+  baseSpeedMultiplier: 2
+  baseAggressiveness: 0.6
+  minGeneValue: 0.2
+  maxGeneValue: 0.85
   evolutionRate: 1
-  evolveTriggerCount: 10
-  mutationRate: 0.15
+  evolveTriggerCount: 5
+  mutationRate: 0.2
   adaptiveDifficulty: 1
   adaptiveStrength: 0.3
