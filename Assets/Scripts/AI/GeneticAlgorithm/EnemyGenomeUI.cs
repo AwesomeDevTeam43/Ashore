@@ -33,6 +33,9 @@ public class EnemyGenomeUI : MonoBehaviour
     private Texture2D backgroundTexture;
     private Texture2D barBackgroundTexture;
     private bool stylesInitialized = false;
+    private bool _hasLoggedOnGUI = false;
+    private bool _hasLoggedDrawing = false;
+    private bool _hasLoggedCameraError = false;
     
     // Cached textures for gene bars to avoid per-frame allocation
     private Texture2D[] cachedBarTextures;
@@ -41,6 +44,7 @@ public class EnemyGenomeUI : MonoBehaviour
     {
         fitnessTracker = GetComponent<EnemyFitnessTracker>();
         mainCamera = Camera.main;
+        Debug.Log($"[EnemyGenomeUI] Awake on {gameObject.name} - tracker: {(fitnessTracker != null ? "found" : "NULL")}, camera: {(mainCamera != null ? "found" : "NULL")}");
     }
     
     private void Start()
@@ -112,25 +116,96 @@ public class EnemyGenomeUI : MonoBehaviour
     
     private void OnGUI()
     {
-        if (!showUI || !globalShowUI || fitnessTracker == null || fitnessTracker.Genome == null) return;
+        // One-time debug log
+        if (!_hasLoggedOnGUI)
+        {
+            Debug.Log($"[EnemyGenomeUI] OnGUI called on {gameObject.name} - showUI:{showUI}, globalShowUI:{globalShowUI}");
+            _hasLoggedOnGUI = true;
+        }
+        
+        // Early exit conditions with debug info
+        if (!showUI || !globalShowUI) return;
+        
+        // Try multiple ways to get the camera
         if (mainCamera == null) mainCamera = Camera.main;
-        if (mainCamera == null) return;
+        if (mainCamera == null) 
+        {
+            // Try finding any camera tagged MainCamera
+            var cameras = Camera.allCameras;
+            foreach (var cam in cameras)
+            {
+                if (cam.CompareTag("MainCamera"))
+                {
+                    mainCamera = cam;
+                    break;
+                }
+            }
+        }
+        if (mainCamera == null && Camera.allCamerasCount > 0)
+        {
+            // Just use the first active camera
+            mainCamera = Camera.allCameras[0];
+        }
+        
+        if (mainCamera == null) 
+        {
+            if (!_hasLoggedCameraError)
+            {
+                Debug.LogWarning($"[EnemyGenomeUI] {gameObject.name}: No camera found! Total cameras: {Camera.allCamerasCount}");
+                _hasLoggedCameraError = true;
+            }
+            return;
+        }
         
         // Check distance from camera
         float distance = Vector3.Distance(mainCamera.transform.position, transform.position);
-        if (distance > maxDistance) return;
+        if (distance > maxDistance) 
+        {
+            // Don't log every frame, too spammy
+            return;
+        }
         
         // Convert world to screen position
         Vector3 worldPos = transform.position + offset;
         Vector3 screenPos = mainCamera.WorldToScreenPoint(worldPos);
         
         // Check if behind camera
-        if (screenPos.z < 0) return;
+        if (screenPos.z < 0) 
+        {
+            // Behind camera, don't draw
+            return;
+        }
+        
+        // We're about to draw! Log once per enemy
+        if (!_hasLoggedDrawing)
+        {
+            Debug.Log($"[EnemyGenomeUI] DRAWING UI for {gameObject.name} at screen pos ({screenPos.x:F0}, {screenPos.y:F0}), camera: {mainCamera.name}");
+            _hasLoggedDrawing = true;
+        }
+        
+        // Simple test draw - a red box that should ALWAYS appear if OnGUI is working
+        // Comment this out once UI is confirmed working
+        GUI.color = Color.red;
+        GUI.Box(new Rect(screenPos.x - 50, Screen.height - screenPos.y - 30, 100, 25), gameObject.name);
+        GUI.color = Color.white;
         
         InitStyles();
         
         // Convert to GUI coordinates (Y inverted)
         float guiY = Screen.height - screenPos.y;
+        
+        // Handle missing tracker or genome - show error state
+        if (fitnessTracker == null)
+        {
+            DrawErrorPanel(screenPos.x, guiY, "No Tracker");
+            return;
+        }
+        
+        if (fitnessTracker.Genome == null)
+        {
+            DrawErrorPanel(screenPos.x, guiY, $"No Genome\n({fitnessTracker.Species})");
+            return;
+        }
         
         var genome = fitnessTracker.Genome;
         var species = fitnessTracker.Species;
@@ -144,6 +219,26 @@ public class EnemyGenomeUI : MonoBehaviour
         {
             DrawCompactPanel(screenPos.x, guiY, genome, species, generation);
         }
+    }
+    
+    private void DrawErrorPanel(float screenX, float guiY, string message)
+    {
+        float panelWidth = 100;
+        float panelHeight = 40;
+        float x = screenX - panelWidth / 2;
+        float y = guiY - panelHeight;
+        
+        x = Mathf.Clamp(x, 5, Screen.width - panelWidth - 5);
+        y = Mathf.Clamp(y, 5, Screen.height - panelHeight - 5);
+        
+        GUI.Box(new Rect(x, y, panelWidth, panelHeight), "", boxStyle);
+        
+        var errorStyle = new GUIStyle(labelStyle);
+        errorStyle.normal.textColor = Color.red;
+        errorStyle.alignment = TextAnchor.MiddleCenter;
+        errorStyle.fontSize = 9;
+        
+        GUI.Label(new Rect(x, y + 5, panelWidth, panelHeight - 10), message, errorStyle);
     }
     
     private void DrawDetailedPanel(float screenX, float guiY, EnemyGenome genome, EnemySpecies species, int generation)

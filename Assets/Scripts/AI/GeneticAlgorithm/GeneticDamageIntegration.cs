@@ -19,7 +19,7 @@ public class GeneticDamageIntegration : MonoBehaviour
     [SerializeField] private bool enableAutoRegistration = true;
     
     [Tooltip("Show debug messages")]
-    [SerializeField] private bool debugMode = false;
+    [SerializeField] private bool debugMode = true; // Default ON for debugging
     
     private HealthSystem healthSystem;
     private int lastHealth;
@@ -57,14 +57,29 @@ public class GeneticDamageIntegration : MonoBehaviour
     private void OnPlayerDamageTaken(GameObject damageSource)
     {
         if (!enableAutoRegistration) return;
-        if (damageSource == null) return;
         
         // Calculate actual damage taken
         int currentHealth = healthSystem.CurrentHealth;
         int damageTaken = lastHealth - currentHealth;
         lastHealth = currentHealth;
         
-        if (damageTaken <= 0) return;
+        // Always log when damage is taken for debugging
+        if (debugMode)
+        {
+            Debug.Log($"🧬 [GeneticIntegration] Player took {damageTaken} damage. Source: {(damageSource != null ? damageSource.name : "NULL")}");
+        }
+        
+        if (damageSource == null)
+        {
+            if (debugMode) Debug.LogWarning("🧬 [GeneticIntegration] Damage source is NULL - cannot attribute damage!");
+            return;
+        }
+        
+        if (damageTaken <= 0) 
+        {
+            if (debugMode) Debug.Log($"🧬 [GeneticIntegration] No actual damage taken (damageTaken={damageTaken})");
+            return;
+        }
         
         // Try to find EnemyFitnessTracker on the damage source or its parent
         var tracker = damageSource.GetComponent<EnemyFitnessTracker>();
@@ -79,12 +94,12 @@ public class GeneticDamageIntegration : MonoBehaviour
             
             if (debugMode)
             {
-                Debug.Log($"🧬 [GeneticIntegration] Auto-registered {damageTaken} damage from {damageSource.name} ({tracker.Species})");
+                Debug.Log($"🧬 [GeneticIntegration] ✓ Registered {damageTaken} damage from {damageSource.name} ({tracker.Species})");
             }
         }
         else if (debugMode)
         {
-            Debug.Log($"🧬 [GeneticIntegration] Damage source {damageSource.name} has no EnemyFitnessTracker");
+            Debug.LogWarning($"🧬 [GeneticIntegration] Damage source '{damageSource.name}' has no EnemyFitnessTracker - damage not tracked for genetics!");
         }
     }
     

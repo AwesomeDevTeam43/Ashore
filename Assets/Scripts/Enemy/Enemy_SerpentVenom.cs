@@ -8,8 +8,8 @@ public class Enemy_SerpentVenom : MonoBehaviour
     public float speed = 10f;
     public float lifetime = 10f;
     private Rigidbody2D rb;
-    // Opcional: Adicionar a referência ao inimigo pai para obter stats se necessário
-    // public VenomShooting parentShooter;
+    // Reference to the enemy that fired this projectile (for genetic algorithm damage attribution)
+    [HideInInspector] public GameObject ownerEnemy;
 
     void Start()
     {
@@ -43,8 +43,9 @@ public class Enemy_SerpentVenom : MonoBehaviour
 
             if (healthSystem != null)
             {
-                // NOVO: Usar damageAmount
-                healthSystem.TakeDamage(damageAmount);
+                // Pass owner's gameObject for genetic algorithm damage attribution
+                GameObject damageSource = ownerEnemy != null ? ownerEnemy : gameObject;
+                healthSystem.TakeDamage(damageAmount, damageSource);
             }
             Destroy(gameObject);
         }

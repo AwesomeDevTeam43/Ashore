@@ -28,7 +28,7 @@ public class EnemyFitnessTracker : MonoBehaviour
     [SerializeField] private int _currentGeneration = 0;
     
     [Header("Debug")]
-    [SerializeField] private bool showDebugInfo = false;
+    [SerializeField] private bool showDebugInfo = true;
     
     [Header("UI")]
     [SerializeField] private bool showGenomeUI = true;
@@ -101,6 +101,25 @@ public class EnemyFitnessTracker : MonoBehaviour
             Debug.LogWarning($"🧬 [{name}] Could not detect species - no EnemyBase or stats found");
         }
         
+        // Always add UI if enabled (even without genome, to show debug state)
+        if (showGenomeUI)
+        {
+            genomeUI = GetComponent<EnemyGenomeUI>();
+            if (genomeUI == null)
+            {
+                genomeUI = gameObject.AddComponent<EnemyGenomeUI>();
+                Debug.Log($"🧬 [{name}] Added EnemyGenomeUI component");
+            }
+            else
+            {
+                Debug.Log($"🧬 [{name}] EnemyGenomeUI already exists");
+            }
+        }
+        else
+        {
+            Debug.Log($"🧬 [{name}] showGenomeUI is FALSE - not adding UI");
+        }
+        
         // Get genome from global evolver
         if (GlobalGeneticEvolver.Instance != null && EnemySpeciesHelper.ShouldEvolve(_species))
         {
@@ -117,16 +136,6 @@ public class EnemyFitnessTracker : MonoBehaviour
             
             // Apply genome to enemy stats
             ApplyGenomeToEnemy();
-            
-            // Add UI if enabled
-            if (showGenomeUI)
-            {
-                genomeUI = GetComponent<EnemyGenomeUI>();
-                if (genomeUI == null)
-                {
-                    genomeUI = gameObject.AddComponent<EnemyGenomeUI>();
-                }
-            }
         }
         else
         {

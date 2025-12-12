@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: 2077492606873816259}
   - component: {fileID: 6220141772026002381}
   - component: {fileID: 6088695784050849370}
+  - component: {fileID: 8859554010004841256}
   m_Layer: 7
   m_Name: BossTest
   m_TagString: Enemy
@@ -264,6 +265,27 @@ MonoBehaviour:
   modelAsset: {fileID: 5022602860645237092, guid: 4f4c6ea641f59624281adc0ca6c41c71, type: 3}
   player: {fileID: 0}
   debugMode: 0
+--- !u!114 &8859554010004841256
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1843977217408722471}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b675bec7d986814eaf5d11577f0e74d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showUI: 1
+  offset: {x: 0, y: 2, z: 0}
+  maxDistance: 25
+  showDetailedView: 1
+  backgroundColor: {r: 0, g: 0, b: 0, a: 0.85}
+  textColor: {r: 1, g: 1, b: 1, a: 1}
+  headerColor: {r: 0.3, g: 1, b: 0.3, a: 1}
+  speciesColor: {r: 1, g: 0.8, b: 0.2, a: 1}
+  fontSize: 10
 --- !u!1 &6855634289121989859
 GameObject:
   m_ObjectHideFlags: 0

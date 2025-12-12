@@ -203,6 +203,8 @@ public class SalamanderSpine : MonoBehaviour
         }
         if (dmg <= 0) dmg = 1;
 
-        hs.TakeDamage(dmg);
+        // Pass owner's gameObject for genetic algorithm damage attribution
+        GameObject damageSource = ownerSalamander != null ? ownerSalamander.gameObject : gameObject;
+        hs.TakeDamage(dmg, damageSource);
     }
 }
