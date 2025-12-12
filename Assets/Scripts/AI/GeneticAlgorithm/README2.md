@@ -248,13 +248,3 @@ Experimentos sugeridos:
 2. Telemetria adicional: instrumentar `EnemyFitnessTracker` para registar tempo em alcance e número de ataques, de modo a aferir impacto de `movementSpeed` e `attackSpeed`.
 3. Comparar com/sem `adaptiveDifficulty` para apreciar o efeito do regulador no equilíbrio.
 
----
-
-## Limitações e trabalho futuro (academic framing)
-
-- Atribuição de aptidão por similaridade introduz ruído na ligação entre instância em cena e exemplar da população; uma referência por-ID permitiria créditos exactos.
-- Sinais de telemetria são actualmente limitados (predominância de dano e tempo). Para favorecer genes comportamentais (movimento, agressividade, velocidade de ataque), é recomendada a recolha de métricas adicionais: tempo em alcance, contagem de ataques, hits por segundo, dano mitigado.
-- O esquema de pesos na função de aptidão é heurístico; uma análise sensibilidade / grid search sobre `mutationRate`, `crossoverRate`, `eliteCount` e os pesos da função de aptidão é necessária para validar robustez.
-- A persistência em ficheiro é útil para iteração, mas requer controlos experimentais (seed RNG, logs de configuração) para reprodutibilidade científica.
-
-
