@@ -1,5 +1,13 @@
 # Ashore — Documentação da Implementação de Algoritmos de Inteligencia Artificial
 
+## Membro do Grupo
+
+Gonçalo Oliveira Araújo - 27928
+
+João Manuel Freitas Ribeiro – 27926
+
+Tiago Miguel Dias Miranda - 27937
+
 ## Índice
 
 - [1) Pathfinding](#1-pathfinding)
