@@ -1,27 +1,5 @@
 # Sistema de Evolução Genética Adversária (GA)
 
-## 📋 Visão Geral
-Este projeto implementa um Algoritmo Genético (AG) integrado num jogo estilo Metroidvania, concebido para adaptar dinamicamente a dificuldade e o comportamento dos inimigos com base no desempenho do jogador.
-
-Ao contrário do nivelamento de dificuldade tradicional (que apenas aumenta a vida/dano linearmente), este sistema permite que cada espécie de inimigo "evolua" gerações sucessivas, otimizando os seus atributos (genes) para se tornarem desafios mais eficazes contra o estilo de jogo específico do jogador.
-
-## 🧬 Arquitetura do Sistema
-O sistema está dividido em quatro componentes fundamentais para garantir modularidade e separation of concerns:
-
-- **O Cérebro (GlobalGeneticEvolver):** Gestor central singleton que controla as populações, executa a seleção natural, crossover e mutação.
-- **O ADN (EnemyGenome):** Estrutura de dados que contém os genes normalizados (0.0 a 1.0) de cada indivíduo.
-- **O Sensor (EnemyFitnessTracker):** Componente local em cada inimigo que recolhe dados em tempo real (dano causado, tempo de sobrevivência).
-- **A Taxonomia (EnemySpecies):** Garante que a evolução ocorre dentro de linhas de espécies independentes (ex: Moscas não evoluem baseadas no sucesso de Golens).
-
-## ⚙️ Implementação e Teoria
-
-### 1. Representação Genética (O Genoma)
-Optámos por utilizar valores normalizados (float 0-1) para os genes em vez de valores absolutos. Isto permite que o mesmo sistema genético seja aplicável a qualquer inimigo, independentemente das suas estatísticas base.
-
-**Excerto de EnemyGenome.cs:**
-```csharp
-[Header("Combat Genes")]
-[Range(0f, 1f)] public float healthGene = 0.5f;     // Escala a Vida Base
 ## Resumo
 Este repositório contém uma implementação aplicada de um Algoritmo Genético (AG) integrado num protótipo de jogo Metroidvania. O objectivo é adaptar automaticamente atributos de inimigos (por espécie) em resposta ao desempenho do jogador, mantendo controlos de equilíbrio que previnem escalonamento indevido.
 
@@ -131,29 +109,5 @@ Experimentos sugeridos:
 - Sinais de telemetria são actualmente limitados (predominância de dano e tempo). Para favorecer genes comportamentais (movimento, agressividade, velocidade de ataque), é recomendada a recolha de métricas adicionais: tempo em alcance, contagem de ataques, hits por segundo, dano mitigado.
 - O esquema de pesos na função de aptidão é heurístico; uma análise sensibilidade / grid search sobre `mutationRate`, `crossoverRate`, `eliteCount` e os pesos da função de aptidão é necessária para validar robustez.
 - A persistência em ficheiro é útil para iteração, mas requer controlos experimentais (seed RNG, logs de configuração) para reprodutibilidade científica.
-
----
-
-## Apêndice — quickstart e pseudocódigo
-
-Quickstart mínimo:
-
-1. Colocar `GenericTrainingArena` na cena.
-2. Confirmar prefabs e componentes (`Enemy_Health`, `HealthSystem`, `EnemyFitnessTracker`).
-3. Pressionar Play e abrir `GlobalGeneticDebugUI` (`G`).
-
-Pseudocódigo (fluxo essencial):
-
-```
-spawn enemy -> GetGenome(instanceId)
-enemy fights -> calls RegisterDamageDealt when hits
-on enemy death -> RegisterKill(instanceId, survivalTime, killedByPlayer)
-    fitness = CalculateFitness(damage, survival)
-    fitness = ApplyAdaptiveFitnessAdjustment(fitness, genome)
-    UpdatePopulationFitness(pop, genome, fitness)
-    if killsSinceEvolution >= evolveTriggerCount: Evolve(pop)
-```
-
----
 
 
