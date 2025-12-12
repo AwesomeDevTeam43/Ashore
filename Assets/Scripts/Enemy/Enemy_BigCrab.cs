@@ -23,6 +23,7 @@ public class BigCrab : EnemyBase
   private EnemyState currentState;
 
   private float timeBtwAttack;
+  private float crabCurrentDamage;
 
   private void Start()
   {
@@ -30,24 +31,25 @@ public class BigCrab : EnemyBase
     enemyHealth = GetComponent<Enemy_Health>();
     rb = GetComponent<Rigidbody2D>();
     animator = GetComponentInChildren<Animator>();
-    
-    if (animator != null)
+
+    // Genome-driven stat overrides
+    var fitnessTracker = GetComponent<EnemyFitnessTracker>();
+    if (fitnessTracker != null && stats != null)
     {
-      foreach (var p in animator.parameters)
-      {
-        if (!string.IsNullOrEmpty(attackTriggerName) && !hasAttackTrigger && p.type == AnimatorControllerParameterType.Trigger && p.name == attackTriggerName)
-          hasAttackTrigger = true;
-        if (!string.IsNullOrEmpty(attackBoolName) && !hasAttackBool && p.type == AnimatorControllerParameterType.Bool && p.name == attackBoolName)
-          hasAttackBool = true;
-      }
+      // Speed
+      typedStats.speed = fitnessTracker.GetScaledMovementSpeed(typedStats.speed);
+      // Aggression range
+      typedStats.followPlayerRange = fitnessTracker.GetScaledAggressionRange(typedStats.followPlayerRange);
+      // Attack range (optional: could be gene-driven if desired)
+      // typedStats.attackRange = fitnessTracker.GetScaledAggressionRange(typedStats.attackRange);
+      // Attack interval
+      typedStats.startTimeBtwAttack = fitnessTracker.GetScaledAttackInterval(typedStats.startTimeBtwAttack);
+      // Damage (use local field, not base property)
+      crabCurrentDamage = fitnessTracker.GetScaledDamage(typedStats.biteDamage > 0 ? typedStats.biteDamage : stats.damage);
+      // Debug log for gene-driven stat application
+      Debug.Log($"🦀 [BigCrab] Genome-driven stats: Speed={typedStats.speed:F2}, FollowRange={typedStats.followPlayerRange:F2}, AttackInterval={typedStats.startTimeBtwAttack:F2}, Damage={crabCurrentDamage:F2}");
     }
 
-    // REMOVER ESTA INICIALIZAÇÃO - Será feita pelo SpawnManager via ApplyLevelMultipliers
-    // if (enemyHealth != null && stats != null)
-    // {
-    //   enemyHealth.Initialize(typedStats.maxHealth, typedStats.xpOnDeath, typedStats.woodDrop, typedStats.stoneDrop, typedStats.ropeDrop, typedStats.meleeResistance, typedStats.rangedResistance);
-    // }
-    
     GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
     if (playerObject != null)
     {
@@ -256,8 +258,8 @@ public class BigCrab : EnemyBase
     {
       if (typedStats.biteDamage <= 0) Debug.LogWarning("Enemy: biteDamage <= 0");
 
-      // Usar currentDamage ao invés de biteDamage para aplicar o dano escalado
-      playerHealth.TakeDamage((int)currentDamage, gameObject);
+      // Use crabCurrentDamage for gene-driven damage
+      playerHealth.TakeDamage((int)crabCurrentDamage, gameObject);
       if (playerRb != null)
       {
         StartCoroutine(ApplyPlayerKnockback(playerRb, player));

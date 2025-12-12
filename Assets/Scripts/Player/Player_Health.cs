@@ -106,12 +106,21 @@ public class Player_Health : MonoBehaviour
 
     public void SetHealth(int health)
     {
+        Debug.Log($"[Player_Health] SetHealth called: {health}");
+        currentHealth = health;
         healthSystem.SetHealth(health);
         previousHealth = health;
+        // Check for death immediately if health is zero or less
+        if (currentHealth <= 0 && !processingDeath)
+        {
+            Debug.Log($"[Player_Health] SetHealth triggers death: {currentHealth}");
+            OnPlayerHealthChanged(currentHealth, healthSystem.MaxHealth);
+        }
     }
 
     private void OnPlayerHealthChanged(int currentHealth, int maxHealth)
-    {        
+    {
+        Debug.Log($"[Player_Health] OnPlayerHealthChanged: {currentHealth}/{maxHealth}");
         // IMPORTANTE: NÃO chamar SetHealth aqui - isso causa loop e eventos duplicados!
         // O HealthSystem já atualizou internamente antes de invocar este evento
 
@@ -119,7 +128,6 @@ public class Player_Health : MonoBehaviour
         if (godMode && currentHealth < maxHealth)
         {
             Debug.Log("Player_Health: God Mode ativo - restaurando HP");
-            // Aqui pode chamar SetHealth porque é intencional restaurar
             healthSystem.SetHealth(maxHealth);
             previousHealth = maxHealth;
             return;
@@ -142,21 +150,25 @@ public class Player_Health : MonoBehaviour
             {
                 return;
             }
-            
             processingDeath = true;
             IsAlive = false;
-            
-            Debug.Log("Player_Health: Player morreu - voltando ao menu");
-            
+
+            Debug.Log("Player_Health: Player morreu");
+
             // Notifica o sistema de Algoritmo Genético sobre a morte do jogador
             if (GlobalGeneticEvolver.Instance != null)
             {
                 GlobalGeneticEvolver.Instance.RegisterPlayerDeath();
             }
-            
-            // Destroy the persistent player so the menu/new game spawns a fresh one
-            PlayerPersistence.DestroyPersistentPlayer();
-            SceneManager.LoadScene("MainMenu");
+
+            // Only do scene change if not in arena
+            if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "arena")
+            {
+                // Destroy the persistent player so the menu/new game spawns a fresh one
+                PlayerPersistence.DestroyPersistentPlayer();
+                UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+            }
+            // In arena, just mark as dead and let arena logic handle respawn/cleanup
         }
     }
 

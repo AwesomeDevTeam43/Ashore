@@ -627,15 +627,24 @@ public class GlobalGeneticEvolver : MonoBehaviour
     
     private float CalculateFitness(float damageDealt, float survivalTime)
     {
-        // Damage dealt is worth more than survival time
-        float fitness = (damageDealt * 10f) + (survivalTime * 0.3f);
-        
-        // Bonus for actually dealing damage
-        if (damageDealt > 0)
+        // --- New fitness function to reward all genes ---
+        // Damage dealt is still most important
+        float fitness = (damageDealt * 10f);
+
+        // Reward for survival time (encourages tankiness/mobility)
+        fitness += survivalTime * 0.5f;
+
+        // Reward for killing the player quickly (attack speed)
+        // If the enemy killed the player, survivalTime is short, so reward inversely
+        if (damageDealt > 0 && survivalTime < 10f) // killed player in under 10s
         {
-            fitness *= 1.5f;
+            fitness += (10f - survivalTime) * 2.0f; // up to +20 for very fast kills
         }
-        
+
+        // Reward for high movement/aggression if enemy spent time near player (proxy: damageDealt > 0)
+        // These values should be passed in, but for now, use genome values if available
+        // (Assume this method is called from RegisterKill, which has access to the genome)
+        // We'll add an overload to pass the genome
         return fitness;
     }
     
@@ -647,7 +656,27 @@ public class GlobalGeneticEvolver : MonoBehaviour
             float penalty = genome.aggressivenessGene * deathPenaltyStrength * (_playerDeaths - deathsBeforeReduction);
             fitness *= Mathf.Max(0.5f, 1f - penalty);
         }
-        
+        // Reward for non-damage genes:
+        // - Attack speed: higher is better if enemy dealt damage
+        // - Movement speed: higher is better if enemy dealt damage
+        // - Aggression: higher is better if enemy dealt damage
+        // - Resistances: higher is better if enemy survived longer
+        if (genome != null)
+        {
+            // If enemy dealt damage, reward attack speed, movement, aggression
+            if (genome.damageDealtThisLife > 0)
+            {
+                fitness += genome.attackSpeedGene * 5f;
+                fitness += genome.movementSpeedGene * 3f;
+                fitness += genome.aggressivenessGene * 3f;
+            }
+            // If enemy survived a long time, reward resistances
+            if (genome.damageDealtThisLife > 0 && genome.Fitness > 0)
+            {
+                fitness += genome.meleeResistanceGene * 2f;
+                fitness += genome.rangedResistanceGene * 2f;
+            }
+        }
         return fitness;
     }
     

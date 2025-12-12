@@ -18,10 +18,20 @@ using System.Collections;
 /// - Usa valores do genoma para escalar dano do enemy
 /// - Regista fitness baseado em dano feito e sobrevivência
 /// </summary>
-public class GeneticTrainingArena : MonoBehaviour
-{
+public class GeneticTrainingArena : MonoBehaviour{
+        private ArenaScoreUI arenaScoreUI;
+    void Awake()
+    {
+        // Ensure ArenaScoreUICreator is present for UI
+        if (FindFirstObjectByType<ArenaScoreUICreator>() == null)
+        {
+            gameObject.AddComponent<ArenaScoreUICreator>();
+        }
+    }
+
     [Header("Prefabs")]
     public GameObject enemyPrefab;
+    public GameObject playerPrefab;
     
     [Header("Arena Settings")]
     public int rounds = 100;
@@ -47,26 +57,33 @@ public class GeneticTrainingArena : MonoBehaviour
     [Header("Debug")]
     public bool debugMode = true;
     public bool showEveryAttack = false;
-    
+   
+    public Transform playerSpawnTransform;
+
+      
     // Runtime
     private int playerWins = 0;
     private int enemyWins = 0;
+    public int PlayerWins => playerWins;
+    public int EnemyWins => enemyWins;
     private int currentRound = 0;
     
     private GameObject currentEnemy;
     
-    // Simulated player state
-    private int simulatedPlayerHealth;
+    // Real player state
+    private GameObject currentPlayer;
+    private Player_Health playerHealthComponent;
+    private HealthSystem playerHealthSystem;
 
-    void Start()
-    {
+    void Start(){
+        // Find ArenaScoreUI for later use
+        arenaScoreUI = FindObjectOfType<ArenaScoreUI>();
         if (GlobalGeneticEvolver.Instance == null)
         {
             Debug.LogError("[Arena] GlobalGeneticEvolver não encontrado! Criando um...");
             var go = new GameObject("GlobalGeneticEvolver");
             go.AddComponent<GlobalGeneticEvolver>();
         }
-        
         StartCoroutine(RunTraining());
     }
 
@@ -103,15 +120,49 @@ public class GeneticTrainingArena : MonoBehaviour
         Debug.Log($"[Arena] Resultados Finais: PlayerWins={playerWins}, EnemyWins={enemyWins}");
         Debug.Log($"[Arena] Win Rate Player: {(float)playerWins / rounds * 100:F1}%");
         Debug.Log($"[Arena] Win Rate Enemy: {(float)enemyWins / rounds * 100:F1}%");
+
+        // Display the best genome for BigCrab in the UI
+        if (GlobalGeneticEvolver.Instance != null && arenaScoreUI != null)
+        {
+            var bestGenome = GlobalGeneticEvolver.Instance.GetBestGenome(EnemySpecies.BigCrab);
+            if (bestGenome != null)
+            {
+                string genomeInfo =
+                    $"BEST GENOME (BigCrab):\n" +
+                    $"  HP Gene: {bestGenome.healthGene:F3}\n" +
+                    $"  DMG Gene: {bestGenome.damageGene:F3}\n" +
+                    $"  AtkSpeed Gene: {bestGenome.attackSpeedGene:F3}\n" +
+                    $"  MoveSpeed Gene: {bestGenome.movementSpeedGene:F3}\n" +
+                    $"  AggroRange Gene: {bestGenome.aggressionRangeGene:F3}\n" +
+                    $"  MeleeResist Gene: {bestGenome.meleeResistanceGene:F3}\n" +
+                    $"  RangedResist Gene: {bestGenome.rangedResistanceGene:F3}\n" +
+                    $"  Aggressiveness Gene: {bestGenome.aggressivenessGene:F3}\n" +
+                    $"  Avg Fitness: {bestGenome.AverageFitness:F2}\n" +
+                    $"  Usages: {bestGenome.TimesUsed}\n" +
+                    $"  PowerLevel: {bestGenome.GetPowerLevel():F2}";
+                arenaScoreUI.SetBestGenome(genomeInfo);
+            }
+            else
+            {
+                arenaScoreUI.SetBestGenome("No genome found for BigCrab.");
+            }
+        }
     }
 
     IEnumerator RunSimulatedRound()
     {
         // Cleanup anterior
         CleanupRound();
-        
-        // Reset player simulado
-        simulatedPlayerHealth = playerMaxHealth;
+        Vector3 playerSpawnPos = playerSpawnTransform.position;
+        // Spawn player
+         // Place player left of enemy
+        currentPlayer = Instantiate(playerPrefab, playerSpawnPos, Quaternion.identity);
+        playerHealthComponent = currentPlayer.GetComponent<Player_Health>();
+        playerHealthSystem = currentPlayer.GetComponent<HealthSystem>();
+        if (playerHealthSystem != null)
+        {
+            playerHealthSystem.Initialize(playerMaxHealth);
+        }
         
         // Determinar posição de spawn
         Vector3 spawnPos = enemySpawnPos;
@@ -121,7 +172,6 @@ public class GeneticTrainingArena : MonoBehaviour
             spawnPos = Camera.main.transform.position + Camera.main.transform.forward * 5f;
             spawnPos.z = 0; // Manter Z = 0 para 2D
         }
-        
         // Spawnar inimigo
         currentEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
         
@@ -175,54 +225,65 @@ public class GeneticTrainingArena : MonoBehaviour
         yield return null;
         
         int currentEnemyHP = enemyHealthSystem?.CurrentHealth ?? enemyMaxHP;
-        
+        int currentPlayerHP = playerHealthSystem != null ? playerHealthSystem.CurrentHealth : playerMaxHealth;
+
         if (debugMode)
         {
-            Debug.Log($"[Arena] Round {currentRound} INÍCIO - Player HP: {simulatedPlayerHealth}, Enemy HP: {currentEnemyHP}");
+            Debug.Log($"[Arena] Round {currentRound} INÍCIO - Player HP: {currentPlayerHP}, Enemy HP: {currentEnemyHP}");
         }
-        
-        // Loop de combate simulado
+
+        // Loop de combate real
         int turnCount = 0;
         float totalDamageToPlayer = 0f;
-        
-        while (simulatedPlayerHealth > 0 && IsEnemyAlive(enemyHealthSystem))
+
+        while (currentPlayerHP > 0 && IsEnemyAlive(enemyHealthSystem))
         {
             turnCount++;
-            
+
             // Player ataca enemy
             if (enemyHealth != null)
             {
                 enemyHealth.TakeDamage(playerDamage, Enemy_Health.DamageSourceType.PlayerMelee);
             }
-            
+
             currentEnemyHP = enemyHealthSystem?.CurrentHealth ?? 0;
-            
+
             if (showEveryAttack)
             {
                 Debug.Log($"[Arena] Turn {turnCount}: Player → Enemy ({playerDamage} dmg). Enemy HP: {currentEnemyHP}");
             }
-            
+
             // Verificar se enemy morreu
             if (!IsEnemyAlive(enemyHealthSystem))
             {
                 break;
             }
-            
+
             // Enemy ataca player (usando dano escalado pelo genoma)
-            simulatedPlayerHealth -= enemyDamage;
+            if (playerHealthSystem != null)
+            {
+                playerHealthSystem.TakeDamage(enemyDamage, currentEnemy);
+                currentPlayerHP = playerHealthSystem.CurrentHealth;
+            }
             totalDamageToPlayer += enemyDamage;
-            
+
             // Registar dano para fitness tracking
             if (tracker != null)
             {
                 tracker.RegisterDamageDealt(enemyDamage);
             }
-            
+
             if (showEveryAttack)
             {
-                Debug.Log($"[Arena] Turn {turnCount}: Enemy → Player ({enemyDamage} dmg). Player HP: {simulatedPlayerHealth}");
+                Debug.Log($"[Arena] Turn {turnCount}: Enemy → Player ({enemyDamage} dmg). Player HP: {currentPlayerHP}");
             }
-            
+
+            // If player is dead (including overkill), break immediately so enemy gets the win
+            if (currentPlayerHP <= 0)
+            {
+                break;
+            }
+
             // Pequena pausa para não bloquear
             if (attackInterval > 0)
             {
@@ -233,32 +294,26 @@ public class GeneticTrainingArena : MonoBehaviour
                 yield return null;
             }
         }
-        
+
         // Determinar vencedor
-        bool playerWon = simulatedPlayerHealth > 0;
-        
-        if (playerWon)
+        bool playerAlive = currentPlayerHP > 0;
+        bool enemyAlive = IsEnemyAlive(enemyHealthSystem);
+        // If both died in the same turn, count as enemy win (prevents player always winning)
+        if (playerAlive && !enemyAlive)
         {
             playerWins++;
             if (debugMode)
             {
                 Debug.Log($"[Arena] Round {currentRound} FIM - PLAYER VENCEU em {turnCount} turnos");
-                Debug.Log($"[Arena]   Player HP restante: {simulatedPlayerHealth}/{playerMaxHealth}");
+                Debug.Log($"[Arena]   Player HP restante: {currentPlayerHP}/{playerMaxHealth}");
                 Debug.Log($"[Arena]   Dano total ao player: {totalDamageToPlayer}");
             }
-            
             // O enemy morreu pelo combate - o sistema de health vai destruí-lo
-            // Esperamos um pouco para garantir que o OnDestroy do EnemyFitnessTracker
-            // é chamado com _wasKilledByPlayer = true
             yield return new WaitForSeconds(0.2f);
-            
-            // Verificar se o enemy já foi destruído pelo sistema de health
-            if (currentEnemy == null)
-            {
-                if (debugMode) Debug.Log($"[Arena] Enemy já foi destruído pelo sistema de health");
-            }
+            if (currentEnemy == null && debugMode)
+                Debug.Log($"[Arena] Enemy já foi destruído pelo sistema de health");
         }
-        else
+        else // enemy wins if both die or if only player dies
         {
             enemyWins++;
             if (debugMode)
@@ -267,22 +322,20 @@ public class GeneticTrainingArena : MonoBehaviour
                 Debug.Log($"[Arena]   Enemy HP restante: {currentEnemyHP}/{enemyMaxHP}");
                 Debug.Log($"[Arena]   Dano total ao player: {totalDamageToPlayer}");
             }
-            
             // O player morreu - o enemy venceu!
-            // Forçar o tracker a dar crédito de fitness a este genoma
             if (tracker != null)
             {
                 tracker.ForceKillCredit();
                 if (debugMode) Debug.Log($"[Arena] Enemy venceu! Fitness credit forçado.");
             }
         }
-        
+
         // Pequena pausa antes do próximo round
         yield return new WaitForSeconds(0.1f);
-        
+
         // Cleanup - só se o enemy ainda existir
         CleanupRound();
-        
+
         yield return null;
     }
     
@@ -292,6 +345,13 @@ public class GeneticTrainingArena : MonoBehaviour
         {
             Destroy(currentEnemy);
             currentEnemy = null;
+        }
+        if (currentPlayer != null)
+        {
+            Destroy(currentPlayer);
+            currentPlayer = null;
+            playerHealthComponent = null;
+            playerHealthSystem = null;
         }
     }
 
@@ -325,3 +385,4 @@ public class GeneticTrainingArena : MonoBehaviour
         StartCoroutine(RunTraining());
     }
 }
+    
