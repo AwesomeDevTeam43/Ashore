@@ -1,583 +1,601 @@
-# Sistema de Pathfinding 2D - Documentação Técnica
+# Ashore — Documentação da Implementação de Algoritmos de Inteligencia Artificial
 
 ## Índice
-1. [Visão Geral](#visão-geral)
-2. [Arquitetura do Sistema](#arquitetura-do-sistema)
-3. [Algoritmo A* (A-Star)](#algoritmo-a-a-star)
-4. [Componentes Principais](#componentes-principais)
-5. [Fluxo de Execução](#fluxo-de-execução)
-6. [Integração com Inimigos](#integração-com-inimigos)
-7. [Parâmetros Configuráveis](#parâmetros-configuráveis)
-8. [Otimizações](#otimizações)
-9. [Debugging Visual](#debugging-visual)
+
+- [1) Pathfinding](#1-pathfinding)
+- [2) State Machine (BeeEnemy)](#2-state-machine-beeenemy)
+- [3) Evolução Genética Adversária (GA)](#3-ga)
 
 ---
 
-## Visão Geral
+<a id="1-pathfinding"></a>
 
-O sistema de pathfinding permite que inimigos (como a `BeeEnemy`) naveguem pelo cenário evitando obstáculos. Utiliza o **algoritmo A*** sobre uma **grid 2D** para encontrar o caminho mais curto entre dois pontos.
+## 1) Pathfinding
 
-### Dois Modos de Operação:
-1. **NavGrid2D** (Preferido): Grid pré-calculado ("baked") para toda a sala - mais eficiente
-2. **GridPathfinder2D** (Fallback): Grid dinâmico calculado em tempo real - mais flexível
+### Pathfinding — Processo (Grelhas, A*, Movimento)
 
----
+Este documento descreve o pathfinding tal como está implementado no **Ashore (Unity 2D)**, com foco nos scripts `NavGrid2D`, `GridPathfinder2D`, `NavAgent2D` e no inimigo `BeeEnemy`.
 
-## Arquitetura do Sistema
+Fluxo real, em runtime:
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Enemy (BeeEnemy)                         │
-│                              │                                  │
-│                    FollowPathTowards()                          │
-│                              │                                  │
-│              ┌───────────────┴───────────────┐                  │
-│              ▼                               ▼                  │
-│     ┌─────────────────┐           ┌──────────────────┐          │
-│     │   NavGrid2D     │           │ GridPathfinder2D │          │
-│     │   (Baked)       │           │    (Dynamic)     │          │
-│     │                 │           │                  │          │
-│     │ • Grid global   │           │ • Grid local     │          │
-│     │ • Pré-calculado │           │ • Tempo real     │          │
-│     │ • Singleton     │           │ • Com cache      │          │
-│     └─────────────────┘           └──────────────────┘          │
-│              │                               │                  │
-│              └───────────────┬───────────────┘                  │
-│                              ▼                                  │
-│                    Algoritmo A* (A-Star)                        │
-│                              │                                  │
-│                              ▼                                  │
-│                   Lista de Waypoints                            │
-│                      (Vector2[])                                │
-└─────────────────────────────────────────────────────────────────┘
-```
+1. **Escolha de grelha**: usa `NavGrid2D.Instance` (baked) quando existe; caso contrário usa `GridPathfinder2D` (local/dinâmico).
+2. **Planeamento**: `FindPath(start, target)` corre A* e devolve uma lista de `Vector2` (waypoints).
+3. **Execução**: o `BeeEnemy` segue os waypoints e transforma-os em `desiredVelocity`, com validação local (`CircleCast`/`OverlapCircle`) e recuperação quando fica bloqueado.
 
 ---
 
-## Algoritmo A* (A-Star)
+### 1) Grelhas (grids): como se representa o mundo para o pathfinding
 
-O A* é um algoritmo de busca que encontra o caminho mais curto combinando:
-- **g(n)**: Custo real do início até o nó atual
-- **h(n)**: Heurística (estimativa) do nó atual até o destino
-- **f(n) = g(n) + h(n)**: Custo total estimado
+O A* (e algoritmos semelhantes) precisam de um grafo. A grelha é uma forma prática de construir esse grafo a partir do mundo:
 
-### Passo a Passo do A*:
+No teu projecto existem **dois modos de grelha**:
 
-```
-1. INICIALIZAÇÃO
-   ├── Criar openSet (nós a explorar) com nó inicial
-   ├── Criar closedSet (nós já explorados) vazio
-   └── Definir g=0 para nó inicial
+- **NavGrid2D (baked)**: uma grelha de nível que pode ser “baked” (`Bake()`), e depois usada em tempo real.
+- **GridPathfinder2D (local/dinâmico)**: constrói uma grelha temporária à volta de um centro (por omissão, o ponto médio entre start e target) e pode usar cache por “chunks” com TTL.
 
-2. LOOP PRINCIPAL (enquanto openSet não está vazio)
-   │
-   ├── 2.1 Selecionar nó com menor f(n) do openSet
-   │        └── Se empate, preferir menor h(n)
-   │
-   ├── 2.2 Se nó atual = destino → SUCESSO!
-   │        └── Reconstruir caminho seguindo parents
-   │
-   ├── 2.3 Mover nó atual para closedSet
-   │
-   └── 2.4 Para cada vizinho do nó atual:
-            │
-            ├── Se vizinho em closedSet → ignorar
-            ├── Se vizinho não é walkable → ignorar
-            │
-            ├── Calcular novo gCost = atual.g + distância
-            │
-            └── Se novo gCost < vizinho.gCost OU vizinho não está em openSet:
-                 ├── Atualizar vizinho.gCost
-                 ├── Calcular vizinho.hCost (distância até destino)
-                 ├── Definir vizinho.parent = nó atual
-                 └── Adicionar vizinho ao openSet (se não estiver)
 
-3. Se openSet ficou vazio → FALHA (sem caminho possível)
-```
+- **Resolução (nodeRadius/nodeDiameter)**: no teu projecto, `nodeRadius` define o “passo” da grelha e afecta o compromisso custo vs precisão (mais nós = A* mais pesado; menos nós = trajectos mais aproximados).
 
-### Cálculo de Distância (Heurística):
+- **Transitável vs não transitável**: cada célula é marcada com base em testes de colisão (se ali cabe o agente sem intersectar obstáculos).
+
+Exemplo (marcar uma célula como transitável, já a considerar folga/clearance):
 
 ```csharp
-// Movimento diagonal custa 14 (√2 ≈ 1.414 × 10)
-// Movimento cardinal custa 10
+Vector2 worldPoint = origin + new Vector2(x * nodeDiameter + nodeRadius, y * nodeDiameter + nodeRadius);
+float r = nodeRadius + clearance;
+bool walkable = !Physics2D.OverlapCircle(worldPoint, r, obstacleMask);
+grid[x, y] = new Node(walkable, worldPoint, x, y);
+```
 
-private static int GetDistance(Node a, Node b)
+- **Folga (clearance)**: o teu código aumenta o raio do teste de colisão (ou ajusta `clearance` na grelha) com base no tamanho do agente, para evitar trajectos apertados.
+
+Exemplo (no `NavAgent2D`, aplicar folga com base no raio do agente ao pedir caminho numa `NavGrid2D`):
+
+```csharp
+float originalClearance = targetGrid.clearance;
+try
 {
-    int dstX = Mathf.Abs(a.x - b.x);
-    int dstY = Mathf.Abs(a.y - b.y);
-    
-    // Primeiro move diagonalmente o máximo possível
-    // Depois move em linha reta o restante
-    if (dstX > dstY)
-        return 14 * dstY + 10 * (dstX - dstY);
-    return 14 * dstX + 10 * (dstY - dstX);
+	targetGrid.clearance = Mathf.Max(targetGrid.clearance, agentRadius);
+	lastPath = targetGrid.FindPath(start, target);
+}
+finally
+{
+	targetGrid.clearance = originalClearance;
 }
 ```
 
-**Exemplo Visual:**
-```
-De A até B (3 células X, 2 células Y):
 
-    A · · ·
-    · ╲ · ·
-    · · ╲ B
+- **Vizinhança (8 direcções + diagonais)**: o teu `GetNeighbours(...)` considera diagonais e bloqueia “corner-cutting” verificando as duas células ortogonais.
 
-Custo = 14×2 (diagonal) + 10×1 (horizontal) = 38
+Exemplo (proibir diagonais que “cortam cantos”):
+
+```csharp
+if (dx != 0 && dy != 0)
+{
+	var n1 = grid[node.x + dx, node.y];
+	var n2 = grid[node.x, node.y + dy];
+	if (!n1.walkable || !n2.walkable) continue;
+}
 ```
+
+- **Grelha baked vs grelha dinâmica (no teu código)**:
+	- *Baked* = `NavGrid2D` (pré-calculada via `Bake()`, usada com `NavGrid2D.Instance.FindPath(...)`).
+	- *Dinâmica/local* = `GridPathfinder2D` (construída à volta de um centro e usada como fallback quando não existe `NavGrid2D.Instance`).
 
 ---
 
-## Componentes Principais
 
-### 1. Node (Nó da Grid)
+### 2) A* (resumo prático)
 
-Cada célula da grid é representada por um `Node`:
+O A* é o algoritmo que escolhe “por onde ir” na grelha, equilibrando custo real e direcção ao alvo:
+
+$$f(n)=g(n)+h(n)$$
+
+- **$g$**: custo acumulado desde o início
+- **$h$**: estimativa até ao alvo
+
+No teu código, a distância/heurística vem de `GetDistance(...)` e é **Octile** (custos 10/14).
+
+Exemplo (o nó guarda $g$, $h$ e calcula $f$):
 
 ```csharp
-public class Node
+public int gCost;
+public int hCost;
+public int fCost => gCost + hCost;
+```
+
+O `FindPath(...)` segue este fluxo:
+
+1. Começa no nó inicial (open set).
+2. Repete: escolhe o nó com menor $f$, expande vizinhos, actualiza custos e `parent`.
+3. Quando chega ao alvo, reconstrói o caminho seguindo `parent` (do alvo para o início) e invertendo.
+
+Exemplo (actualização de vizinho quando se encontra um caminho melhor):
+
+```csharp
+int newCost = current.gCost + GetDistance(current, neighbour);
+if (!openSet.Contains(neighbour) || newCost < neighbour.gCost)
 {
-    public bool walkable;      // Pode-se passar por aqui?
-    public Vector2 worldPos;   // Posição no mundo
-    public int x, y;           // Coordenadas na grid
-    public int gCost;          // Custo do início até aqui
-    public int hCost;          // Estimativa até o destino
-    public Node parent;        // Nó anterior no caminho
-    
-    public int fCost => gCost + hCost;  // Custo total
+	neighbour.gCost = newCost;
+	neighbour.hCost = GetDistance(neighbour, targetNode);
+	neighbour.parent = current;
+	if (!openSet.Contains(neighbour)) openSet.Add(neighbour);
 }
 ```
 
-### 2. Construção da Grid
-
-```csharp
-// Para cada célula da grid:
-for (int x = 0; x < gridSizeX; x++)
-{
-    for (int y = 0; y < gridSizeY; y++)
-    {
-        // Calcular posição no mundo
-        Vector2 worldPoint = origin + new Vector2(
-            x * nodeDiameter + nodeRadius,
-            y * nodeDiameter + nodeRadius
-        );
-        
-        // Verificar se há obstáculo (Physics2D.OverlapCircle)
-        float r = nodeRadius + clearance;
-        bool walkable = !Physics2D.OverlapCircle(worldPoint, r, obstacleMask);
-        
-        // Criar nó
-        grid[x, y] = new Node(walkable, worldPoint, x, y);
-    }
-}
-```
-
-**Visualização da Grid:**
-```
-┌───┬───┬───┬───┬───┬───┬───┬───┐
-│ · │ · │ · │ · │ · │ · │ · │ · │  · = walkable
-├───┼───┼───┼───┼───┼───┼───┼───┤  █ = obstáculo
-│ · │ · │ █ │ █ │ █ │ · │ · │ · │
-├───┼───┼───┼───┼───┼───┼───┼───┤
-│ · │ · │ █ │ █ │ █ │ · │ · │ · │
-├───┼───┼───┼───┼───┼───┼───┼───┤
-│ A │ · │ · │ · │ · │ · │ · │ B │  A = início
-├───┼───┼───┼───┼───┼───┼───┼───┤  B = destino
-│ · │ · │ · │ · │ · │ · │ · │ · │
-└───┴───┴───┴───┴───┴───┴───┴───┘
-```
-
-### 3. Obtenção de Vizinhos
-
-```csharp
-private IEnumerable<Node> GetNeighbours(Node node)
-{
-    // Verificar 8 direções (incluindo diagonais)
-    for (int dx = -1; dx <= 1; dx++)
-    {
-        for (int dy = -1; dy <= 1; dy++)
-        {
-            if (dx == 0 && dy == 0) continue;  // Ignorar o próprio nó
-            
-            int nx = node.x + dx;
-            int ny = node.y + dy;
-            
-            // Verificar limites da grid
-            if (nx < 0 || ny < 0 || nx >= gridSizeX || ny >= gridSizeY) 
-                continue;
-            
-            var neighbour = grid[nx, ny];
-            if (!neighbour.walkable) continue;
-            
-            // IMPORTANTE: Prevenir "corner cutting"
-            // Não permitir diagonal se os cardinais adjacentes estão bloqueados
-            if (dx != 0 && dy != 0)
-            {
-                var n1 = grid[node.x + dx, node.y];  // Horizontal
-                var n2 = grid[node.x, node.y + dy];  // Vertical
-                if (!n1.walkable || !n2.walkable) continue;
-            }
-            
-            yield return neighbour;
-        }
-    }
-}
-```
-
-**Corner Cutting - Por que evitar:**
-```
-Sem proteção:           Com proteção:
-    · █ ·                   · █ ·
-    · ╲ ·  ← Atravessa      · │ ·  ← Contorna
-    · █ ·     a parede!     · └─·     corretamente
-```
+Nota do teu código: tanto em `GridPathfinder2D` como em `NavGrid2D`, o open set é uma `List` e o closed set é um `HashSet`, com desempate por `h` quando `f` empata.
 
 ---
 
-## Fluxo de Execução
+### 3) Execução do caminho: como o teu inimigo se move
 
-### Passo 1: Inimigo decide mover-se
+O A* devolve uma lista de pontos (`currentPath`). No teu inimigo (a abelha), a execução funciona assim:
+
+#### Seguimento por waypoints
+
+- O caminho é uma lista de waypoints.
+- O agente aponta para o waypoint actual.
+- Quando chega “perto o suficiente” (threshold), avança para o próximo.
+
+Exemplo (trocar de waypoint quando chega perto):
 
 ```csharp
-// Em RoamBehavior() ou RetreatBehavior():
-FollowPathTowards(player.transform.position, typedStats.roamSpeed);
-```
-
-### Passo 2: Verificar se precisa recalcular caminho
-
-```csharp
-private void FollowPathTowards(Vector3 target, float speed)
+if (toWp.magnitude <= pathPointThreshold)
 {
-    repathTimer -= Time.deltaTime;
-    
-    // Recalcular a cada 0.25 segundos OU se chegou ao fim do caminho atual
-    if (repathTimer <= 0f || pathIndex >= currentPath.Count)
-    {
-        repathTimer = repathInterval;  // Reset timer (0.25s)
-        
-        // Tentar encontrar caminho...
-    }
+	pathIndex++;
+	if (pathIndex >= currentPath.Count)
+	{
+		desiredVelocity = Vector2.zero;
+		return;
+	}
 }
 ```
 
-### Passo 3: Escolher sistema de pathfinding
+No teu código, `pathPointThreshold` demasiado pequeno pode causar oscilações; demasiado grande pode fazer avançar waypoints cedo demais.
+
+#### Aplicação do movimento (Rigidbody2D)
+
+No teu código, a abelha calcula uma `desiredVelocity` e aplica-a no `FixedUpdate` através do `Rigidbody2D`:
 
 ```csharp
-List<Vector2> path = null;
+rb.linearVelocity = desiredVelocity;
+```
 
-if (NavGrid2D.Instance != null)
+Isto significa que **não estás a usar** um modo “cinemático puro” baseado em `transform.position`/`MovePosition` como estratégia principal; o movimento é feito via `Rigidbody2D`.
+
+#### Validação local (anti-tunneling / bloqueios)
+
+Antes de aplicar a velocidade, o teu `FixedUpdate` faz um `CircleCast` na direcção do movimento para evitar atravessar obstáculos, e se detectar bloqueio força repath ou tenta um pequeno “nudge”:
+
+```csharp
+var hit = Physics2D.CircleCast(origin, rad, dir, stepDist, obstacleMask);
+if (hit.collider != null)
 {
-    // PREFERIDO: Usar grid pré-calculada da sala
-    path = NavGrid2D.Instance.FindPath(transform.position, target);
-}
-else
-{
-    // FALLBACK: Criar grid dinâmica local
-    pathfinder.Configure(gridWorldSize, nodeRadius, obstacleMask);
-    pathfinder.SetClearance(GetClearance());  // Raio do collider
-    path = pathfinder.FindPath(transform.position, target);
+	if (hit.distance <= 0.02f)
+	{
+		float nudgeSpeed = Mathf.Max(desiredSpeed * 0.6f, 0.5f);
+		desiredVelocity = hit.normal.normalized * nudgeSpeed;
+	}
+	else
+		desiredVelocity = Vector2.zero;
+	repathTimer = 0f;
 }
 ```
 
-### Passo 4: Se falhou, tentar recuperação
+#### Fallback quando não há caminho
 
-```csharp
-if (path == null)
-{
-    // Estratégia 1: Aumentar tamanho da grid (1.5x, 2x)
-    // Estratégia 2: Tentar diferentes centros para a grid
-    // Estratégia 3: Usar steering local como último recurso
-    
-    float[] sizeMults = new float[] { 1.5f, 2.0f };
-    Vector2[] centers = new Vector2[] {
-        (start + target) * 0.5f,  // Meio
-        start,                      // Posição atual
-        target                      // Destino
-    };
-    
-    // Tentar combinações até encontrar caminho...
-}
-```
-
-### Passo 5: Seguir waypoints
-
-```csharp
-// Obter waypoint atual
-Vector2 wp = currentPath[pathIndex];
-Vector2 toWp = wp - (Vector2)transform.position;
-
-// Se chegou perto o suficiente, avançar para próximo waypoint
-if (toWp.magnitude <= pathPointThreshold)  // 0.15 unidades
-{
-    pathIndex++;
-    if (pathIndex >= currentPath.Count)
-    {
-        desiredVelocity = Vector2.zero;  // Chegou ao destino!
-        return;
-    }
-    wp = currentPath[pathIndex];
-    toWp = wp - (Vector2)transform.position;
-}
-
-// Definir velocidade em direção ao waypoint
-desiredVelocity = toWp.normalized * speed;
-```
-
-### Passo 6: Aplicar movimento (FixedUpdate)
-
-```csharp
-private void FixedUpdate()
-{
-    // Verificação de colisão ANTES de mover (previne tunneling)
-    float stepDist = desiredVelocity.magnitude * Time.fixedDeltaTime;
-    Vector2 dir = desiredVelocity.normalized;
-    
-    var hit = Physics2D.CircleCast(origin, clearance, dir, stepDist, obstacleMask);
-    
-    if (hit.collider != null)
-    {
-        // Colisão detectada!
-        if (hit.distance <= 0.02f)
-        {
-            // Muito perto: empurrar para fora
-            desiredVelocity = hit.normal * nudgeSpeed;
-        }
-        else
-        {
-            // Bloqueado à frente: parar e recalcular
-            desiredVelocity = Vector2.zero;
-            repathTimer = 0f;  // Forçar repath imediato
-        }
-    }
-    
-    // Aplicar velocidade final
-    rb.linearVelocity = desiredVelocity;
-}
-```
+Se depois das tentativas o `currentPath` ficar vazio, o teu código não pára: faz um steer local que amostra 16 direcções e escolhe a melhor (equilibra “ir para o alvo” e “estar livre de colisões”), usando `CircleCast` para avaliar espaço livre.
 
 ---
 
-## Integração com Inimigos
+### 4) Integração em tempo real (no `BeeEnemy`): repath, fallback e recuperação
 
-### Configuração no Inspector (BeeEnemy)
+A tua integração “em jogo” acontece sobretudo em `BeeEnemy.FollowPathTowards(target, speed)`:
 
-```
-[Header("Pathfinding")]
-├── obstacleMask        → LayerMask (Ground | MovingPlatform)
-├── gridWorldSize       → Vector2 (12, 8) - Tamanho da grid local
-├── nodeRadius          → float (0.2) - Metade do tamanho de célula
-├── pathPointThreshold  → float (0.15) - Distância para "chegar" a waypoint
-└── repathInterval      → float (0.25) - Segundos entre recálculos
-```
+- É chamada em **Roaming** para aproximar ao jogador quando não há lunge/LOS, e para regressar ao `spawnPosition` quando sai do leash.
+- É chamada em **Lunging** para ir para `playerAttackPoint` (pés do jogador).
+- É chamada em **Retreating** para ir para `retreatTargetPosition`.
 
-### Clearance (Folga do Collider)
+#### Quando recalcula o caminho
 
-O sistema calcula automaticamente o "clearance" baseado no collider do inimigo:
-
-```csharp
-private float GetClearance()
-{
-    if (col2D is CircleCollider2D cc)
-        return cc.radius * scale * 0.6f;
-    
-    if (col2D is CapsuleCollider2D cap)
-        return Mathf.Max(cap.size.x, cap.size.y) * 0.3f * scale;
-    
-    // Fallback: usar bounds do collider
-    Bounds b = col2D.bounds;
-    float halfDiagonal = 0.5f * Mathf.Sqrt(b.size.x² + b.size.y²);
-    return Mathf.Max(clearance, halfDiagonal);
-}
-```
-
-Isto garante que o pathfinder encontra caminhos onde o inimigo **realmente cabe**.
-
----
-
-## Parâmetros Configuráveis
-
-### GridPathfinder2D
-
-| Parâmetro | Tipo | Default | Descrição |
-|-----------|------|---------|-----------|
-| `gridWorldSize` | Vector2 | (12, 8) | Dimensões da grid em unidades do mundo |
-| `nodeRadius` | float | 0.2 | Raio de cada célula (metade do tamanho) |
-| `obstacleMask` | LayerMask | - | Layers consideradas obstáculos |
-| `clearance` | float | 0 | Folga extra além do nodeRadius |
-| `useCache` | bool | true | Usar cache de grids |
-| `cacheTTL` | float | 0.75 | Tempo de vida do cache (segundos) |
-
-### NavGrid2D
-
-| Parâmetro | Tipo | Default | Descrição |
-|-----------|------|---------|-----------|
-| `origin` | Vector2 | (-20, -12) | Canto inferior esquerdo da grid |
-| `size` | Vector2 | (40, 24) | Dimensões totais da grid |
-| `nodeRadius` | float | 0.12 | Raio de cada célula |
-| `clearance` | float | 0 | Folga extra para verificação |
-| `obstacleMask` | LayerMask | - | Layers bloqueadoras |
-| `bakeOnStart` | bool | true | Calcular grid no Start() |
-
----
-
-## Otimizações
-
-### 1. Cache de Grids (GridPathfinder2D)
-
-```csharp
-// Grids são cacheadas por "chunk" para evitar recálculo
-string key = $"{size}|r{nodeRadius}|m{mask}|cx{chunkX}|cy{chunkY}";
-
-if (cache.TryGetValue(key, out var entry))
-{
-    if (Time.time - entry.createdTime <= cacheTTL)
-    {
-        // Reutilizar grid existente!
-        grid = entry.grid;
-        return;
-    }
-}
-```
-
-### 2. Repath Interval
-
-Em vez de recalcular o caminho a cada frame, usa-se um intervalo:
+O caminho é recalculado quando `repathTimer` expira (a cada `repathInterval`) ou quando o agente chega ao fim do caminho (`pathIndex >= currentPath.Count`):
 
 ```csharp
 repathTimer -= Time.deltaTime;
-if (repathTimer <= 0f)  // A cada 0.25 segundos
+if (repathTimer <= 0f || pathIndex >= currentPath.Count)
 {
-    repathTimer = repathInterval;
-    // Recalcular caminho...
+	repathTimer = repathInterval;
 }
 ```
 
-### 3. Fallback para Steering Local
+#### Escolha de grelha (baked vs local)
 
-Se o A* falhar completamente, usa-se um steering simples:
+- Com `NavGrid2D.Instance`: usa `NavGrid2D.Instance.FindPath(transform.position, target)`.
+- Sem `NavGrid2D.Instance`: reconfigura o `GridPathfinder2D` com `gridWorldSize`, `nodeRadius`, `obstacleMask`, aplica `SetClearance(GetClearance())`, e chama `FindPath(transform.position, target)`.
+
+#### Tentativas de recuperação quando `FindPath` falha
+
+Se `path == null`, o `BeeEnemy` tenta recuperar:
+
+- multiplica `gridWorldSize` por `1.5f` e `2.0f`;
+- tenta centros base: ponto médio `(start+target)/2`, posição actual (start) e target;
+- se continuar a falhar, tenta 4 centros offset a partir do midpoint (ao longo de `dirToTarget` e do perpendicular), com offset `max(1, min(big.x,big.y)*0.25f)`.
+
+#### Recuperação de “stuck” (só em `Retreating`)
+
+No `FixedUpdate`, se a abelha estiver quase parada durante tempo suficiente (`stuckVelocityThreshold` e `stuckTimeThreshold`), força repath e escolhe um `retreatTargetPosition` alternativo numa direcção aleatória (`Random.insideUnitCircle.normalized`), até `maxRecoveryAttempts` (depois volta a `Roaming`).
+
+---
+
+<a id="2-state-machine-beeenemy"></a>
+
+## 2) State Machine (BeeEnemy)
+
+### State Machine — BeeEnemy (Giant Bee)
+
+Estados:
+
+- `Roaming`
+- `AttackWindup`
+- `Lunging`
+- `Retreating`
+
+---
+
+### Loop (o que corre em runtime)
+
+#### Update
+
+O `Update()` reduz `currentCooldown`, faz `FlipSprite()`, calcula `playerDistance` e chama `StateMachine(playerDistance)`.
 
 ```csharp
-// Amostrar 16 direções e escolher a melhor
-for (int i = 0; i < 16; i++)
-{
-    float angle = (360f / 16) * i;
-    Vector2 dir = new Vector2(Cos(angle), Sin(angle));
-    
-    float align = Vector2.Dot(dir, toTarget.normalized);  // Alinhamento com destino
-    float free = CheckClearance(dir);                      // Espaço livre
-    
-    float score = align * 0.7f + free * 0.6f;
-    if (score > bestScore) bestDir = dir;
-}
+if (currentCooldown > 0f) currentCooldown -= Time.deltaTime;
+FlipSprite();
+StateMachine(Vector3.Distance(transform.position, player.transform.position));
 ```
 
-### 4. Nudge de Recuperação de Stuck
+#### FixedUpdate
+
+O movimento é aplicado por física (`rb.linearVelocity = desiredVelocity`). Antes disso, o script faz validação de colisões e pode forçar repath (`repathTimer = 0f`). A recuperação de “stuck” existe apenas em `Retreating`.
+
+---
+
+### Transições (exactas)
+
+| De | Para | Condição no código | Efeito/Acção |
+|---|------|---------------------|--------------|
+| `Roaming` | `AttackWindup` | `currentCooldown <= 0f` e `playerDistance <= typedStats.lungeRange` e `HasLineOfSightToAttackPoint(GetPlayerFeetPosition())` | `StartAttackWindup()` |
+| `AttackWindup` | `Lunging` | `windupTimer >= windupDuration` | `BeginLungeAfterWindup()` |
+| `Lunging` | `Retreating` | `lungeTimer >= typedStats.lungeDuration` **ou** `Distance(transform.position, playerAttackPoint) < 0.3f` | `EndLunge()` |
+| `Lunging` | `Retreating` | colisão com o jogador (`OnCollisionEnter2D`) | `EndLunge()` |
+| `Retreating` | `Roaming` | `Distance(transform.position, retreatTargetPosition) < 0.5f` | `rb.linearVelocity = 0`, `currentCooldown = 0`, `repathTimer = 0`, `desiredVelocity = 0` |
+
+---
+
+### Comportamento por estado (resumo)
+
+#### Roaming
+
+- Calcula `withinLeash` por `typedStats.playerDetect * 1.0f`.
+- Se estiver fora do leash, chama `FollowPathTowards(spawnPosition, typedStats.retreatSpeed)`.
+- Se estiver dentro do leash e puder atacar:
+  - com LOS para os “pés”: entra em `AttackWindup`;
+  - sem LOS: aproxima via `FollowPathTowards(player.position, typedStats.roamSpeed)`.
+- Se estiver dentro do leash mas o jogador estiver fora de `lungeRange`: aproxima via pathfinding.
+- Caso contrário: `desiredVelocity = Vector2.zero`.
+
+#### AttackWindup
+
+- Ao entrar (`StartAttackWindup()`): guarda `lungeStartPosition`, define `playerAttackPoint` como “pés”, zera `windupTimer` e activa flags/animação.
+- Enquanto decorre: `desiredVelocity = Vector2.zero`; quando `windupTimer >= windupDuration` passa a `Lunging`.
+
+#### Lunging
+
+- Chama `FollowPathTowards(playerAttackPoint, typedStats.lungingForce)`.
+- Termina por tempo (`typedStats.lungeDuration`), por distância ao ponto (`< 0.3f`) ou por colisão com o player → `EndLunge()`.
+
+#### Retreating
+
+- Chama `FollowPathTowards(retreatTargetPosition, typedStats.retreatSpeed)`.
+- Se chegar a `retreatTargetPosition` (distância `< 0.5f`), volta a `Roaming` e limpa cooldown.
+- Se ficar “stuck” tempo suficiente, força repath e escolhe um `retreatTargetPosition` alternativo.
+
+---
+
+### Alvos e checks usados na decisão
+
+#### Ponto de ataque (pés)
+
+`playerAttackPoint = GetPlayerFeetPosition()`:
 
 ```csharp
-// Se velocidade muito baixa por muito tempo → stuck!
-if (speed < stuckVelocityThreshold && stuckTimer >= stuckTimeThreshold)
-{
-    // Escolher direção aleatória para tentar sair
-    Vector2 altDir = Random.insideUnitCircle.normalized;
-    retreatTargetPosition = position + altDir * retreatRange;
-}
+Bounds bounds = playerCollider.bounds;
+return new Vector3(bounds.center.x, bounds.min.y, bounds.center.z);
+```
+
+#### LOS para iniciar AttackWindup
+
+Inicia windup apenas se `Raycast` não acertar em nada no `obstacleMask`:
+
+```csharp
+var hit = Physics2D.Raycast(origin, dir, dist, obstacleMask);
+return hit.collider == null;
 ```
 
 ---
 
-## Debugging Visual
+### Recuperação de stuck (só em Retreating)
 
-### Gizmos do NavGrid2D
+- Thresholds (Inspector): `stuckVelocityThreshold = 0.05f`, `stuckTimeThreshold = 0.8f`, `maxRecoveryAttempts = 5`.
+- Se exceder tentativas: volta a `Roaming`.
+- Caso contrário: escolhe direcção aleatória e chama `FollowPathTowards(...)` com fallbacks quando `typedStats` é null.
 
 ```csharp
-private void OnDrawGizmosSelected()
+Vector2 altDir = Random.insideUnitCircle.normalized;
+retreatTargetPosition = transform.position + (Vector3)(altDir * (typedStats != null ? typedStats.retreatRange : 2f));
+FollowPathTowards(retreatTargetPosition, typedStats != null ? typedStats.retreatSpeed : 1f);
+```
+
+---
+
+### Onde o pathfinding entra
+
+- `Roaming` → `FollowPathTowards(player.position, typedStats.roamSpeed)` ou `FollowPathTowards(spawnPosition, typedStats.retreatSpeed)`
+- `Lunging` → `FollowPathTowards(playerAttackPoint, typedStats.lungingForce)`
+- `Retreating` → `FollowPathTowards(retreatTargetPosition, typedStats.retreatSpeed)`
+
+---
+
+<a id="3-ga"></a>
+
+## 3) Evolução Genética Adversária (GA)
+
+### Sistema de Evolução Genética Adversária (GA)
+
+### Resumo
+Este repositório contém uma implementação aplicada de um Algoritmo Genético (AG) integrado num protótipo de jogo Metroidvania. O objectivo é adaptar automaticamente atributos de inimigos (por espécie) em resposta ao desempenho do jogador, mantendo controlos de equilíbrio que previnem escalonamento indevido.
+
+O documento descreve a arquitectura, as representações genéticas, a função de aptidão, os operadores evolutivos, mecanismos de controlo, e procedimentos experimentais recomendados.
+
+---
+
+### Arquitectura e componentes principais
+
+- `GlobalGeneticEvolver` — singleton responsável por populações por espécie, selecção, crossover, mutação, evolução por gerações, persistência em ficheiro e mecânicas de dificuldade adaptativa.
+- `EnemyGenome` — representação do genoma com genes normalizados em [0,1] e utilitários para conversão para valores de jogo (HP, dano, velocidade, resistências).
+- `EnemyFitnessTracker` — componente por-instância que aplica o genoma ao inimigo, recolhe métricas de combate (dano, tempo de vida) e reporta ao evolutor.
+- `GeneticDamageIntegration` — utilitário que liga eventos de dano do jogador ao sistema genético para atribuição precisa de crédito.
+- UI de diagnóstico: `EnemyGenomeUI`, `GlobalGeneticDebugUI`, `GeneticDebugController`.
+
+Referências de ficheiros: `Assets/Scripts/AI/GeneticAlgorithm/`.
+
+---
+
+### Métodos e design
+
+#### Representação do genoma
+Genes são floats normalizados. Esta escolha facilita aplicação uniforme entre espécies com diferentes escalas de estatísticas base. As transformações para valores de jogo são determinísticas (ver secção "Mapeamento Gene → Valores").
+
+Excerto (estrutura de genes):
+
+```csharp
+[Range(0f,1f)] float healthGene, damageGene, attackSpeedGene;
+[Range(0f,1f)] float movementSpeedGene, aggressionRangeGene;
+[Range(0f,1f)] float meleeResistanceGene, rangedResistanceGene, aggressivenessGene;
+```
+
+#### Função de aptidão — definição e motivação
+O sistema define a aptidão (fitness) de uma instância como uma combinação ponderada de métricas observáveis durante um encontro: dano causado e tempo de sobrevivência são os sinais base. O código actual calcula:
+
+$$\text{fitness} = 10 \cdot D + 0.5 \cdot T + B( D, T )$$
+
+onde:
+- $D$ é o dano total causado pelo inimigo ao jogador;
+- $T$ é o tempo de sobrevivência (seconds);
+- $B(D,T)$ é um bónus para eliminações rápidas definido por código (ex.: $B = 2(10 - T)$ quando $D>0$ e $T<10$).
+
+Racional: dano mede eficácia ofensiva directa; tempo mede sustentabilidade; o bónus rápido favorece ataques que capitalizam a velocidade de ataque.
+
+Adicionalmente, existe um ajuste adaptativo que penaliza genomas agressivos se o jogador morrer frequentemente — isto implementa uma forma de regulação baseada no estado do jogador.
+
+#### Seleção e operadores evolucionários
+
+- Seleção: torneio de tamanho `tournamentSize` com escolha por aptidão média.
+- Elitismo: os `eliteCount` melhores genomas passam para a geração seguinte com portabilidade parcial de aptidão.
+- Crossover: uniform crossover (cada gene tem 50% probabilidade de vir de um dos pais).
+- Mutação: por-gene com probabilidade `mutationRate` e amplitude `mutationStrength`.
+
+Parâmetros chave encontram-se editáveis como campos serializáveis em `GlobalGeneticEvolver`.
+
+##### Implementação detalhada dos operadores genéticos
+
+**Função de aptidão (CalculateFitness):**
+
+```csharp
+private float CalculateFitness(float damageDealt, float survivalTime)
 {
-    // Contorno da grid
-    Gizmos.color = new Color(0, 1, 0, 0.1f);
-    Gizmos.DrawWireCube(origin + size * 0.5f, size);
+	// Dano causado é o fator mais importante
+	float fitness = (damageDealt * 10f);
+
+	// Recompensa pela sobrevivência (encoraja comportamentos defensivos)
+	fitness += survivalTime * 0.5f;
+
+	// Bónus para eliminações rápidas (beneficia attackSpeedGene)
+	if (damageDealt > 0 && survivalTime < 10f) 
+	{
+		fitness += (10f - survivalTime) * 2.0f; 
+	}
+
+	return fitness;
+}
+```
+
+**Ciclo de evolução (Evolve):**
+
+```csharp
+private void Evolve(SpeciesPopulation pop)
+{
+	pop.generation++;
+	pop.killsSinceEvolution = 0;
     
-    // Células (verde = walkable, vermelho = bloqueado)
-    for (int x = 0; x < gridX; x++)
-    for (int y = 0; y < gridY; y++)
-    {
-        var n = grid[x, y];
-        Gizmos.color = n.walkable ? Color.green : Color.red;
-        Gizmos.DrawCube(n.worldPos, nodeRadius * 1.6f);
-    }
+	List<EnemyGenome> newPopulation = new List<EnemyGenome>();
+    
+	// Elitismo: preserva os melhores
+	var elites = pop.population
+		.OrderByDescending(g => g.AverageFitness)
+		.Take(eliteCount)
+		.ToList();
+    
+	foreach (var elite in elites)
+	{
+		var clone = elite.Clone();
+		clone.Fitness = elite.AverageFitness * 0.3f; // Carryover reduzido
+		newPopulation.Add(clone);
+	}
+    
+	// Preenchimento com crossover e mutação
+	while (newPopulation.Count < populationSize)
+	{
+		EnemyGenome child;
+        
+		if (Random.value < crossoverRate && pop.population.Count >= 2)
+		{
+			var p1 = TournamentSelect(pop);
+			var p2 = TournamentSelectExcluding(pop, p1);
+			child = EnemyGenome.Crossover(p1, p2);
+		}
+		else
+		{
+			child = TournamentSelect(pop).Clone();
+		}
+        
+		child.Mutate(mutationRate, mutationStrength);
+		child.species = pop.species;
+		child.ClampGenes(maxGeneValue);
+        
+		newPopulation.Add(child);
+	}
+    
+	pop.population = newPopulation;
 }
 ```
 
-### Gizmos do BeeEnemy
+**Crossover uniforme (EnemyGenome.Crossover):**
 
 ```csharp
-// Caminho atual (cyan)
-if (currentPath.Count > 0)
+public static EnemyGenome Crossover(EnemyGenome parent1, EnemyGenome parent2)
 {
-    Gizmos.color = Color.cyan;
-    for (int i = 0; i < currentPath.Count - 1; i++)
-    {
-        Gizmos.DrawLine(currentPath[i], currentPath[i + 1]);
-        Gizmos.DrawWireSphere(currentPath[i], 0.06f);
-    }
+	EnemyGenome child = new EnemyGenome { species = parent1.species };
+    
+	// Cada gene tem 50% de chance de vir de cada pai
+	child.healthGene = Random.value > 0.5f ? parent1.healthGene : parent2.healthGene;
+	child.damageGene = Random.value > 0.5f ? parent1.damageGene : parent2.damageGene;
+	child.attackSpeedGene = Random.value > 0.5f ? parent1.attackSpeedGene : parent2.attackSpeedGene;
+	child.movementSpeedGene = Random.value > 0.5f ? parent1.movementSpeedGene : parent2.movementSpeedGene;
+	child.aggressionRangeGene = Random.value > 0.5f ? parent1.aggressionRangeGene : parent2.aggressionRangeGene;
+	child.meleeResistanceGene = Random.value > 0.5f ? parent1.meleeResistanceGene : parent2.meleeResistanceGene;
+	child.rangedResistanceGene = Random.value > 0.5f ? parent1.rangedResistanceGene : parent2.rangedResistanceGene;
+	child.aggressivenessGene = Random.value > 0.5f ? parent1.aggressivenessGene : parent2.aggressivenessGene;
+    
+	return child;
+}
+```
+
+**Mutação (EnemyGenome.Mutate):**
+
+```csharp
+public void Mutate(float mutationRate = 0.1f, float mutationStrength = 0.2f)
+{
+	if (Random.value < mutationRate)
+		healthGene = MutateGene(healthGene, mutationStrength);
+    
+	if (Random.value < mutationRate)
+		damageGene = MutateGene(damageGene, mutationStrength);
+    
+	if (Random.value < mutationRate)
+		attackSpeedGene = MutateGene(attackSpeedGene, mutationStrength);
+    
+	if (Random.value < mutationRate)
+		movementSpeedGene = MutateGene(movementSpeedGene, mutationStrength);
+    
+	if (Random.value < mutationRate)
+		aggressionRangeGene = MutateGene(aggressionRangeGene, mutationStrength);
+    
+	if (Random.value < mutationRate)
+		meleeResistanceGene = MutateGene(meleeResistanceGene, mutationStrength);
+    
+	if (Random.value < mutationRate)
+		rangedResistanceGene = MutateGene(rangedResistanceGene, mutationStrength);
+    
+	if (Random.value < mutationRate)
+		aggressivenessGene = MutateGene(aggressivenessGene, mutationStrength);
 }
 
-// Clearance do agente (azul claro)
-Gizmos.color = new Color(0.2f, 0.8f, 1f, 0.6f);
-Gizmos.DrawWireSphere(transform.position, GetClearance());
-
-// Velocidade desejada (laranja)
-Gizmos.color = new Color(1f, 0.5f, 0f, 0.8f);
-Gizmos.DrawLine(position, position + desiredVelocity * 0.1f);
+private float MutateGene(float gene, float strength)
+{
+	float mutation = Random.Range(-strength, strength);
+	return Mathf.Clamp01(gene + mutation);
+}
 ```
+
+**Limitação de genes (EnemyGenome.ClampGenes):**
+
+```csharp
+public void ClampGenes(float maxValue)
+{
+	healthGene = Mathf.Min(healthGene, maxValue);
+	damageGene = Mathf.Min(damageGene, maxValue);
+	attackSpeedGene = Mathf.Min(attackSpeedGene, maxValue);
+	movementSpeedGene = Mathf.Min(movementSpeedGene, maxValue);
+	aggressionRangeGene = Mathf.Min(aggressionRangeGene, maxValue);
+	meleeResistanceGene = Mathf.Min(meleeResistanceGene, maxValue);
+	rangedResistanceGene = Mathf.Min(rangedResistanceGene, maxValue);
+	aggressivenessGene = Mathf.Min(aggressivenessGene, maxValue);
+}
+```
+
+#### Atribuição de aptidão à população
+Em vez de actualizar directamente o genoma que foi instanciado (que pode ter sido modificado pelos multiplicadores de geração), o sistema procura o exemplar mais semelhante dentro da população e acumula o fitness nesse exemplar. A similaridade é calculada pela soma das diferenças absolutas num subconjunto de genes.
+
+Esta estratégia mantém resiliência a pequenas variações e permite acumular estatísticas na população persistente, ao custo de alguma imprecisão na atribuição directa.
 
 ---
 
-## Resumo do Fluxo Completo
+### Mapeamento Gene → Valores de Jogo (implementação)
 
-```
-┌────────────────────────────────────────────────────────────────┐
-│  1. Update() → StateMachine() → RoamBehavior()                 │
-│                                      │                         │
-│  2. FollowPathTowards(target, speed) │                         │
-│              │                       ▼                         │
-│              │         ┌─────────────────────────┐             │
-│              │         │ repathTimer expirou?    │             │
-│              │         │ OU pathIndex >= count?  │             │
-│              │         └───────────┬─────────────┘             │
-│              │                     │ SIM                       │
-│              ▼                     ▼                           │
-│  3. ┌─────────────────────────────────────────────┐            │
-│     │ NavGrid2D existe?                           │            │
-│     │ SIM → NavGrid2D.FindPath()                  │            │
-│     │ NÃO → GridPathfinder2D.FindPath()           │            │
-│     └─────────────────────────────────────────────┘            │
-│              │                                                 │
-│              ▼                                                 │
-│  4. Path encontrado?                                           │
-│     │ SIM → currentPath = path                                 │
-│     │ NÃO → Tentar recovery (grid maior, centros diferentes)   │
-│     │       └→ Ainda NÃO? → Steering local                     │
-│              │                                                 │
-│              ▼                                                 │
-│  5. Seguir waypoints:                                          │
-│     │ wp = currentPath[pathIndex]                              │
-│     │ Se perto (< 0.15) → pathIndex++                          │
-│     │ desiredVelocity = (wp - pos).normalized * speed          │
-│              │                                                 │
-│              ▼                                                 │
-│  6. FixedUpdate():                                             │
-│     │ CircleCast para verificar colisão                        │
-│     │ Se colidir → nudge ou parar + repath                     │
-│     │ rb.linearVelocity = desiredVelocity                      │
-│              │                                                 │
-│              ▼                                                 │
-│  7. Inimigo move-se suavemente evitando obstáculos! ✓          │
-└────────────────────────────────────────────────────────────────┘
-```
+- `GetScaledHealth(baseHealth, minMult=0.5f, maxMult=2.0f)`
+  - HP = round(baseHealth * lerp(minMult, maxMult, healthGene))
+- `GetScaledDamage(baseDamage, minMult=0.5f, maxMult=2.0f)`
+  - Dano = baseDamage * lerp(minMult, maxMult, damageGene)
+- `GetScaledAttackInterval(baseInterval, minMult=0.5f, maxMult=1.5f)`
+  - Intervalo = baseInterval * lerp(maxMult, minMult, attackSpeedGene) (gene alto → ataque mais rápido)
+- `GetScaledMovementSpeed(baseSpeed, minMult=0.7f, maxMult=1.5f)`
+- Resistências: `GetScaledMeleeResistance(maxResistance=0.5f)` retorna a fração mitigada de dano.
+
+Exemplo numérico: `healthGene = 0.8`, `baseHealth = 100` → multiplicador ≈ 1.7 → HP ≈ 170.
 
 ---
 
-## Ficheiros Relacionados
+### Instrumentação, diagnóstico e persistência
 
-- `Assets/Scripts/Pathfinding/GridPathfinder2D.cs` - Pathfinder dinâmico com A*
-- `Assets/Scripts/Pathfinding/NavGrid2D.cs` - Grid pré-calculada da sala
-- `Assets/Scripts/Enemy/Enemy_GiantBee.cs` - Exemplo de integração com inimigo
+- UI por-inimigo: `EnemyGenomeUI` mostra genes e indicadores em tempo real.
+- Painel global: `GlobalGeneticDebugUI` (toggle `G`) apresenta estatísticas por espécie e curva de evolução.
+- Controles: `GeneticDebugController` (H, Ctrl+R, F5, Tab) para testes e respawn.
+- Integração de dano: `GeneticDamageIntegration` liga eventos `HealthSystem` do jogador à contabilização de dano para garantir atribuição correcta.
+- Persistência: o estado do evolutor é serializado em JSON para `Application.persistentDataPath` (campo `saveFileName`).
+
+---
+
+### Procedimento experimental recomendado
+
+Configuração típica para observação rápida:
+
+- `populationSize` = 20
+- `evolveTriggerCount` = 5
+- `rounds` (no `GenericTrainingArena`) = 200
+
+Experimentos sugeridos:
+
+1. Ablação de genes: fixe `damageGene` e observe se comportamento/movimento evolui.
+2. Telemetria adicional: instrumentar `EnemyFitnessTracker` para registar tempo em alcance e número de ataques, de modo a aferir impacto de `movementSpeed` e `attackSpeed`.
+3. Comparar com/sem `adaptiveDifficulty` para apreciar o efeito do regulador no equilíbrio.
