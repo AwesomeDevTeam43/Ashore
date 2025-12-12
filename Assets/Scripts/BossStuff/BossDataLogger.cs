@@ -183,6 +183,30 @@ private float lastSaveTime = 0f;
         
         Debug.Log($"BossDataLogger: Logged {action} - Distance: {distanceToPlayer:F2}, BossHP: {bossHealthPct:F2}, PlayerHP: {playerHealthPct:F2}");
     }
+
+    /// <summary>
+    /// Public method to log an action with validation.
+    /// Validates that Combo and Laser are not used in Phase 1.
+    /// Called by StateMachineBehaviours when entering action states.
+    /// </summary>
+    /// <param name="action">The boss action being performed</param>
+    public void LogAction(string action)
+    {
+        if (!enableLogging) return;
+
+        // Validate action based on phase
+        bool isPhase2 = IsPhase2();
+        
+        // Skip Combo and Laser actions in Phase 1 (invalid data)
+        if (!isPhase2 && (action == "Combo" || action == "Laser"))
+        {
+            Debug.LogWarning($"BossDataLogger: Skipping invalid action '{action}' in Phase 1");
+            return;
+        }
+
+        // Log the action using the existing method
+        LogGameState(action);
+    }
     
     private float CalculateDistanceToPlayer()
     {

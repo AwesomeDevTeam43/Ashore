@@ -2429,11 +2429,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2516520056431682912, guid: c07ce74aebaa3e54cac53ce65005e10f, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 265.36
+      value: 264.55
       objectReference: {fileID: 0}
     - target: {fileID: 2516520056431682912, guid: c07ce74aebaa3e54cac53ce65005e10f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -309.54
+      value: -312.62
       objectReference: {fileID: 0}
     - target: {fileID: 2516520056431682912, guid: c07ce74aebaa3e54cac53ce65005e10f, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2489,6 +2489,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1843977217408722471, guid: c07ce74aebaa3e54cac53ce65005e10f, type: 3}
       insertIndex: -1
       addedObject: {fileID: 192611238}
+    - targetCorrespondingSourceObject: {fileID: 1843977217408722471, guid: c07ce74aebaa3e54cac53ce65005e10f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 192611239}
   m_SourcePrefab: {fileID: 100100000, guid: c07ce74aebaa3e54cac53ce65005e10f, type: 3}
 --- !u!1 &129249489
 GameObject:
@@ -4021,6 +4024,30 @@ MonoBehaviour:
   meleeResistance: 0
   rangedResistance: 0
   combatFeedback: {fileID: 0}
+--- !u!114 &192611239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 192611228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  modelAsset: {fileID: 5022602860645237092, guid: a3655ce0d295bc84599a5d9090de4d54, type: 3}
+  player: {fileID: 1392275600}
+  decisionInterval: 0.5
+  attackRange: 4
+  moveSpeed: 3
+  showOnScreenDebug: 1
+  debugMode: 1
+  _status: Initializing...
+  _lastDecision: None
+  _totalDecisionsMade: 0
+  _modelConfidence: 0
+  _isModelLoaded: 0
 --- !u!1 &194798165
 GameObject:
   m_ObjectHideFlags: 0
@@ -704528,6 +704555,58 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &1748682043
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1748682045}
+  - component: {fileID: 1748682044}
+  m_Layer: 0
+  m_Name: SIMULATE
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1748682044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1748682043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d27c0dc0b9cd85c4db6c93519f31f27f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  runSimulation: 0
+  battlesToSimulate: 100
+  simulationSpeed: 1
+  maxBattleDuration: 120
+  useSmartAI: 1
+  boss: {fileID: 192611228}
+  player: {fileID: 1392275600}
+  csvFilePath: ml/boss_training_data.csv
+--- !u!4 &1748682045
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1748682043}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 265.3132, y: -309.30414, z: 0.7953886}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1750030644
 GameObject:
   m_ObjectHideFlags: 0
@@ -711831,3 +711910,4 @@ SceneRoots:
   - {fileID: 933042172}
   - {fileID: 110104191}
   - {fileID: 1391785502}
+  - {fileID: 1748682045}

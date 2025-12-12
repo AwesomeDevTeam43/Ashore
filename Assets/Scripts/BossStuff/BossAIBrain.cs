@@ -48,7 +48,7 @@ public class BossAIBrain : MonoBehaviour
     [SerializeField] [Tooltip("Is model loaded")] private bool _isModelLoaded = false;
 
     // Action labels (must match Python's LabelEncoder - alphabetical)
-    private readonly string[] actionLabels = { "Attack", "Combo", "Idle", "Laser" };
+    private readonly string[] actionLabels = { "Attack", "Combo", "Laser" };
 
     // Constant for indicating boss has never attacked (must match BossDataLogger)
     private const float NEVER_ATTACKED_TIME = 999f;
@@ -315,11 +315,6 @@ public class BossAIBrain : MonoBehaviour
                     isWaitingForActionComplete = false;
                     currentAction = "Idle";
                 }
-                break;
-                
-            case "Idle":
-                // Just stay in idle/chase state
-                isWaitingForActionComplete = false;
                 break;
                 
             default:

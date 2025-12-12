@@ -107,3 +107,8 @@ ml/*.pth
 ml/*.pt
 ml/__pycache__/
 ml/uv.lock
+
+# AI directory generated files
+AI/boss_training_data.csv
+AI/boss_ai.onnx
+AI/__pycache__/
