@@ -148,6 +148,12 @@ public class Player_Health : MonoBehaviour
             
             Debug.Log("Player_Health: Player morreu - voltando ao menu");
             
+            // Notifica o sistema de Algoritmo Genético sobre a morte do jogador
+            if (GlobalGeneticEvolver.Instance != null)
+            {
+                GlobalGeneticEvolver.Instance.RegisterPlayerDeath();
+            }
+            
             // Destroy the persistent player so the menu/new game spawns a fresh one
             PlayerPersistence.DestroyPersistentPlayer();
             SceneManager.LoadScene("MainMenu");

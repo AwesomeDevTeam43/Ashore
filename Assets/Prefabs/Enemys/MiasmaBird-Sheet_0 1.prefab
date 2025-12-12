@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: -4874473007516744658}
   - component: {fileID: -6050992702018294182}
   - component: {fileID: -6218376452502855671}
+  - component: {fileID: 7025710572918087139}
   m_Layer: 7
   m_Name: MiasmaBird-Sheet_0 1
   m_TagString: Enemy
@@ -274,6 +275,24 @@ MonoBehaviour:
   staggerAnimatorSpeed: 0
   normalAnimatorSpeed: 1
   debugLogs: 1
+--- !u!114 &7025710572918087139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 83480763817178628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5276c1359ff482e468222e98f6761241, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _damageDealtToPlayer: 0
+  _spawnTime: 0
+  _isTracking: 0
+  showDebugInfo: 0
+  showGenomeUI: 1
+  zoneDifficulty: {fileID: 0}
 --- !u!1 &5839572414982354396
 GameObject:
   m_ObjectHideFlags: 0

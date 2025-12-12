@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: -4600171107686472438}
   - component: {fileID: 4914990007136314267}
   - component: {fileID: 5118995876414565643}
+  - component: {fileID: 1033052399807481502}
   m_Layer: 7
   m_Name: Miasma Bloom
   m_TagString: Enemy
@@ -309,3 +310,21 @@ MonoBehaviour:
   staggerAnimatorSpeed: 0
   normalAnimatorSpeed: 1
   debugLogs: 1
+--- !u!114 &1033052399807481502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1209253475454012991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5276c1359ff482e468222e98f6761241, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _damageDealtToPlayer: 0
+  _spawnTime: 0
+  _isTracking: 0
+  showDebugInfo: 0
+  showGenomeUI: 1
+  zoneDifficulty: {fileID: 0}

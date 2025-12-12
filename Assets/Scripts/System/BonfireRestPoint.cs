@@ -126,6 +126,13 @@ public class BonfireRestPoint : MonoBehaviour, ISaveable
             // Set return point
             Vector3 rp = returnPoint != null ? returnPoint.position : transform.position;
             ReturnPointManager.SetReturnPoint(rp);
+            
+            // Notifica o sistema de Algoritmo Genético
+            if (GlobalGeneticEvolver.Instance != null)
+            {
+                GlobalGeneticEvolver.Instance.OnRestPoint();
+                GlobalGeneticEvolver.Instance.ResetPlayerDeaths();
+            }
 
             // Save game (persists bonfire state and player data)
             var pc = player.GetComponent<Player_Controller>();

@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: -6406895806861494338}
   - component: {fileID: 1803234359606023249}
   - component: {fileID: -6410344447458180258}
+  - component: {fileID: 3094755727155666815}
   m_Layer: 7
   m_Name: Bee
   m_TagString: Enemy
@@ -111,6 +112,9 @@ MonoBehaviour:
   stats: {fileID: 11400000, guid: 6cd5ce0ad94975c468742e32ec259006, type: 2}
   currentLevel: 1
   damageVariance: 0.1
+  stuckVelocityThreshold: 0.05
+  stuckTimeThreshold: 0.8
+  maxRecoveryAttempts: 5
   animator: {fileID: 0}
   isAttackingParam: isAttacking
   isLungingParam: isLunging
@@ -319,3 +323,21 @@ MonoBehaviour:
   staggerAnimatorSpeed: 0
   normalAnimatorSpeed: 1
   debugLogs: 1
+--- !u!114 &3094755727155666815
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8379307940926905367}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5276c1359ff482e468222e98f6761241, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _damageDealtToPlayer: 0
+  _spawnTime: 0
+  _isTracking: 0
+  showDebugInfo: 0
+  showGenomeUI: 1
+  zoneDifficulty: {fileID: 0}
