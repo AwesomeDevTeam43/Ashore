@@ -254,7 +254,20 @@ public class MeleeWeapon : MonoBehaviour
     {
         if (animator != null) 
         {
-            animator.SetTrigger("Meele Attack");
+            string triggerName;
+            if (currentDir == MeleeDir.Up)
+            {
+                triggerName = "AttackUp";
+            }
+            else if (currentDir == MeleeDir.Down)
+            {
+                triggerName = "AttackDown";
+            }
+            else
+            {
+                triggerName = "Meele Attack";
+            }
+            animator.SetTrigger(triggerName);
         }
     }
 
