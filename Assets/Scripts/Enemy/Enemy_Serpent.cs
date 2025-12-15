@@ -6,6 +6,20 @@ public class VenomShooting : EnemyBase
     public GameObject venomPrefab;
     public Transform shootPoint;
     private Transform player;
+
+    [Header("Audio")]
+    [SerializeField] private AudioSource idleAudioSource;
+    [SerializeField] private AudioSource sfxAudioSource;
+    [SerializeField] private AudioClip idleClip;
+    [Tooltip("Usado tanto para PreparingToShoot quanto Shooting (mesmo clip).")]
+    [SerializeField] private AudioClip shootClip;
+    [SerializeField] private AudioClip biteClip;
+    [SerializeField] private float idleIntervalSeconds = 3f;
+    [SerializeField] private float hearDistance = 12f;
+    [SerializeField, Range(0f, 1f)] private float spatialBlend = 1f;
+    [SerializeField, Range(0f, 1f)] private float idleVolume = 1f;
+    [SerializeField, Range(0f, 1f)] private float sfxVolume = 1f;
+    private float idleTimer;
     [Header("Animation")]
     [SerializeField] private Animator animator;
     [SerializeField] private bool useAttackTrigger = true;
@@ -47,10 +61,13 @@ public class VenomShooting : EnemyBase
         meleeCooldownTimer = 0f;
         shootCooldownTimer = 0f;
         currentState = EnemyState.Idle;
+        idleTimer = Mathf.Max(0.01f, idleIntervalSeconds);
         if (animator == null)
         {
             animator = GetComponentInChildren<Animator>();
         }
+
+        EnsureAudioSources();
     }
 
     void Update()
@@ -61,6 +78,9 @@ public class VenomShooting : EnemyBase
         if (shootCooldownTimer > 0f) shootCooldownTimer -= Time.deltaTime;
         HandleStateTransitions(distance);
         HandleStateActions(distance);
+
+        HandleIdleAudio(distance);
+
         if (currentState != EnemyState.Idle)
         {
             FacePlayer();
@@ -71,12 +91,12 @@ public class VenomShooting : EnemyBase
     {
         if (distance < typedStats.meleeRange)
         {
-            currentState = EnemyState.Biting;
+            SetState(EnemyState.Biting);
             return;
         }
         if (currentState == EnemyState.Biting)
         {
-            currentState = EnemyState.Idle;
+            SetState(EnemyState.Idle);
         }
         if (currentState == EnemyState.PreparingToShoot || currentState == EnemyState.Shooting)
         {
@@ -86,18 +106,18 @@ public class VenomShooting : EnemyBase
         {
             if (shootCooldownTimer <= 0f)
             {
-                currentState = EnemyState.PreparingToShoot;
+                SetState(EnemyState.PreparingToShoot);
                 currentChargeTime = chargeDuration;
                 return;
             }
             else
             {
-                currentState = EnemyState.Idle;
+                SetState(EnemyState.Idle);
             }
         }
         else
         {
-            currentState = EnemyState.Idle;
+            SetState(EnemyState.Idle);
         }
     }
 
@@ -117,7 +137,7 @@ public class VenomShooting : EnemyBase
                 }
                 if (currentChargeTime <= 0f)
                 {
-                    currentState = EnemyState.Shooting;
+                    SetState(EnemyState.Shooting);
                 }
                 break;
             case EnemyState.Shooting:
@@ -126,7 +146,8 @@ public class VenomShooting : EnemyBase
                     if (useAttackTrigger)
                     {
                         animator.SetTrigger(attackTrigger);
-                    }
+                        
+                    } 
                     else
                     {
                         animator.SetBool(attackBool, true);
@@ -142,7 +163,7 @@ public class VenomShooting : EnemyBase
                 {
                     spriteRenderer.color = originalColor;
                 }
-                currentState = EnemyState.Idle;
+                SetState(EnemyState.Idle);
                 break;
             case EnemyState.Idle:
                 break;
@@ -174,6 +195,7 @@ public class VenomShooting : EnemyBase
             {
                 if (currentDamage <= 0) Debug.LogWarning("VenomShooting: currentDamage <= 0");
                 ph.TakeDamage((int)currentDamage);
+                PlaySfx(biteClip);
                 Debug.Log("Serpent Bite! Player hit.");
             }
             else
@@ -181,6 +203,107 @@ public class VenomShooting : EnemyBase
                 Debug.LogWarning("VenomShooting: Player HealthSystem not found.");
             }
             meleeCooldownTimer = typedStats.startTimeBtwAttack;
+        }
+    }
+
+    private void SetState(EnemyState newState)
+    {
+        if (currentState == newState) return;
+        EnemyState previous = currentState;
+        currentState = newState;
+        OnStateEntered(newState, previous);
+    }
+
+    private void OnStateEntered(EnemyState state, EnemyState previous)
+    {
+        if (state == EnemyState.PreparingToShoot)
+        {
+            StopIdleAudio();
+            PlaySfx(shootClip);
+        }
+
+        if (state == EnemyState.Idle)
+        {
+            idleTimer = Mathf.Max(0.01f, idleIntervalSeconds);
+        }
+    }
+
+    private void HandleIdleAudio(float distanceToPlayer)
+    {
+        if (idleAudioSource == null) return;
+
+        bool canHear = distanceToPlayer <= hearDistance;
+        UpdateAudioSourceDistance(idleAudioSource);
+        UpdateAudioSourceDistance(sfxAudioSource);
+
+        if (!canHear || currentState != EnemyState.Idle)
+        {
+            StopIdleAudio();
+            return;
+        }
+
+        if (idleClip == null) return;
+
+        idleTimer -= Time.deltaTime;
+        if (idleTimer > 0f) return;
+
+        idleAudioSource.clip = idleClip;
+        idleAudioSource.volume = idleVolume;
+        idleAudioSource.Play();
+        idleTimer = Mathf.Max(0.01f, idleIntervalSeconds);
+    }
+
+    private void StopIdleAudio()
+    {
+        if (idleAudioSource != null && idleAudioSource.isPlaying)
+        {
+            idleAudioSource.Stop();
+        }
+    }
+
+    private void PlaySfx(AudioClip clip)
+    {
+        if (clip == null || sfxAudioSource == null || player == null) return;
+        float distance = Vector2.Distance(player.position, transform.position);
+        if (distance > hearDistance) return;
+
+        sfxAudioSource.volume = sfxVolume;
+        sfxAudioSource.PlayOneShot(clip);
+    }
+
+    private void EnsureAudioSources()
+    {
+        if (idleAudioSource == null)
+        {
+            idleAudioSource = gameObject.AddComponent<AudioSource>();
+        }
+        if (sfxAudioSource == null)
+        {
+            sfxAudioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        ConfigureAudioSource(idleAudioSource);
+        ConfigureAudioSource(sfxAudioSource);
+    }
+
+    private void ConfigureAudioSource(AudioSource source)
+    {
+        if (source == null) return;
+        source.playOnAwake = false;
+        source.loop = false;
+        source.spatialBlend = spatialBlend;
+        source.rolloffMode = AudioRolloffMode.Linear;
+        source.minDistance = 1f;
+        source.maxDistance = Mathf.Max(1f, hearDistance);
+    }
+
+    private void UpdateAudioSourceDistance(AudioSource source)
+    {
+        if (source == null) return;
+        float max = Mathf.Max(1f, hearDistance);
+        if (!Mathf.Approximately(source.maxDistance, max))
+        {
+            source.maxDistance = max;
         }
     }
 
@@ -205,5 +328,8 @@ public class VenomShooting : EnemyBase
         Gizmos.DrawWireSphere(transform.position, typedStats.distanceToPlayer);
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, typedStats.meleeRange);
+
+        Gizmos.color = new Color(1f, 1f, 0f, 0.5f);
+        Gizmos.DrawWireSphere(transform.position, hearDistance);
     }
 }

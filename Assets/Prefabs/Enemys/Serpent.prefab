@@ -243,8 +243,19 @@ MonoBehaviour:
   stats: {fileID: 11400000, guid: 3f76e932fbaef8d46b067d0cfb367d5c, type: 2}
   currentLevel: 1
   damageVariance: 0.1
+  audioSource: {fileID: 0}
   venomPrefab: {fileID: 3782958444212843831, guid: bc3e400054c204a42bede3e5714f13f7, type: 3}
   shootPoint: {fileID: 4461074059452632901}
+  idleAudioSource: {fileID: 0}
+  sfxAudioSource: {fileID: 0}
+  idleClip: {fileID: 8300000, guid: 51aadfce1680c754f9a37270ee2b6eaa, type: 3}
+  shootClip: {fileID: 8300000, guid: e34b6572edb36db43bb92349af53d54f, type: 3}
+  biteClip: {fileID: 8300000, guid: cb07d044060b4784daecd1151a9f7ca6, type: 3}
+  idleIntervalSeconds: 3
+  hearDistance: 12
+  spatialBlend: 1
+  idleVolume: 1
+  sfxVolume: 1
   animator: {fileID: 6046646683153675568}
   useAttackTrigger: 1
   attackTrigger: Attack
