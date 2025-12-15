@@ -2,43 +2,61 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
-using TMPro;
+using UnityEngine.InputSystem;
+using System.Collections.Generic;
 
 /// <summary>
 /// Self-contained Pause Menu that creates its own UI and works across all scenes.
-/// Just add this script to any GameObject in your first game scene.
+/// Uses PauseMenuUIFactory, AudioSettingsController, and ControlsRebindController for separation of concerns.
 /// </summary>
 public class GamePauseManager : MonoBehaviour
 {
     [Header("Settings")]
-    [SerializeField] private KeyCode pauseKey = KeyCode.Escape;
     [SerializeField] private string mainMenuSceneName = "MainMenu";
+    [SerializeField] private string menuActionName = "Menu";
     
     [Header("Appearance")]
     [SerializeField] private Color overlayColor = new Color(0, 0, 0, 0.85f);
-    [SerializeField] private Color buttonColor = new Color(0.2f, 0.6f, 0.85f, 1f);
-    [SerializeField] private Color buttonHoverColor = new Color(0.3f, 0.75f, 0.95f, 1f);
-    [SerializeField] private int buttonFontSize = 42;
-    [SerializeField] private int titleFontSize = 72;
     
-    // Runtime references
+    // Input System references
+    private InputAction menuAction;
+    private InputAction leftTabAction;
+    private InputAction rightTabAction;
+    private InputActionAsset inputActions;
+    
+    // Controllers
+    private AudioSettingsController audioController;
+    private ControlsRebindController controlsController;
+    
+    // UI References
     private Canvas pauseCanvas;
     private GameObject pausePanel;
     private GameObject optionsPanel;
-    private bool isPaused = false;
+    private GameObject audioTabContent;
+    private GameObject controlsTabContent;
+    private Button audioTabButton;
+    private Button controlsTabButton;
+    private Button optionsBackButton;
     
+    // State
+    private bool isPaused = false;
+    private bool isAudioTabActive = true;
+    private List<Button> pauseMenuButtons = new List<Button>();
+    
+    // Singleton
     private static GamePauseManager instance;
     public static GamePauseManager Instance => instance;
     public bool IsPaused => isPaused;
 
     private void Awake()
     {
-        // Singleton - persist across scenes
         if (instance == null)
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
+            
             EnsureEventSystemExists();
+            FindInputActionAsset();
             CreatePauseMenuUI();
         }
         else
@@ -57,9 +75,132 @@ public class GamePauseManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
+    private void Update()
+    {
+        if (isPaused)
+        {
+            UIInputMode.DetectThisFrame();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        UnsubscribeFromActions();
+        controlsController?.Dispose();
+        if (instance == this) instance = null;
+    }
+
+    #region Initialization
+
+    private void FindInputActionAsset()
+    {
+        var inputHandler = FindAnyObjectByType<Player_InputHandler>();
+        if (inputHandler != null && inputHandler.ControlsAsset != null)
+        {
+            inputActions = inputHandler.ControlsAsset;
+            Debug.Log("[GamePauseManager] Found InputActionAsset from Player_InputHandler");
+            
+            SetupMenuAction();
+            SetupTabActions();
+            
+            // Initialize controllers
+            controlsController = new ControlsRebindController(inputActions);
+            controlsController.LoadInputRebinds();
+            audioController = new AudioSettingsController();
+        }
+        else
+        {
+            Debug.LogWarning("[GamePauseManager] Could not find Player_InputHandler or InputActionAsset!");
+            audioController = new AudioSettingsController();
+        }
+    }
+
+    private void SetupMenuAction()
+    {
+        menuAction = inputActions.FindAction(menuActionName);
+        if (menuAction != null)
+        {
+            menuAction.performed += OnMenuActionPerformed;
+            menuAction.Enable();
+            Debug.Log("[GamePauseManager] Menu action found and enabled (Escape + Gamepad Start)");
+        }
+        else
+        {
+            Debug.LogWarning($"[GamePauseManager] Could not find '{menuActionName}' action!");
+        }
+    }
+
+    private void SetupTabActions()
+    {
+        leftTabAction = inputActions.FindAction("UI/LeftTab");
+        rightTabAction = inputActions.FindAction("UI/RightTab");
+        
+        if (leftTabAction != null)
+        {
+            leftTabAction.performed += OnLeftTabPerformed;
+            Debug.Log("[GamePauseManager] LeftTab (L1) action found");
+        }
+        if (rightTabAction != null)
+        {
+            rightTabAction.performed += OnRightTabPerformed;
+            Debug.Log("[GamePauseManager] RightTab (R1) action found");
+        }
+    }
+
+    private void UnsubscribeFromActions()
+    {
+        if (menuAction != null) menuAction.performed -= OnMenuActionPerformed;
+        if (leftTabAction != null) leftTabAction.performed -= OnLeftTabPerformed;
+        if (rightTabAction != null) rightTabAction.performed -= OnRightTabPerformed;
+    }
+
+    private void EnsureEventSystemExists()
+    {
+        if (FindAnyObjectByType<EventSystem>() == null)
+        {
+            GameObject eventSystem = new GameObject("EventSystem");
+            eventSystem.AddComponent<EventSystem>();
+            eventSystem.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
+            DontDestroyOnLoad(eventSystem);
+        }
+    }
+
+    #endregion
+
+    #region Input Callbacks
+
+    private void OnMenuActionPerformed(InputAction.CallbackContext context)
+    {
+        if (SceneManager.GetActiveScene().name == mainMenuSceneName) return;
+        TogglePause();
+    }
+
+    private void OnLeftTabPerformed(InputAction.CallbackContext context)
+    {
+        if (!isPaused || optionsPanel == null || !optionsPanel.activeSelf) return;
+        if (!isAudioTabActive)
+        {
+            SwitchToTab(true);
+            SelectFirstButtonInCurrentTab();
+        }
+    }
+
+    private void OnRightTabPerformed(InputAction.CallbackContext context)
+    {
+        if (!isPaused || optionsPanel == null || !optionsPanel.activeSelf) return;
+        if (isAudioTabActive)
+        {
+            SwitchToTab(false);
+            SelectFirstButtonInCurrentTab();
+        }
+    }
+
+    #endregion
+
+    #region Scene Management
+
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Always hide pause menu when entering main menu
         if (scene.name == mainMenuSceneName)
         {
             isPaused = false;
@@ -67,47 +208,12 @@ public class GamePauseManager : MonoBehaviour
             if (pausePanel != null) pausePanel.SetActive(false);
             if (optionsPanel != null) optionsPanel.SetActive(false);
         }
-        
-        // Ensure EventSystem exists in each scene
         EnsureEventSystemExists();
     }
 
-    /// <summary>
-    /// Ensures an EventSystem exists in the scene (required for UI buttons to work)
-    /// </summary>
-    private void EnsureEventSystemExists()
-    {
-        if (FindAnyObjectByType<EventSystem>() == null)
-        {
-            GameObject eventSystem = new GameObject("EventSystem");
-            eventSystem.AddComponent<EventSystem>();
-            eventSystem.AddComponent<StandaloneInputModule>();
-            DontDestroyOnLoad(eventSystem);
-        }
-    }
+    #endregion
 
-    private void Update()
-    {
-        // Don't pause in main menu
-        if (SceneManager.GetActiveScene().name == mainMenuSceneName)
-            return;
-
-        if (Input.GetKeyDown(pauseKey))
-        {
-            TogglePause();
-        }
-    }
-
-    /// <summary>
-    /// Toggle pause state
-    /// </summary>
-    public void TogglePause()
-    {
-        if (isPaused)
-            Resume();
-        else
-            Pause();
-    }
+    #region UI Creation
 
     private void CreatePauseMenuUI()
     {
@@ -126,155 +232,142 @@ public class GamePauseManager : MonoBehaviour
         
         canvasGO.AddComponent<GraphicRaycaster>();
 
-        // Create main pause panel
         pausePanel = CreateMainPausePanel(canvasGO.transform);
-        
-        // Create options panel
         optionsPanel = CreateOptionsPanel(canvasGO.transform);
         
-        // Hide both panels initially
         pausePanel.SetActive(false);
         optionsPanel.SetActive(false);
     }
 
     private GameObject CreateMainPausePanel(Transform parent)
     {
-        // Background overlay
-        GameObject panel = new GameObject("PausePanel");
-        panel.transform.SetParent(parent, false);
+        pauseMenuButtons.Clear();
         
-        RectTransform panelRect = panel.AddComponent<RectTransform>();
-        panelRect.anchorMin = Vector2.zero;
-        panelRect.anchorMax = Vector2.one;
-        panelRect.sizeDelta = Vector2.zero;
-        
-        Image bgImage = panel.AddComponent<Image>();
-        bgImage.color = overlayColor;
+        GameObject panel = PauseMenuUIFactory.CreatePanel(parent, "PausePanel", overlayColor);
 
         // Title
-        CreateTextElement(panel.transform, "PAUSED", titleFontSize, 
+        PauseMenuUIFactory.CreateTextElement(panel.transform, "PAUSED", PauseMenuUIFactory.TitleFontSize, 
             new Vector2(0.5f, 0.78f), new Vector2(0.5f, 0.88f), new Vector2(600, 0));
 
-        // Resume Button
-        CreateButton(panel.transform, "Resume", 
-            new Vector2(0.35f, 0.55f), new Vector2(0.65f, 0.65f),
-            Resume);
-
-        // Options Button
-        CreateButton(panel.transform, "Options", 
-            new Vector2(0.35f, 0.42f), new Vector2(0.65f, 0.52f),
-            ShowOptions);
-
-        // Quit Button
-        CreateButton(panel.transform, "Quit to Menu", 
-            new Vector2(0.35f, 0.29f), new Vector2(0.65f, 0.39f),
-            QuitToMainMenu);
+        // Buttons
+        pauseMenuButtons.Add(PauseMenuUIFactory.CreateButton(panel.transform, "Resume", 
+            new Vector2(0.35f, 0.55f), new Vector2(0.65f, 0.65f), Resume));
+        
+        pauseMenuButtons.Add(PauseMenuUIFactory.CreateButton(panel.transform, "Options", 
+            new Vector2(0.35f, 0.42f), new Vector2(0.65f, 0.52f), ShowOptions));
+        
+        pauseMenuButtons.Add(PauseMenuUIFactory.CreateButton(panel.transform, "Quit to Menu", 
+            new Vector2(0.35f, 0.29f), new Vector2(0.65f, 0.39f), QuitToMainMenu));
 
         return panel;
     }
 
     private GameObject CreateOptionsPanel(Transform parent)
     {
-        // Background overlay
-        GameObject panel = new GameObject("OptionsPanel");
-        panel.transform.SetParent(parent, false);
-        
-        RectTransform panelRect = panel.AddComponent<RectTransform>();
-        panelRect.anchorMin = Vector2.zero;
-        panelRect.anchorMax = Vector2.one;
-        panelRect.sizeDelta = Vector2.zero;
-        
-        Image bgImage = panel.AddComponent<Image>();
-        bgImage.color = overlayColor;
+        GameObject panel = PauseMenuUIFactory.CreatePanel(parent, "OptionsPanel", overlayColor);
 
         // Title
-        CreateTextElement(panel.transform, "OPTIONS", titleFontSize, 
-            new Vector2(0.5f, 0.78f), new Vector2(0.5f, 0.88f), new Vector2(600, 0));
+        PauseMenuUIFactory.CreateTextElement(panel.transform, "OPTIONS", PauseMenuUIFactory.TitleFontSize, 
+            new Vector2(0.5f, 0.85f), new Vector2(0.5f, 0.95f), new Vector2(600, 0));
 
-        // Placeholder text
-        CreateTextElement(panel.transform, "Options coming soon...", buttonFontSize - 10, 
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.55f), new Vector2(600, 0));
+        // Tab Container
+        GameObject tabContainer = PauseMenuUIFactory.CreateContainer(panel.transform, "TabContainer",
+            new Vector2(0.25f, 0.75f), new Vector2(0.75f, 0.82f));
+        
+        audioTabButton = PauseMenuUIFactory.CreateTabButton(tabContainer.transform, "Audio", 
+            new Vector2(0f, 0f), new Vector2(0.48f, 1f), () => SwitchToTab(true));
+        
+        controlsTabButton = PauseMenuUIFactory.CreateTabButton(tabContainer.transform, "Controls", 
+            new Vector2(0.52f, 0f), new Vector2(1f, 1f), () => SwitchToTab(false));
+
+        // Content Container
+        GameObject contentContainer = PauseMenuUIFactory.CreateContainer(panel.transform, "ContentContainer",
+            new Vector2(0.15f, 0.2f), new Vector2(0.85f, 0.73f), new Color(0.1f, 0.1f, 0.15f, 0.9f));
+
+        // Tab Contents
+        audioTabContent = audioController.CreateAudioTabContent(contentContainer.transform);
+        controlsTabContent = controlsController?.CreateControlsTabContent(contentContainer.transform, ResetAllInputBindings) 
+            ?? CreateEmptyContent(contentContainer.transform, "Controls not available");
 
         // Back Button
-        CreateButton(panel.transform, "Back", 
-            new Vector2(0.35f, 0.25f), new Vector2(0.65f, 0.35f),
-            HideOptions);
+        optionsBackButton = PauseMenuUIFactory.CreateButton(panel.transform, "Back", 
+            new Vector2(0.35f, 0.08f), new Vector2(0.65f, 0.16f), HideOptions);
+
+        // Setup navigation
+        audioController.SetupOptionsNavigation(optionsBackButton);
+        
+        // Start with Audio tab
+        SwitchToTab(true);
 
         return panel;
     }
 
-    private void CreateTextElement(Transform parent, string text, int fontSize, 
-        Vector2 anchorMin, Vector2 anchorMax, Vector2 sizeDelta)
+    private GameObject CreateEmptyContent(Transform parent, string message)
     {
-        GameObject textGO = new GameObject("Text_" + text);
-        textGO.transform.SetParent(parent, false);
+        GameObject content = new GameObject("EmptyContent");
+        content.transform.SetParent(parent, false);
         
-        RectTransform rect = textGO.AddComponent<RectTransform>();
-        rect.anchorMin = anchorMin;
-        rect.anchorMax = anchorMax;
-        rect.anchoredPosition = Vector2.zero;
-        rect.sizeDelta = sizeDelta;
+        RectTransform rect = content.AddComponent<RectTransform>();
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.sizeDelta = Vector2.zero;
         
-        TextMeshProUGUI tmp = textGO.AddComponent<TextMeshProUGUI>();
-        tmp.text = text;
-        tmp.fontSize = fontSize;
-        tmp.fontStyle = FontStyles.Bold;
-        tmp.color = Color.white;
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.enableAutoSizing = false;
+        PauseMenuUIFactory.CreateTextElement(content.transform, message, 32,
+            new Vector2(0.1f, 0.4f), new Vector2(0.9f, 0.6f), Vector2.zero);
         
-        // Add gradient effect for title
-        if (fontSize >= 60)
+        return content;
+    }
+
+    #endregion
+
+    #region Tab Management
+
+    private void SwitchToTab(bool isAudioTab)
+    {
+        isAudioTabActive = isAudioTab;
+        
+        audioTabContent.SetActive(isAudioTab);
+        controlsTabContent.SetActive(!isAudioTab);
+        
+        // Update tab button colors
+        Color activeColor = PauseMenuUIFactory.ButtonColor;
+        Color inactiveColor = new Color(0.15f, 0.15f, 0.2f, 1f);
+        
+        audioTabButton.GetComponent<Image>().color = isAudioTab ? activeColor : inactiveColor;
+        controlsTabButton.GetComponent<Image>().color = isAudioTab ? inactiveColor : activeColor;
+        
+        RebuildNavScope(optionsPanel);
+    }
+
+    private void SelectFirstButtonInCurrentTab()
+    {
+        if (optionsPanel == null || !optionsPanel.activeSelf) return;
+        
+        if (isAudioTabActive)
         {
-            tmp.enableVertexGradient = true;
-            tmp.colorGradient = new VertexGradient(
-                new Color(0.6f, 0.85f, 1f),  // top left
-                new Color(0.6f, 0.85f, 1f),  // top right
-                new Color(1f, 0.95f, 0.8f),  // bottom left
-                new Color(1f, 0.95f, 0.8f)   // bottom right
-            );
+            if (audioController.MasterVolumeSlider != null)
+            {
+                EventSystem.current.SetSelectedGameObject(audioController.MasterVolumeSlider.gameObject);
+            }
+        }
+        else
+        {
+            var buttons = controlsController?.ControlsTabButtons;
+            if (buttons != null && buttons.Count > 0 && buttons[0] != null)
+            {
+                EventSystem.current.SetSelectedGameObject(buttons[0].gameObject);
+            }
         }
     }
 
-    private void CreateButton(Transform parent, string text, 
-        Vector2 anchorMin, Vector2 anchorMax, UnityEngine.Events.UnityAction onClick)
+    #endregion
+
+    #region Pause Control
+
+    public void TogglePause()
     {
-        GameObject buttonGO = new GameObject("Button_" + text);
-        buttonGO.transform.SetParent(parent, false);
-        
-        RectTransform rect = buttonGO.AddComponent<RectTransform>();
-        rect.anchorMin = anchorMin;
-        rect.anchorMax = anchorMax;
-        rect.anchoredPosition = Vector2.zero;
-        rect.sizeDelta = Vector2.zero;
-        
-        Image image = buttonGO.AddComponent<Image>();
-        image.color = buttonColor;
-        
-        Button button = buttonGO.AddComponent<Button>();
-        ColorBlock colors = button.colors;
-        colors.normalColor = buttonColor;
-        colors.highlightedColor = buttonHoverColor;
-        colors.pressedColor = new Color(buttonColor.r * 0.8f, buttonColor.g * 0.8f, buttonColor.b * 0.8f);
-        colors.selectedColor = buttonHoverColor;
-        colors.fadeDuration = 0.15f;
-        button.colors = colors;
-        button.onClick.AddListener(onClick);
-        
-        // Button text
-        GameObject textGO = new GameObject("Text");
-        textGO.transform.SetParent(buttonGO.transform, false);
-        
-        RectTransform textRect = textGO.AddComponent<RectTransform>();
-        textRect.anchorMin = Vector2.zero;
-        textRect.anchorMax = Vector2.one;
-        textRect.sizeDelta = Vector2.zero;
-        
-        TextMeshProUGUI tmp = textGO.AddComponent<TextMeshProUGUI>();
-        tmp.text = text;
-        tmp.fontSize = buttonFontSize;
-        tmp.color = Color.white;
-        tmp.alignment = TextAlignmentOptions.Center;
+        if (isPaused) Resume();
+        else Pause();
     }
 
     public void Pause()
@@ -286,6 +379,16 @@ public class GamePauseManager : MonoBehaviour
         
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
+        
+        leftTabAction?.Enable();
+        rightTabAction?.Enable();
+        
+        RebuildNavScope(pausePanel);
+        
+        if (pauseMenuButtons.Count > 0 && pauseMenuButtons[0] != null)
+        {
+            EventSystem.current?.SetSelectedGameObject(pauseMenuButtons[0].gameObject);
+        }
     }
 
     public void Resume()
@@ -294,23 +397,75 @@ public class GamePauseManager : MonoBehaviour
         Time.timeScale = 1f;
         pausePanel.SetActive(false);
         optionsPanel.SetActive(false);
+        
+        leftTabAction?.Disable();
+        rightTabAction?.Disable();
+        
+        EventSystem.current?.SetSelectedGameObject(null);
     }
 
     public void ShowOptions()
     {
         pausePanel.SetActive(false);
         optionsPanel.SetActive(true);
+        
+        RebuildNavScope(optionsPanel);
+        SelectFirstButtonInCurrentTab();
     }
 
     public void HideOptions()
     {
         optionsPanel.SetActive(false);
         pausePanel.SetActive(true);
+        
+        RebuildNavScope(pausePanel);
+        
+        if (pauseMenuButtons.Count > 0 && pauseMenuButtons[0] != null)
+        {
+            EventSystem.current?.SetSelectedGameObject(pauseMenuButtons[0].gameObject);
+        }
+    }
+
+    #endregion
+
+    #region Navigation Helpers
+
+    private void RebuildNavScope(GameObject panel)
+    {
+        if (panel == null) return;
+        var scope = panel.GetComponent<UINavScope>();
+        scope?.Rebuild();
+    }
+
+    #endregion
+
+    #region Menu Actions
+
+    private void ResetAllInputBindings()
+    {
+        controlsController?.ResetAllInputBindings(optionsPanel.transform, RecreateControlsTab);
+    }
+
+    private GameObject RecreateControlsTab(Transform optionsPanelTransform)
+    {
+        if (controlsTabContent != null)
+        {
+            Destroy(controlsTabContent);
+            
+            Transform contentContainer = optionsPanelTransform.Find("ContentContainer");
+            if (contentContainer != null)
+            {
+                controlsTabContent = controlsController.CreateControlsTabContent(
+                    contentContainer, ResetAllInputBindings);
+                controlsTabContent.SetActive(true);
+                return controlsTabContent;
+            }
+        }
+        return null;
     }
 
     public void QuitToMainMenu()
     {
-        // Hide panels first
         pausePanel.SetActive(false);
         optionsPanel.SetActive(false);
         
@@ -328,9 +483,5 @@ public class GamePauseManager : MonoBehaviour
         #endif
     }
 
-    private void OnDestroy()
-    {
-        if (instance == this)
-            instance = null;
-    }
+    #endregion
 }

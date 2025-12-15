@@ -19,6 +19,7 @@ public class Player_InputHandler : MonoBehaviour
     [SerializeField] private string rangeAttack = "RangeAttack";
     [SerializeField] private string interact = "Interact";
     [SerializeField] private string inventory = "Inventory";
+    [SerializeField] private string menu = "Menu";
     [Header("Control Scheme Detection")]
     [SerializeField] private string keyboardMouseSchemeName = "Keyboard&Mouse";
     [SerializeField] private string gamepadSchemeName = "Gamepad";
@@ -31,6 +32,7 @@ public class Player_InputHandler : MonoBehaviour
     private InputAction rangeAttackAction;
     private InputAction interactAction;
     private InputAction inventoryAction;
+    private InputAction menuAction;
 
     public Vector2 MovementInput { get; private set; }
     public Vector2 LookInput { get; private set; }
@@ -39,6 +41,7 @@ public class Player_InputHandler : MonoBehaviour
     public bool RangeAttackTriggered { get; private set; }
     public bool InteractActionTriggered { get; private set; }
     public bool InventoryActionTriggered { get; private set; }
+    public bool MenuActionTriggered { get; private set; }
     public InputActionAsset ControlsAsset => playerControls;
     public string CurrentControlScheme => string.IsNullOrEmpty(currentControlScheme) ? defaultSchemeName : currentControlScheme;
 
@@ -119,6 +122,7 @@ public class Player_InputHandler : MonoBehaviour
         rangeAttackAction = mapReference?.FindAction(rangeAttack);
         interactAction = mapReference?.FindAction(interact);
         inventoryAction = mapReference?.FindAction(inventory);
+        menuAction = mapReference?.FindAction(menu);
 
         MakeInputEvents();
     }
@@ -181,6 +185,9 @@ public class Player_InputHandler : MonoBehaviour
 
         inventoryAction.performed += inputInfo => { InventoryActionTriggered = true; OnInventoryPressed?.Invoke(); UpdateControlScheme(inputInfo); };
         inventoryAction.canceled += inputInfo => { InventoryActionTriggered = false; };
+
+        menuAction.performed += inputInfo => { MenuActionTriggered = true; UpdateControlScheme(inputInfo); };
+        menuAction.canceled += inputInfo => { MenuActionTriggered = false; };
     }
 
     private void Handle8Directions()
