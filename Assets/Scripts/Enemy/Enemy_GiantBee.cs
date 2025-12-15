@@ -9,6 +9,30 @@ public class BeeEnemy : EnemyBase
   private Collider2D playerCollider;
   private HealthSystem playerHealth;
 
+  [Header("Audio")]
+  private AudioSource sfxSource;
+  private AudioSource windupSource;
+  private AudioSource lungeSource;
+  private AudioSource retreatSource;
+  [SerializeField] private AudioClip windupSfx;
+  [SerializeField] private AudioClip lungeSfx;
+  [SerializeField] private AudioClip hitSfx;
+  [SerializeField] private AudioClip retreatSfx;
+  [SerializeField, Range(0f, 1f)] private float sfxVolume = 1f;
+  [SerializeField] private bool randomizePitch = true;
+  [SerializeField] private Vector2 pitchRange = new Vector2(0.95f, 1.05f);
+
+  [Header("Audio - Idle")]
+  [SerializeField] private AudioSource idleSource;
+  [SerializeField] private AudioClip idleLoopSfx;
+  [SerializeField, Range(0f, 1f)] private float idleVolume = 0.5f;
+
+  [Header("Audio - Distance")]
+  [SerializeField] private Transform listenerOverride;
+  [SerializeField] private float minAudibleDistance = 2f;
+  [SerializeField] private float maxAudibleDistance = 12f;
+  private Transform listenerTransform;
+
   private enum EnemyState { Roaming, AttackWindup, Lunging, Retreating }
   private EnemyState enemyState;
 
@@ -113,6 +137,190 @@ public class BeeEnemy : EnemyBase
 
     if (stingerHitbox != null) stingerHitbox.enabled = false;
     if (stingerVisual != null) stingerVisual.enabled = false;
+
+    if (sfxSource == null)
+    {
+      sfxSource = GetComponent<AudioSource>();
+    }
+    if (sfxSource == null)
+    {
+      sfxSource = gameObject.AddComponent<AudioSource>();
+    }
+    if (sfxSource != null)
+    {
+      sfxSource.playOnAwake = false;
+      sfxSource.loop = false;
+      // 2D by default. If you want 3D attenuation, set Spatial Blend in the Inspector.
+      sfxSource.spatialBlend = 0f;
+    }
+    
+    if (idleSource == null)
+    {
+      // Prefer a different AudioSource so one-shots (attack SFX) don't cut the idle loop.
+      var sources = GetComponents<AudioSource>();
+      if (sources != null)
+      {
+        foreach (var src in sources)
+        {
+          if (src != null && src != sfxSource)
+          {
+            idleSource = src;
+            break;
+          }
+        }
+      }
+    }
+    if (idleSource == null)
+    {
+      idleSource = gameObject.AddComponent<AudioSource>();
+    }
+    if (idleSource != null)
+    {
+      idleSource.playOnAwake = false;
+      idleSource.loop = true;
+      idleSource.spatialBlend = 0f;
+      idleSource.volume = idleVolume;
+      if (idleLoopSfx != null) idleSource.clip = idleLoopSfx;
+    }
+
+    if (retreatSource == null)
+    {
+      // Dedicated source so we can Stop() the retreat clip as soon as retreat ends.
+      var sources = GetComponents<AudioSource>();
+      if (sources != null)
+      {
+        foreach (var src in sources)
+        {
+          if (src != null && src != sfxSource && src != idleSource)
+          {
+            retreatSource = src;
+            break;
+          }
+        }
+      }
+    }
+    if (retreatSource == null)
+    {
+      retreatSource = gameObject.AddComponent<AudioSource>();
+    }
+    if (retreatSource != null)
+    {
+      retreatSource.playOnAwake = false;
+      retreatSource.loop = false;
+      retreatSource.spatialBlend = 0f;
+    }
+
+    if (windupSource == null)
+    {
+      var sources = GetComponents<AudioSource>();
+      if (sources != null)
+      {
+        foreach (var src in sources)
+        {
+          if (src != null && src != sfxSource && src != idleSource && src != retreatSource)
+          {
+            windupSource = src;
+            break;
+          }
+        }
+      }
+    }
+    if (windupSource == null)
+    {
+      windupSource = gameObject.AddComponent<AudioSource>();
+    }
+    if (windupSource != null)
+    {
+      windupSource.playOnAwake = false;
+      windupSource.loop = false;
+      windupSource.spatialBlend = 0f;
+    }
+
+    if (lungeSource == null)
+    {
+      var sources = GetComponents<AudioSource>();
+      if (sources != null)
+      {
+        foreach (var src in sources)
+        {
+          if (src != null && src != sfxSource && src != idleSource && src != retreatSource && src != windupSource)
+          {
+            lungeSource = src;
+            break;
+          }
+        }
+      }
+    }
+    if (lungeSource == null)
+    {
+      lungeSource = gameObject.AddComponent<AudioSource>();
+    }
+    if (lungeSource != null)
+    {
+      lungeSource.playOnAwake = false;
+      lungeSource.loop = false;
+      lungeSource.spatialBlend = 0f;
+    }
+
+    ResolveListenerTransform();
+  }
+
+  private void ResolveListenerTransform()
+  {
+    if (listenerOverride != null)
+    {
+      listenerTransform = listenerOverride;
+      return;
+    }
+
+    // Prefer the player as reference (camera usually follows player).
+    if (player != null)
+    {
+      listenerTransform = player.transform;
+      return;
+    }
+
+    if (Camera.main != null)
+    {
+      listenerTransform = Camera.main.transform;
+      return;
+    }
+
+    var al = FindFirstObjectByType<AudioListener>();
+    if (al != null) listenerTransform = al.transform;
+  }
+
+  private float GetDistanceAttenuation01()
+  {
+    if (maxAudibleDistance <= 0f) return 1f;
+    if (listenerTransform == null) ResolveListenerTransform();
+    if (listenerTransform == null) return 1f;
+
+    float minD = Mathf.Max(0f, minAudibleDistance);
+    float maxD = Mathf.Max(minD + 0.0001f, maxAudibleDistance);
+    float d = Vector2.Distance((Vector2)transform.position, (Vector2)listenerTransform.position);
+    if (d >= maxD) return 0f;
+    if (d <= minD) return 1f;
+    return 1f - Mathf.InverseLerp(minD, maxD, d);
+  }
+
+  private void PlaySfx(AudioClip clip)
+  {
+    if (clip == null || sfxSource == null) return;
+
+    float att = GetDistanceAttenuation01();
+    if (att <= 0.0001f) return;
+
+    float originalPitch = sfxSource.pitch;
+    if (randomizePitch)
+    {
+      float min = Mathf.Min(pitchRange.x, pitchRange.y);
+      float max = Mathf.Max(pitchRange.x, pitchRange.y);
+      sfxSource.pitch = Random.Range(min, max);
+    }
+
+    sfxSource.PlayOneShot(clip, sfxVolume * att);
+    sfxSource.pitch = originalPitch;
   }
 
   private void Update()
@@ -124,6 +332,10 @@ public class BeeEnemy : EnemyBase
 
     float playerDistance = Vector3.Distance(transform.position, player.transform.position);
     StateMachine(playerDistance);
+    
+    UpdateIdleAudio();
+    UpdateRetreatAudio();
+    UpdateStateSfxAudio();
   }
 
   public bool TryAttack()
@@ -136,6 +348,134 @@ public class BeeEnemy : EnemyBase
     if (!HasLineOfSightToAttackPoint(feet)) return false;
     StartAttackWindup();
     return true;
+  }
+  
+  private void UpdateIdleAudio()
+  {
+    if (idleSource == null) return;
+
+    float att = GetDistanceAttenuation01();
+
+    // Keep clip/volume in sync with Inspector changes.
+    if (idleSource.clip != idleLoopSfx) idleSource.clip = idleLoopSfx;
+    idleSource.volume = idleVolume * att;
+
+    bool shouldPlay = (enemyState == EnemyState.Roaming);
+    if (idleLoopSfx == null) shouldPlay = false;
+    if (att <= 0.0001f) shouldPlay = false;
+
+    if (shouldPlay)
+    {
+      if (!idleSource.isPlaying)
+      {
+        idleSource.Play();
+      }
+    }
+    else
+    {
+      if (idleSource.isPlaying)
+      {
+        idleSource.Stop();
+      }
+    }
+  }
+
+  private void UpdateRetreatAudio()
+  {
+    if (retreatSource == null) return;
+    if (retreatSource.clip != retreatSfx) retreatSource.clip = retreatSfx;
+
+    float att = GetDistanceAttenuation01();
+    retreatSource.volume = sfxVolume * att;
+
+    // If it's too far to hear, stop to avoid a long clip continuing silently.
+    if (retreatSource.isPlaying && att <= 0.0001f)
+    {
+      retreatSource.Stop();
+    }
+  }
+
+  private void PlayRetreatSfx()
+  {
+    if (retreatSfx == null || retreatSource == null) return;
+
+    float att = GetDistanceAttenuation01();
+    if (att <= 0.0001f) return;
+
+    retreatSource.Stop();
+    retreatSource.clip = retreatSfx;
+    retreatSource.volume = sfxVolume * att;
+    retreatSource.Play();
+  }
+
+  private void StopRetreatSfx()
+  {
+    if (retreatSource == null) return;
+    if (retreatSource.isPlaying) retreatSource.Stop();
+  }
+
+  private void UpdateStateSfxAudio()
+  {
+    float att = GetDistanceAttenuation01();
+
+    if (windupSource != null)
+    {
+      if (windupSource.clip != windupSfx) windupSource.clip = windupSfx;
+      windupSource.volume = sfxVolume * att;
+      if (windupSource.isPlaying && att <= 0.0001f) windupSource.Stop();
+    }
+
+    if (lungeSource != null)
+    {
+      if (lungeSource.clip != lungeSfx) lungeSource.clip = lungeSfx;
+      lungeSource.volume = sfxVolume * att;
+      if (lungeSource.isPlaying && att <= 0.0001f) lungeSource.Stop();
+    }
+  }
+
+  private void PlayWindupSfx()
+  {
+    if (windupSfx == null || windupSource == null) return;
+
+    float att = GetDistanceAttenuation01();
+    if (att <= 0.0001f) return;
+
+    windupSource.Stop();
+    windupSource.clip = windupSfx;
+    windupSource.volume = sfxVolume * att;
+    windupSource.Play();
+  }
+
+  private void StopWindupSfx()
+  {
+    if (windupSource == null) return;
+    if (windupSource.isPlaying) windupSource.Stop();
+  }
+
+  private void PlayLungeSfx()
+  {
+    if (lungeSfx == null || lungeSource == null) return;
+
+    float att = GetDistanceAttenuation01();
+    if (att <= 0.0001f) return;
+
+    lungeSource.Stop();
+    lungeSource.clip = lungeSfx;
+    lungeSource.volume = sfxVolume * att;
+    lungeSource.Play();
+  }
+
+  private void StopLungeSfx()
+  {
+    if (lungeSource == null) return;
+    if (lungeSource.isPlaying) lungeSource.Stop();
+  }
+
+  private void OnDisable()
+  {
+    StopWindupSfx();
+    StopLungeSfx();
+    StopRetreatSfx();
   }
 
   private void FixedUpdate()
@@ -209,6 +549,9 @@ public class BeeEnemy : EnemyBase
             recoveryAttemptCount = 0;
             desiredVelocity = Vector2.zero;
             enemyState = EnemyState.Roaming;
+            StopWindupSfx();
+            StopLungeSfx();
+            StopRetreatSfx();
           }
           else
           {
@@ -294,6 +637,8 @@ public class BeeEnemy : EnemyBase
   private void StartAttackWindup()
   {
     if (enemyState == EnemyState.AttackWindup || enemyState == EnemyState.Lunging || enemyState == EnemyState.Retreating) return;
+    StopLungeSfx();
+    StopRetreatSfx();
     lungeStartPosition = transform.position;
     playerAttackPoint = GetPlayerFeetPosition();
     windupTimer = 0f;
@@ -305,6 +650,8 @@ public class BeeEnemy : EnemyBase
       animator.SetBool(isRetreatingParam, false);
     }
     EnableStinger(true); // stinger visually out during windup
+
+    PlayWindupSfx();
 
     // ADICIONAR: Telegraph visual
     if (combatFeedback != null)
@@ -344,6 +691,9 @@ public class BeeEnemy : EnemyBase
     // ADICIONAR: Desabilitar linha de telegraph
     if (lungeTelegraphLine != null)
       lungeTelegraphLine.enabled = false;
+
+    StopWindupSfx();
+    PlayLungeSfx();
   }
 
   private void EnableStinger(bool on)
@@ -391,6 +741,8 @@ public class BeeEnemy : EnemyBase
 
   private void EndLunge()
   {
+    StopWindupSfx();
+    StopLungeSfx();
     Vector2 retreatDir = (lungeStartPosition - transform.position).normalized;
     retreatTargetPosition = transform.position + (Vector3)retreatDir * typedStats.retreatRange;
     currentCooldown = typedStats.lungeCooldown;
@@ -400,6 +752,8 @@ public class BeeEnemy : EnemyBase
       animator.SetBool(isLungingParam, false);
       animator.SetBool(isRetreatingParam, true);
     }
+
+    PlayRetreatSfx();
   }
 
   private void RetreatBehavior(float playerDistance)
@@ -423,6 +777,7 @@ public class BeeEnemy : EnemyBase
       repathTimer = 0f; // force a fresh path next frame
       desiredVelocity = Vector2.zero;
       enemyState = EnemyState.Roaming;
+      StopRetreatSfx();
       if (animator != null)
       {
         animator.SetBool(isAttackingParam, false);
@@ -661,6 +1016,8 @@ public class BeeEnemy : EnemyBase
       if (playerHealth != null)
       {
         playerHealth.TakeDamage((int)currentDamage);
+
+        PlaySfx(hitSfx);
         
         // ADICIONAR: Feedback de ataque bem-sucedido
         if (combatFeedback != null)

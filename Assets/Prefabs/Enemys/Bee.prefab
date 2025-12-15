@@ -112,6 +112,23 @@ MonoBehaviour:
   currentLevel: 1
   damageVariance: 0.1
   audioSource: {fileID: 0}
+  sfxSource: {fileID: 0}
+  windupSource: {fileID: 0}
+  lungeSource: {fileID: 0}
+  retreatSource: {fileID: 0}
+  windupSfx: {fileID: 8300000, guid: aadc377fcb270e547b04390448c41ec3, type: 3}
+  lungeSfx: {fileID: 8300000, guid: aadc377fcb270e547b04390448c41ec3, type: 3}
+  hitSfx: {fileID: 0}
+  retreatSfx: {fileID: 8300000, guid: cb07d044060b4784daecd1151a9f7ca6, type: 3}
+  sfxVolume: 1
+  randomizePitch: 1
+  pitchRange: {x: 0.95, y: 1.05}
+  idleSource: {fileID: 0}
+  idleLoopSfx: {fileID: 8300000, guid: d90b91d59e8ccf444b97962b23c4639a, type: 3}
+  idleVolume: 0.5
+  listenerOverride: {fileID: 0}
+  minAudibleDistance: 2
+  maxAudibleDistance: 12
   stuckVelocityThreshold: 0.05
   stuckTimeThreshold: 0.8
   maxRecoveryAttempts: 5
