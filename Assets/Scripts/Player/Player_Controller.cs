@@ -387,11 +387,14 @@ public class Player_Controller : MonoBehaviour
 
   public void LoadGame()
   {
-    Debug.Log("Loading game...");
+    Debug.Log($"[Player_Controller] Loading game from slot {SaveSlotTracker.CurrentSlot}...");
     PlayerData data = SaveSystem.LoadPlayer(SaveSlotTracker.CurrentSlot);
 
     if (data != null)
     {
+      Debug.Log($"[Player_Controller] Save data loaded! Position in save: ({data.position[0]}, {data.position[1]}, {data.position[2]})");
+      Debug.Log($"[Player_Controller] Current position BEFORE load: {transform.position}");
+      
       // Restore play time for this slot
       SaveSystem.SetPlayTime(data.playTime, SaveSlotTracker.CurrentSlot);
 
@@ -404,7 +407,24 @@ public class Player_Controller : MonoBehaviour
       xP_System.Initialize(data.level, data.currentXp, data.maxXp, LVL1XpAmount, XpGrowthMultiplier);
       UpdateStatsFromLevel();
 
-      transform.position = new Vector3(data.position[0], data.position[1], data.position[2]);
+      Vector3 loadedPosition = new Vector3(data.position[0], data.position[1], data.position[2]);
+      
+      // Only apply position from save if it's not at origin (0,0,0) - keep current position if save has invalid position
+      if (loadedPosition != Vector3.zero)
+      {
+        transform.position = loadedPosition;
+        Debug.Log($"[Player_Controller] Position set from save: {transform.position}");
+      }
+      else
+      {
+        Debug.Log($"[Player_Controller] Save has (0,0,0) position - keeping current position: {transform.position}");
+      }
+      
+      // Also reset velocity to prevent falling
+      var rb = GetComponent<Rigidbody2D>();
+      if (rb != null) rb.linearVelocity = Vector2.zero;
+      
+      Debug.Log($"[Player_Controller] Final position AFTER load: {transform.position}");
 
       Inventory.instance.Clear();
       var namesList = (data.inventoryResourceNames != null && data.inventoryResourceNames.Count > 0)

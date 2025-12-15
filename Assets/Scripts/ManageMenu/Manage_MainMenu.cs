@@ -16,7 +16,7 @@ public class Manage_MainMenu : MonoBehaviour
     [SerializeField] private string gameSceneName = "GameScene";
     [SerializeField] private string mainMenuScene = "MainMenu";
     [SerializeField] private string tutorialSceneName = "TutorialScene";
-    [SerializeField] private Vector3 tutorialSpawnPosition = Vector3.zero;
+    [SerializeField] private Vector3 tutorialSpawnPosition = new Vector3(-44.36f, -4.01f, 0f);
     [SerializeField] private Transform tutorialSpawnOverride;
     [SerializeField] private PlayerStats defaultPlayerStats;
 
@@ -27,12 +27,8 @@ public class Manage_MainMenu : MonoBehaviour
 
     void Start()
     {
-        if (loadGameButton != null)
-            loadGameButton.onClick.AddListener(OnLoadClicked);
-        if (newGameButton != null)
-            newGameButton.onClick.AddListener(OnNewGameClicked);
-        if (quitButton != null)
-            quitButton.onClick.AddListener(OnQuitClicked);
+        // Button listeners are now handled by MainMenuController
+        // This script only handles camera setup and utility functions
     }
 
     // Call this from your save slot UI (e.g. button click) to set the slot

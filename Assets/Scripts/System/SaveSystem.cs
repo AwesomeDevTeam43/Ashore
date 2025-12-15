@@ -48,6 +48,10 @@ public static class SaveSystem
 
     public static void CreateNewGameSave(PlayerStats stats, string targetScene, Vector3 spawnPosition, int slot)
     {
+        Debug.Log($"[SaveSystem] Creating new game save for slot {slot}");
+        Debug.Log($"[SaveSystem] Spawn position being saved: {spawnPosition}");
+        Debug.Log($"[SaveSystem] Target scene: {targetScene}");
+        
         int baseLevel = 1;
         int baseMaxXp = stats != null ? stats.Level1XpAmount : 10;
         int baseHealth = stats != null ? stats.GetHealth(baseLevel) : 10;
@@ -70,6 +74,7 @@ public static class SaveSystem
             mainWeaponType = Player_Controller.MainWeaponType.Melee.ToString()
         };
         WritePlayerData(data, slot);
+        Debug.Log($"[SaveSystem] New game save created successfully at slot {slot}");
     }
 
     public static PlayerData LoadPlayer(int slot)
@@ -90,6 +95,26 @@ public static class SaveSystem
         {
             Debug.LogWarning("Save file not found in " + path);
             return null;
+        }
+    }
+
+    public static void DeleteSave(int slot)
+    {
+        string path = GetSaveFilePath(slot);
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+            Debug.Log($"Save file deleted: {path}");
+            
+            // Reset play time for this slot
+            if (slot >= 1 && slot <= 3)
+            {
+                playTimeCache[slot] = 0f;
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"No save file found to delete at: {path}");
         }
     }
 

@@ -312,7 +312,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Game
+  m_text: Options
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -448,7 +448,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Load Game
+  m_text: Start Game
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -540,7 +540,7 @@ GameObject:
   - component: {fileID: 650316690}
   - component: {fileID: 650316689}
   m_Layer: 5
-  m_Name: LoadGame
+  m_Name: StartGameButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -874,7 +874,7 @@ GameObject:
   - component: {fileID: 864135518}
   - component: {fileID: 864135517}
   m_Layer: 5
-  m_Name: MainMenu
+  m_Name: MainMenuPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1001,7 +1001,7 @@ GameObject:
   - component: {fileID: 1057376433}
   - component: {fileID: 1057376432}
   m_Layer: 5
-  m_Name: NewGame
+  m_Name: Options
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1329,7 +1329,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1437085092}
   m_CullTransparentMesh: 1
---- !u!1 &1527381611
+--- !u!1 &1533351090
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1337,40 +1337,62 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1527381613}
-  - component: {fileID: 1527381612}
+  - component: {fileID: 1533351092}
+  - component: {fileID: 1533351091}
   m_Layer: 0
-  m_Name: MenuManager
+  m_Name: MainMenuController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1527381612
+--- !u!114 &1533351091
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1527381611}
+  m_GameObject: {fileID: 1533351090}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 424b14617fe281e4c9e644c78c473f2a, type: 3}
+  m_Script: {fileID: 11500000, guid: e71ebd04454f1aa43be15f8f58d41f36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainMenuSceneName: MainMenu
-  menuActionName: Menu
-  overlayColor: {r: 0, g: 0, b: 0, a: 0.85}
---- !u!4 &1527381613
+  mainMenuPanel: {fileID: 864135516}
+  saveSlotsPanel: {fileID: 0}
+  optionsPanel: {fileID: 0}
+  startGameButton: {fileID: 650316689}
+  optionsButton: {fileID: 1057376432}
+  quitButton: {fileID: 1972832400}
+  slotsBackButton: {fileID: 0}
+  slotButtons:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  slotTitleTexts:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  slotInfoTexts: []
+  optionsBackButton: {fileID: 0}
+  gameSceneName: GameScene
+  tutorialSceneName: TutorialScene
+  tutorialSpawnPosition: {x: 0, y: 0, z: 0}
+  defaultPlayerStats: {fileID: 11400000, guid: bd35a466862b3c849af092f1d041e9c1, type: 2}
+  buttonColor: {r: 0.2, g: 0.6, b: 0.85, a: 1}
+  slotEmptyColor: {r: 0.3, g: 0.4, b: 0.5, a: 0.8}
+  highlightedColor: {r: 0.3, g: 0.75, b: 0.95, a: 1}
+  pressedColor: {r: 0.15, g: 0.5, b: 0.7, a: 1}
+--- !u!4 &1533351092
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1527381611}
+  m_GameObject: {fileID: 1533351090}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 552.7795, y: 278.40536, z: -0.039148092}
+  m_LocalPosition: {x: 609.9654, y: 330.33838, z: -0.07156162}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1562,4 +1584,4 @@ SceneRoots:
   - {fileID: 864135521}
   - {fileID: 1268521255}
   - {fileID: 1862964200}
-  - {fileID: 1527381613}
+  - {fileID: 1533351092}
