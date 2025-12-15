@@ -139,7 +139,7 @@ public class BonfireRestPoint : MonoBehaviour, ISaveable
             else
             {
                 // Defensive: fall back to SaveSystem if Player_Controller not found
-                SaveSystem.SavePlayer(pc, xp, ph, Inventory.instance);
+                SaveSystem.SavePlayer(pc, xp, ph, Inventory.instance, SaveSlotTracker.CurrentSlot);
             }
         }
     }

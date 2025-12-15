@@ -5,6 +5,8 @@ using UnityEngine.SceneManagement;
 [System.Serializable]
 public class PlayerData
 {
+    // Total play time in seconds
+    public float playTime;
     // Player Stats & Position
     public int level;
     public int currentXp;
@@ -29,7 +31,7 @@ public class PlayerData
     // Parameterless constructor for JSON deserialization
     public PlayerData() { }
 
-    public PlayerData(Player_Controller player, XP_System xp, Player_Health health, Inventory inventory)
+    public PlayerData(Player_Controller player, XP_System xp, Player_Health health, Inventory inventory, float playTimeSeconds = 0f)
     {
         // Stats
         level = xp.CurrentLevel;
@@ -77,6 +79,9 @@ public class PlayerData
 
         // Main weapon type (persist player's selected combat mode)
         mainWeaponType = player.CurrentMainWeapon.ToString();
+
+        // Play time
+        playTime = playTimeSeconds;
     }
 
     // Preferred key for equipment resource lookup

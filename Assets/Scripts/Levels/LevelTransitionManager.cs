@@ -419,7 +419,7 @@ public class LevelTransitionManager : MonoBehaviour
 
   private void RestoreWorldViaSaveSystem()
   {
-    var data = SaveSystem.LoadPlayer();
+    var data = SaveSystem.LoadPlayer(SaveSlotTracker.CurrentSlot);
     if (data == null || data.worldData == null || data.worldData.Count == 0) return;
     SaveSystem.RestoreWorldState(data);
   }

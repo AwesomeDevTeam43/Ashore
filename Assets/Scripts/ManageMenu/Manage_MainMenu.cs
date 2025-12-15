@@ -1,6 +1,12 @@
+
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+// Tracks the current save slot selected by the player
+public static class SaveSlotTracker
+{
+    public static int CurrentSlot = 1;
+}
 
 public class Manage_MainMenu : MonoBehaviour
 {
@@ -29,9 +35,15 @@ public class Manage_MainMenu : MonoBehaviour
             quitButton.onClick.AddListener(OnQuitClicked);
     }
 
+    // Call this from your save slot UI (e.g. button click) to set the slot
+    public void SelectSaveSlot(int slot)
+    {
+        SaveSlotTracker.CurrentSlot = Mathf.Clamp(slot, 1, 3);
+    }
+
     private void OnLoadClicked()
     {
-        string savedScene = SaveSystem.GetSavedSceneName();
+        string savedScene = SaveSystem.GetSavedSceneName(SaveSlotTracker.CurrentSlot);
         if (!string.IsNullOrEmpty(savedScene))
         {
             GameFlowState.LoadGameOnStart = true;
@@ -52,7 +64,7 @@ public class Manage_MainMenu : MonoBehaviour
         {
             spawnPos = tutorialSpawnOverride.position;
         }
-        SaveSystem.CreateNewGameSave(defaultPlayerStats, tutorialSceneName, spawnPos);
+        SaveSystem.CreateNewGameSave(defaultPlayerStats, tutorialSceneName, spawnPos, SaveSlotTracker.CurrentSlot);
         GameFlowState.LoadGameOnStart = true;
         SceneManager.LoadScene(string.IsNullOrEmpty(tutorialSceneName) ? gameSceneName : tutorialSceneName);
     }

@@ -8,15 +8,19 @@ using UnityEngine.SceneManagement;
 
 public static class SaveSystem
 {
-    private static readonly string SAVE_FILE = "/player.json";
-    private static string SaveFilePath => Application.persistentDataPath + SAVE_FILE;
-
-    public static void SavePlayer(Player_Controller player, XP_System xp, Player_Health health, Inventory inventory)
+    private static string GetSaveFilePath(int slot)
     {
-        PlayerData data = new PlayerData(player, xp, health, inventory);
+        slot = Mathf.Clamp(slot, 1, 3);
+        return Application.persistentDataPath + "/player" + slot + ".json";
+    }
 
-    var saveableEntities = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).OfType<ISaveable>();
+    private static float[] playTimeCache = new float[4]; // 1-based index for slots 1-3
 
+    public static void SavePlayer(Player_Controller player, XP_System xp, Player_Health health, Inventory inventory, int slot)
+    {
+        float playTime = playTimeCache[slot];
+        PlayerData data = new PlayerData(player, xp, health, inventory, playTime);
+        var saveableEntities = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).OfType<ISaveable>();
         foreach (var saveable in saveableEntities)
         {
             var guidComponent = (saveable as MonoBehaviour).GetComponent<GuidComponent>();
@@ -25,11 +29,24 @@ public static class SaveSystem
                 data.worldData[guidComponent.GetGuid()] = saveable.CaptureState();
             }
         }
-
-        WritePlayerData(data);
+        WritePlayerData(data, slot);
     }
 
-    public static void CreateNewGameSave(PlayerStats stats, string targetScene, Vector3 spawnPosition)
+    // Call this every frame from a manager to track play time for the current slot
+    public static void AddPlayTime(float deltaTime, int slot)
+    {
+        if (slot < 1 || slot > 3) return;
+        playTimeCache[slot] += deltaTime;
+    }
+
+    // Optionally, call this when loading a save to restore play time
+    public static void SetPlayTime(float playTime, int slot)
+    {
+        if (slot < 1 || slot > 3) return;
+        playTimeCache[slot] = playTime;
+    }
+
+    public static void CreateNewGameSave(PlayerStats stats, string targetScene, Vector3 spawnPosition, int slot)
     {
         int baseLevel = 1;
         int baseMaxXp = stats != null ? stats.Level1XpAmount : 10;
@@ -52,13 +69,12 @@ public static class SaveSystem
             equippedResourceName = null,
             mainWeaponType = Player_Controller.MainWeaponType.Melee.ToString()
         };
-
-        WritePlayerData(data);
+        WritePlayerData(data, slot);
     }
 
-    public static PlayerData LoadPlayer()
+    public static PlayerData LoadPlayer(int slot)
     {
-        string path = SaveFilePath;
+        string path = GetSaveFilePath(slot);
         if (File.Exists(path))
         {
             JsonSerializerSettings settings = new JsonSerializerSettings
@@ -67,7 +83,6 @@ public static class SaveSystem
             };
             string json = File.ReadAllText(path);
             PlayerData data = JsonConvert.DeserializeObject<PlayerData>(json, settings);
-
             Debug.Log("Game Loaded from: " + path);
             return data;
         }
@@ -78,9 +93,9 @@ public static class SaveSystem
         }
     }
 
-    public static string GetSavedSceneName()
+    public static string GetSavedSceneName(int slot)
     {
-        string path = SaveFilePath;
+        string path = GetSaveFilePath(slot);
         if (!File.Exists(path)) return null;
         try
         {
@@ -95,28 +110,26 @@ public static class SaveSystem
         }
     }
 
-    private static void WritePlayerData(PlayerData data)
+    private static void WritePlayerData(PlayerData data, int slot)
     {
         if (data == null)
         {
             Debug.LogWarning("SaveSystem: No data provided to write.");
             return;
         }
-
         JsonSerializerSettings settings = new JsonSerializerSettings
         {
             TypeNameHandling = TypeNameHandling.All
         };
         string json = JsonConvert.SerializeObject(data, Formatting.Indented, settings);
-
-        File.WriteAllText(SaveFilePath, json);
-        Debug.Log("Game Saved to: " + SaveFilePath);
+        string path = GetSaveFilePath(slot);
+        File.WriteAllText(path, json);
+        Debug.Log("Game Saved to: " + path);
     }
 
     public static void RestoreWorldState(PlayerData data)
     {
-    var saveableEntities = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).OfType<ISaveable>();
-
+        var saveableEntities = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).OfType<ISaveable>();
         foreach (var saveable in saveableEntities)
         {
             var guidComponent = (saveable as MonoBehaviour).GetComponent<GuidComponent>();

@@ -382,16 +382,19 @@ public class Player_Controller : MonoBehaviour
   public void SaveGame()
   {
     Debug.Log("Saving game...");
-    SaveSystem.SavePlayer(this, xP_System, playerHealth, Inventory.instance);
+    SaveSystem.SavePlayer(this, xP_System, playerHealth, Inventory.instance, SaveSlotTracker.CurrentSlot);
   }
 
   public void LoadGame()
   {
     Debug.Log("Loading game...");
-    PlayerData data = SaveSystem.LoadPlayer();
+    PlayerData data = SaveSystem.LoadPlayer(SaveSlotTracker.CurrentSlot);
 
     if (data != null)
     {
+      // Restore play time for this slot
+      SaveSystem.SetPlayTime(data.playTime, SaveSlotTracker.CurrentSlot);
+
       if (healthSystem != null)
       {
         healthSystem.MaxHealth = data.maxHealth;
