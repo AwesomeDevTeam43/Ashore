@@ -187928,7 +187928,7 @@ PrefabInstance:
     - target: {fileID: 318375757719289399, guid: a4508f1dee54d2840b1c6bfeb8b006bf, type: 3}
       propertyPath: musicSource
       value: 
-      objectReference: {fileID: 934598089}
+      objectReference: {fileID: 0}
     - target: {fileID: 2259242410273707102, guid: a4508f1dee54d2840b1c6bfeb8b006bf, type: 3}
       propertyPath: m_LocalPosition.x
       value: 57.255985
