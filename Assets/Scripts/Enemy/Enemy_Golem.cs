@@ -12,6 +12,22 @@ public class Enemy_Golem : EnemyBase
     private Transform player;
     private Collider2D col2d;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource idleAudioSource;
+    [SerializeField] private AudioSource sfxAudioSource;
+    [SerializeField] private AudioSource moveAudioSource;
+    [SerializeField] private AudioClip idleClip;
+    [SerializeField] private AudioClip moveLoopClip;
+    [SerializeField] private AudioClip slamClip;
+    [SerializeField] private float idleIntervalSeconds = 3f;
+    [SerializeField] private float hearDistance = 12f;
+    [SerializeField, Range(0f, 1f)] private float spatialBlend = 1f;
+    [SerializeField, Range(0f, 1f)] private float idleVolume = 1f;
+    [SerializeField, Range(0f, 1f)] private float moveVolume = 1f;
+    [SerializeField, Range(0f, 1f)] private float sfxVolume = 1f;
+    [SerializeField] private float minMoveSpeedForSound = 0.05f;
+    private float idleTimer;
+
     [Header("Animator Params")]
     [SerializeField] private string walkBool = "isWalking";
     [SerializeField] private string attackTrigger = "Attack";
@@ -71,6 +87,9 @@ public class Enemy_Golem : EnemyBase
         lastX = transform.position.x;
         spawnPos = transform.position;
 
+        idleTimer = Mathf.Max(0.01f, idleIntervalSeconds);
+        EnsureAudioSources();
+
     }
 
     void Update()
@@ -82,18 +101,18 @@ public class Enemy_Golem : EnemyBase
         switch (state)
         {
             case State.Idle:
-                if (dist <= (typedStats != null ? typedStats.detectRange : 6f)) state = State.Chase;
+                if (dist <= (typedStats != null ? typedStats.detectRange : 6f)) SetState(State.Chase);
                 break;
             case State.Chase:
                 if (dist > (typedStats != null ? typedStats.leashDistance : 12f))
                 {
-                    state = State.Return;
+                    SetState(State.Return);
                     if (animator) animator.SetBool(walkBool, true);
                     break;
                 }
                 if (dist <= (typedStats != null ? typedStats.slamRange : 1.6f) && cooldown <= 0f)
                 {
-                    state = State.Slam;
+                    SetState(State.Slam);
                     windupTimer = typedStats != null ? typedStats.slamWindup : 0.5f;
                     rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
                     if (animator) animator.SetBool(walkBool,false);
@@ -103,7 +122,7 @@ public class Enemy_Golem : EnemyBase
             case State.Slam:
                 if (dist > (typedStats != null ? typedStats.leashDistance : 12f))
                 {
-                    state = State.Return;
+                    SetState(State.Return);
                     break;
                 }
                 
@@ -117,23 +136,173 @@ public class Enemy_Golem : EnemyBase
                 if (windupTimer <= 0f)
                 {
                     cooldown = typedStats != null ? typedStats.slamCooldown : 2.2f;
-                    state = State.Chase;
+                    SetState(State.Chase);
                 }
                 break;
             case State.Return:
                 // If player comes close again, resume chase
                 if (dist <= (typedStats != null ? typedStats.detectRange : 6f))
                 {
-                    state = State.Chase;
+                    SetState(State.Chase);
                     break;
                 }
                 // Arrived at spawn -> idle
                 if (Vector2.Distance(transform.position, spawnPos) <= (typedStats != null ? typedStats.returnStopDistance : 0.5f))
                 {
-                    state = State.Idle;
+                    SetState(State.Idle);
                     if (animator) animator.SetBool(walkBool, false);
                 }
                 break;
+        }
+
+        HandleIdleAudio(dist);
+        HandleMoveAudio(dist);
+    }
+
+    private void SetState(State newState)
+    {
+        if (state == newState) return;
+        State previous = state;
+        state = newState;
+        OnStateEntered(newState, previous);
+    }
+
+    private void OnStateEntered(State entered, State previous)
+    {
+        if (entered == State.Slam)
+        {
+            StopIdleAudio();
+            //PlaySfx(slamClip);
+        }
+
+        if (entered == State.Idle)
+        {
+            idleTimer = Mathf.Max(0.01f, idleIntervalSeconds);
+            StopMoveAudio();
+        }
+
+        if (entered != State.Chase && entered != State.Return)
+        {
+            StopMoveAudio();
+        }
+    }
+
+    private void HandleIdleAudio(float distanceToPlayer)
+    {
+        if (idleAudioSource == null) return;
+
+        bool canHear = distanceToPlayer <= hearDistance;
+        UpdateAudioSourceDistance(idleAudioSource);
+        UpdateAudioSourceDistance(sfxAudioSource);
+        UpdateAudioSourceDistance(moveAudioSource);
+
+        if (!canHear || state != State.Idle)
+        {
+            StopIdleAudio();
+            return;
+        }
+
+        if (idleClip == null) return;
+
+        idleTimer -= Time.deltaTime;
+        if (idleTimer > 0f) return;
+
+        idleAudioSource.clip = idleClip;
+        idleAudioSource.volume = idleVolume;
+        idleAudioSource.Play();
+        idleTimer = Mathf.Max(0.01f, idleIntervalSeconds);
+    }
+
+    private void HandleMoveAudio(float distanceToPlayer)
+    {
+        if (moveAudioSource == null) return;
+
+        bool canHear = distanceToPlayer <= hearDistance;
+        bool inMoveState = state == State.Chase || state == State.Return;
+        bool isMoving = rb != null && Mathf.Abs(rb.linearVelocity.x) > minMoveSpeedForSound;
+
+        if (!canHear || !inMoveState || !isMoving || moveLoopClip == null)
+        {
+            StopMoveAudio();
+            return;
+        }
+
+        if (moveAudioSource.clip != moveLoopClip)
+        {
+            moveAudioSource.clip = moveLoopClip;
+        }
+
+        moveAudioSource.volume = moveVolume;
+        if (!moveAudioSource.isPlaying)
+        {
+            moveAudioSource.Play();
+        }
+    }
+
+    private void StopIdleAudio()
+    {
+        if (idleAudioSource != null && idleAudioSource.isPlaying)
+        {
+            idleAudioSource.Stop();
+        }
+    }
+
+    private void StopMoveAudio()
+    {
+        if (moveAudioSource != null && moveAudioSource.isPlaying)
+        {
+            moveAudioSource.Stop();
+        }
+    }
+
+    private void PlaySfx(AudioClip clip)
+    {
+        if (clip == null || sfxAudioSource == null || player == null) return;
+        float distance = Vector2.Distance(player.position, transform.position);
+        if (distance > hearDistance) return;
+
+        sfxAudioSource.volume = sfxVolume;
+        sfxAudioSource.PlayOneShot(clip);
+    }
+
+    private void EnsureAudioSources()
+    {
+        if (idleAudioSource == null)
+        {
+            idleAudioSource = gameObject.AddComponent<AudioSource>();
+        }
+        if (sfxAudioSource == null)
+        {
+            sfxAudioSource = gameObject.AddComponent<AudioSource>();
+        }
+        if (moveAudioSource == null)
+        {
+            moveAudioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        ConfigureAudioSource(idleAudioSource, loop: false);
+        ConfigureAudioSource(sfxAudioSource, loop: false);
+        ConfigureAudioSource(moveAudioSource, loop: true);
+    }
+
+    private void ConfigureAudioSource(AudioSource source, bool loop)
+    {
+        if (source == null) return;
+        source.playOnAwake = false;
+        source.loop = loop;
+        source.spatialBlend = spatialBlend;
+        source.rolloffMode = AudioRolloffMode.Linear;
+        source.minDistance = 1f;
+        source.maxDistance = Mathf.Max(1f, hearDistance);
+    }
+
+    private void UpdateAudioSourceDistance(AudioSource source)
+    {
+        if (source == null) return;
+        float max = Mathf.Max(1f, hearDistance);
+        if (!Mathf.Approximately(source.maxDistance, max))
+        {
+            source.maxDistance = max;
         }
     }
 
@@ -367,6 +536,8 @@ public class Enemy_Golem : EnemyBase
         float radius = typedStats != null ? typedStats.slamRadius : 2.75f;
         int mask = slamHitMask.value != 0 ? slamHitMask.value : LayerMask.GetMask("Player");
         var hits = Physics2D.OverlapCircleAll(transform.position, radius, mask);
+
+        PlaySfx(slamClip);
         
         // ADICIONAR: Efeito de impacto
         if (slamImpactPrefab != null)
@@ -408,6 +579,9 @@ public class Enemy_Golem : EnemyBase
         Gizmos.color = Color.red; Gizmos.DrawWireSphere(transform.position, radius);
         Gizmos.color = Color.yellow; Gizmos.DrawWireSphere(transform.position, dRange);
         Gizmos.color = Color.cyan; Gizmos.DrawWireSphere(transform.position, sRange);
+
+        Gizmos.color = new Color(1f, 1f, 0f, 0.5f);
+        Gizmos.DrawWireSphere(transform.position, hearDistance);
     // hop debug rays
         Gizmos.color = Color.magenta;
         float dir = Application.isPlaying && player ? Mathf.Sign(player.position.x - transform.position.x) : Mathf.Sign(transform.localScale.x);

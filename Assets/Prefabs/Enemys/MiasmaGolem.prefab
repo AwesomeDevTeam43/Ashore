@@ -224,7 +224,21 @@ MonoBehaviour:
   stats: {fileID: 11400000, guid: b07395be782cb4e4380990c4719674c3, type: 2}
   currentLevel: 1
   damageVariance: 0.1
+  audioSource: {fileID: 0}
   typedStats: {fileID: 11400000, guid: b07395be782cb4e4380990c4719674c3, type: 2}
+  idleAudioSource: {fileID: 0}
+  sfxAudioSource: {fileID: 0}
+  moveAudioSource: {fileID: 0}
+  idleClip: {fileID: 0}
+  moveLoopClip: {fileID: 8300000, guid: 35a42e320e8c67249a8c0b52783b7716, type: 3}
+  slamClip: {fileID: 8300000, guid: 8dae64503a875d94ca339079a1497fca, type: 3}
+  idleIntervalSeconds: 3
+  hearDistance: 12
+  spatialBlend: 1
+  idleVolume: 1
+  moveVolume: 1
+  sfxVolume: 1
+  minMoveSpeedForSound: 0.05
   walkBool: isWalking
   attackTrigger: Attack
   obstacleMask:
