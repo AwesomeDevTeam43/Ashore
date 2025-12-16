@@ -36,13 +36,13 @@ Fluxo real, em runtime:
 
 O A* (e algoritmos semelhantes) precisam de um grafo. A grelha é uma forma prática de construir esse grafo a partir do mundo:
 
-No teu projecto existem **dois modos de grelha**:
+Neste projecto existem **dois modos de grelha**:
 
 - **NavGrid2D (baked)**: uma grelha de nível que pode ser “baked” (`Bake()`), e depois usada em tempo real.
 - **GridPathfinder2D (local/dinâmico)**: constrói uma grelha temporária à volta de um centro (por omissão, o ponto médio entre start e target) e pode usar cache por “chunks” com TTL.
 
 
-- **Resolução (nodeRadius/nodeDiameter)**: no teu projecto, `nodeRadius` define o “passo” da grelha e afecta o compromisso custo vs precisão (mais nós = A* mais pesado; menos nós = trajectos mais aproximados).
+- **Resolução (nodeRadius/nodeDiameter)**: neste projecto, `nodeRadius` define o “passo” da grelha e afecta o compromisso custo vs precisão (mais nós = A* mais pesado; menos nós = trajectos mais aproximados).
 
 - **Transitável vs não transitável**: cada célula é marcada com base em testes de colisão (se ali cabe o agente sem intersectar obstáculos).
 
@@ -55,7 +55,7 @@ bool walkable = !Physics2D.OverlapCircle(worldPoint, r, obstacleMask);
 grid[x, y] = new Node(walkable, worldPoint, x, y);
 ```
 
-- **Folga (clearance)**: o teu código aumenta o raio do teste de colisão (ou ajusta `clearance` na grelha) com base no tamanho do agente, para evitar trajectos apertados.
+- **Folga (clearance)**: código que aumenta o raio do teste de colisão (ou ajusta `clearance` na grelha) com base no tamanho do agente, para evitar trajectos apertados.
 
 Exemplo (no `NavAgent2D`, aplicar folga com base no raio do agente ao pedir caminho numa `NavGrid2D`):
 
@@ -102,7 +102,7 @@ $$f(n)=g(n)+h(n)$$
 - **$g$**: custo acumulado desde o início
 - **$h$**: estimativa até ao alvo
 
-No teu código, a distância/heurística vem de `GetDistance(...)` e é **Octile** (custos 10/14).
+No código, a distância/heurística vem de `GetDistance(...)` e é **Octile** (custos 10/14).
 
 Exemplo (o nó guarda $g$, $h$ e calcula $f$):
 
@@ -131,13 +131,13 @@ if (!openSet.Contains(neighbour) || newCost < neighbour.gCost)
 }
 ```
 
-Nota do teu código: tanto em `GridPathfinder2D` como em `NavGrid2D`, o open set é uma `List` e o closed set é um `HashSet`, com desempate por `h` quando `f` empata.
+Nota do código: tanto em `GridPathfinder2D` como em `NavGrid2D`, o open set é uma `List` e o closed set é um `HashSet`, com desempate por `h` quando `f` empata.
 
 ---
 
 ### 3) Execução do caminho: como o teu inimigo se move
 
-O A* devolve uma lista de pontos (`currentPath`). No teu inimigo (a abelha), a execução funciona assim:
+O A* devolve uma lista de pontos (`currentPath`). No inimigo (a abelha), a execução funciona assim:
 
 #### Seguimento por waypoints
 
@@ -159,17 +159,17 @@ if (toWp.magnitude <= pathPointThreshold)
 }
 ```
 
-No teu código, `pathPointThreshold` demasiado pequeno pode causar oscilações; demasiado grande pode fazer avançar waypoints cedo demais.
+No código, `pathPointThreshold` demasiado pequeno pode causar oscilações; demasiado grande pode fazer avançar waypoints cedo demais.
 
 #### Aplicação do movimento (Rigidbody2D)
 
-No teu código, a abelha calcula uma `desiredVelocity` e aplica-a no `FixedUpdate` através do `Rigidbody2D`:
+No código, a abelha calcula uma `desiredVelocity` e aplica-a no `FixedUpdate` através do `Rigidbody2D`:
 
 ```csharp
 rb.linearVelocity = desiredVelocity;
 ```
 
-Isto significa que **não estás a usar** um modo “cinemático puro” baseado em `transform.position`/`MovePosition` como estratégia principal; o movimento é feito via `Rigidbody2D`.
+Isto significa que **não estamos a usar** um modo “cinemático puro” baseado em `transform.position`/`MovePosition` como estratégia principal; o movimento é feito via `Rigidbody2D`.
 
 #### Validação local (anti-tunneling / bloqueios)
 
@@ -192,13 +192,13 @@ if (hit.collider != null)
 
 #### Fallback quando não há caminho
 
-Se depois das tentativas o `currentPath` ficar vazio, o teu código não pára: faz um steer local que amostra 16 direcções e escolhe a melhor (equilibra “ir para o alvo” e “estar livre de colisões”), usando `CircleCast` para avaliar espaço livre.
+Se depois das tentativas o `currentPath` ficar vazio, o código não pára: faz um steer local que amostra 16 direcções e escolhe a melhor (equilibra “ir para o alvo” e “estar livre de colisões”), usando `CircleCast` para avaliar o espaço livre.
 
 ---
 
 ### 4) Integração em tempo real (no `BeeEnemy`): repath, fallback e recuperação
 
-A tua integração “em jogo” acontece sobretudo em `BeeEnemy.FollowPathTowards(target, speed)`:
+A integração “em jogo” acontece sobretudo em `BeeEnemy.FollowPathTowards(target, speed)`:
 
 - É chamada em **Roaming** para aproximar ao jogador quando não há lunge/LOS, e para regressar ao `spawnPosition` quando sai do leash.
 - É chamada em **Lunging** para ir para `playerAttackPoint` (pés do jogador).
@@ -361,7 +361,7 @@ FollowPathTowards(retreatTargetPosition, typedStats != null ? typedStats.retreat
 ### Sistema de Evolução Genética Adversária (GA)
 
 ### Resumo
-Este repositório contém uma implementação aplicada de um Algoritmo Genético (AG) integrado num protótipo de jogo Metroidvania. O objectivo é adaptar automaticamente atributos de inimigos (por espécie) em resposta ao desempenho do jogador, mantendo controlos de equilíbrio que previnem escalonamento indevido.
+Este repositório contém uma implementação aplicada de um Algoritmo Genético (AG). O objectivo é adaptar automaticamente atributos de inimigos (por espécie) em resposta ao desempenho do jogador, mantendo controlos de equilíbrio que previnem escalonamento indevido.
 
 O documento descreve a arquitectura, as representações genéticas, a função de aptidão, os operadores evolutivos, mecanismos de controlo, e procedimentos experimentais recomendados.
 
@@ -382,7 +382,7 @@ Referências de ficheiros: `Assets/Scripts/AI/GeneticAlgorithm/`.
 ### Métodos e design
 
 #### Representação do genoma
-Genes são floats normalizados. Esta escolha facilita aplicação uniforme entre espécies com diferentes escalas de estatísticas base. As transformações para valores de jogo são determinísticas (ver secção "Mapeamento Gene → Valores").
+Genes são floats normalizados. Esta escolha facilita aplicação uniforme entre espécies com diferentes escalas de estatísticas base. As transformações para valores de jogo são determinísticas.
 
 Excerto (estrutura de genes):
 
