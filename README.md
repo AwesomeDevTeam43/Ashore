@@ -73,7 +73,7 @@ finally
 ```
 
 
-- **Vizinhança (8 direcções + diagonais)**: o teu `GetNeighbours(...)` considera diagonais e bloqueia “corner-cutting” verificando as duas células ortogonais.
+- **Vizinhança (8 direcções + diagonais)**: o `GetNeighbours(...)` considera diagonais e bloqueia “corner-cutting” verificando as duas células ortogonais.
 
 Exemplo (proibir diagonais que “cortam cantos”):
 
@@ -86,7 +86,7 @@ if (dx != 0 && dy != 0)
 }
 ```
 
-- **Grelha baked vs grelha dinâmica (no teu código)**:
+- **Grelha baked vs grelha dinâmica (no código)**:
 	- *Baked* = `NavGrid2D` (pré-calculada via `Bake()`, usada com `NavGrid2D.Instance.FindPath(...)`).
 	- *Dinâmica/local* = `GridPathfinder2D` (construída à volta de um centro e usada como fallback quando não existe `NavGrid2D.Instance`).
 
@@ -135,7 +135,7 @@ Nota do código: tanto em `GridPathfinder2D` como em `NavGrid2D`, o open set é 
 
 ---
 
-### 3) Execução do caminho: como o teu inimigo se move
+### 3) Execução do caminho: como o inimigo se move
 
 O A* devolve uma lista de pontos (`currentPath`). No inimigo (a abelha), a execução funciona assim:
 
@@ -173,7 +173,7 @@ Isto significa que **não estamos a usar** um modo “cinemático puro” basead
 
 #### Validação local (anti-tunneling / bloqueios)
 
-Antes de aplicar a velocidade, o teu `FixedUpdate` faz um `CircleCast` na direcção do movimento para evitar atravessar obstáculos, e se detectar bloqueio força repath ou tenta um pequeno “nudge”:
+Antes de aplicar a velocidade, o `FixedUpdate` faz um `CircleCast` na direcção do movimento para evitar atravessar obstáculos, e se detectar bloqueio força repath ou tenta um pequeno “nudge”:
 
 ```csharp
 var hit = Physics2D.CircleCast(origin, rad, dir, stepDist, obstacleMask);
