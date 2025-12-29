@@ -152,6 +152,11 @@ public class BeeEnemy : EnemyBase
       sfxSource.loop = false;
       // 2D by default. If you want 3D attenuation, set Spatial Blend in the Inspector.
       sfxSource.spatialBlend = 0f;
+      if (AudioManager.Instance != null)
+      {
+        var g = AudioManager.Instance.GetSFXGroup();
+        if (g != null) sfxSource.outputAudioMixerGroup = g;
+      }
     }
     
     if (idleSource == null)
@@ -181,6 +186,11 @@ public class BeeEnemy : EnemyBase
       idleSource.spatialBlend = 0f;
       idleSource.volume = idleVolume;
       if (idleLoopSfx != null) idleSource.clip = idleLoopSfx;
+      if (AudioManager.Instance != null)
+      {
+        var g = AudioManager.Instance.GetSFXGroup();
+        if (g != null) idleSource.outputAudioMixerGroup = g;
+      }
     }
 
     if (retreatSource == null)
@@ -208,6 +218,11 @@ public class BeeEnemy : EnemyBase
       retreatSource.playOnAwake = false;
       retreatSource.loop = false;
       retreatSource.spatialBlend = 0f;
+      if (AudioManager.Instance != null)
+      {
+        var g = AudioManager.Instance.GetSFXGroup();
+        if (g != null) retreatSource.outputAudioMixerGroup = g;
+      }
     }
 
     if (windupSource == null)
@@ -234,6 +249,11 @@ public class BeeEnemy : EnemyBase
       windupSource.playOnAwake = false;
       windupSource.loop = false;
       windupSource.spatialBlend = 0f;
+      if (AudioManager.Instance != null)
+      {
+        var g = AudioManager.Instance.GetSFXGroup();
+        if (g != null) windupSource.outputAudioMixerGroup = g;
+      }
     }
 
     if (lungeSource == null)
@@ -260,6 +280,11 @@ public class BeeEnemy : EnemyBase
       lungeSource.playOnAwake = false;
       lungeSource.loop = false;
       lungeSource.spatialBlend = 0f;
+      if (AudioManager.Instance != null)
+      {
+        var g = AudioManager.Instance.GetSFXGroup();
+        if (g != null) lungeSource.outputAudioMixerGroup = g;
+      }
     }
 
     ResolveListenerTransform();

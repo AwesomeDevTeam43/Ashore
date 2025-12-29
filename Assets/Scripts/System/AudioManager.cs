@@ -7,6 +7,8 @@ public class AudioManager : MonoBehaviour
     public AudioMixer audioMixer; // Assign your Master mixer in inspector
     public AudioSource musicSource;
     public AudioSource sfxSource;
+    // Assign the SFX group from your AudioMixer (e.g. from SFX.preset) in the Inspector
+    public AudioMixerGroup sfxGroup;
 
     void Awake()
     {
@@ -31,6 +33,12 @@ public class AudioManager : MonoBehaviour
             SetMusicVolume(music);
             SetSFXVolume(sfx);
 
+            // Ensure the AudioManager's SFX AudioSource outputs to the configured SFX group
+            if (sfxSource != null && sfxGroup != null)
+            {
+                sfxSource.outputAudioMixerGroup = sfxGroup;
+            }
+
             // Start a short coroutine to re-apply saved volumes a few times.
             // Some platforms have timing issues where the mixer isn't fully ready at Awake,
             // reapplying a couple times shortly after startup ensures the values stick.
@@ -52,6 +60,11 @@ public class AudioManager : MonoBehaviour
     public void PlaySFX(AudioClip clip)
     {
         sfxSource.PlayOneShot(clip);
+    }
+
+    public AudioMixerGroup GetSFXGroup()
+    {
+        return sfxGroup;
     }
 
     // These methods are called by your UI sliders

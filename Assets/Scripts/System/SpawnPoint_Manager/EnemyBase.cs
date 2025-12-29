@@ -25,6 +25,32 @@ public abstract class EnemyBase : MonoBehaviour
         {
             audioSource = GetComponent<AudioSource>();
         }
+        // Ensure enemy audio uses the project's SFX mixer group when available
+        if (audioSource != null && AudioManager.Instance != null)
+        {
+            var group = AudioManager.Instance.GetSFXGroup();
+            if (group != null)
+            {
+                audioSource.outputAudioMixerGroup = group;
+            }
+        }
+    }
+
+    // Some scenes may initialize AudioManager after enemies. Ensure routing is applied once AudioManager exists.
+    protected virtual void Start()
+    {
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+        }
+        if (audioSource != null && AudioManager.Instance != null && audioSource.outputAudioMixerGroup == null)
+        {
+            var group = AudioManager.Instance.GetSFXGroup();
+            if (group != null)
+            {
+                audioSource.outputAudioMixerGroup = group;
+            }
+        }
     }
 
     public virtual void SetStats(Enemy_Stats s)
@@ -125,6 +151,11 @@ public abstract class EnemyBase : MonoBehaviour
             temp.spatialBlend = 0f; // 2D by default; adjust if needed
             temp.volume = Mathf.Clamp01(vol);
             temp.clip = clip;
+            if (AudioManager.Instance != null)
+            {
+                var g = AudioManager.Instance.GetSFXGroup();
+                if (g != null) temp.outputAudioMixerGroup = g;
+            }
             temp.Play();
             Destroy(temp, clip.length + 0.05f);
         }
@@ -150,6 +181,11 @@ public abstract class EnemyBase : MonoBehaviour
         src.spatialBlend = 0f; // 2D by default; set to 1f for 3D
         src.volume = Mathf.Clamp01(vol);
         src.clip = clip;
+        if (AudioManager.Instance != null)
+        {
+            var g = AudioManager.Instance.GetSFXGroup();
+            if (g != null) src.outputAudioMixerGroup = g;
+        }
         src.Play();
         Object.Destroy(host, clip.length + 0.1f);
     }

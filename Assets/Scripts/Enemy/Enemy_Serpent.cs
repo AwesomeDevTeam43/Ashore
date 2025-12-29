@@ -295,6 +295,12 @@ public class VenomShooting : EnemyBase
         source.rolloffMode = AudioRolloffMode.Linear;
         source.minDistance = 1f;
         source.maxDistance = Mathf.Max(1f, hearDistance);
+        // Route enemy audio through the project's SFX AudioMixerGroup when available
+        if (AudioManager.Instance != null)
+        {
+            var g = AudioManager.Instance.GetSFXGroup();
+            if (g != null) source.outputAudioMixerGroup = g;
+        }
     }
 
     private void UpdateAudioSourceDistance(AudioSource source)
