@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9f84406ce8d1bc4fb0ac050889e4e8e, type: 3}
+  m_Name: FirstNote 12
+  m_EditorClassIdentifier: 
+  entryId: CityTerminal
+  title: '[System Error: Access Restricted]'
+  bodyText: "Evacuation order: All personnel to report to the laboratory. Do not
+    attempt to leave the island. The anomaly is spreading.\r\n\u2014Central Command"
+  portrait: {fileID: 0}
+  voiceClip: {fileID: 0}
+  playAsSFX: 1
+  maxCharsPerPage: 0

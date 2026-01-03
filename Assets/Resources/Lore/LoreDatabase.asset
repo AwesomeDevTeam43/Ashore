@@ -12,4 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0b09cf338c83e147814a0089a3848a1, type: 3}
   m_Name: LoreDatabase
   m_EditorClassIdentifier: 
-  entries: []
+  entries:
+  - {fileID: 11400000, guid: 1449d8d3118c2c645b5c14ba9f7c7cb9, type: 2}
+  - {fileID: 11400000, guid: 97c1cd48af61a7141861abc8dda77ecb, type: 2}
+  - {fileID: 11400000, guid: 0cab7c1fddcabce46993b6980dbf6b5d, type: 2}
+  - {fileID: 11400000, guid: e45435cc7e6b2634d82bef13871e36b3, type: 2}
+  - {fileID: 11400000, guid: 891983ad98e618b43a2d087363a21af8, type: 2}
+  - {fileID: 11400000, guid: c6aa1a749cd4307429cdb2bb26fa33b8, type: 2}
+  - {fileID: 11400000, guid: 6539677a5d6e05941a524afab56058d9, type: 2}
+  - {fileID: 11400000, guid: ab0f798af3d62f24cb4cc110cffc37d6, type: 2}
+  - {fileID: 11400000, guid: 69d95ca5b65223947bbd3da67a101fea, type: 2}
+  - {fileID: 11400000, guid: 1e835b92d633f1d44a733b5a0d5d712d, type: 2}
+  - {fileID: 11400000, guid: b73fc643bf3e0f240a71c1cac1e4b7f2, type: 2}
+  - {fileID: 11400000, guid: 2b70814a0b70a894e97aaa596f4b685d, type: 2}
+  - {fileID: 11400000, guid: ab9441ee36d9bb9408cee793aa4ff4f5, type: 2}
+  - {fileID: 11400000, guid: ba7c9614bf4eb3942a68fd27a830d9ab, type: 2}
+  - {fileID: 11400000, guid: 82927f930dcdd8a4a889f044d4d1b68c, type: 2}
+  - {fileID: 11400000, guid: 49e4e1866df8c464e9b81fbcfae36e87, type: 2}
+  - {fileID: 11400000, guid: 5941aac9b0222294dbb597f732a4a4f8, type: 2}
+  - {fileID: 11400000, guid: 3570c5b19046ebc40a510afedcb4afed, type: 2}
+  - {fileID: 11400000, guid: a8cbdd3e040bc374385c1e5abf2992ed, type: 2}

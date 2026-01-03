@@ -10,11 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a9f84406ce8d1bc4fb0ac050889e4e8e, type: 3}
-  m_Name: FirstNote
+  m_Name: FirstNote 10
   m_EditorClassIdentifier: 
-  entryId: 
-  title: 
-  bodyText: 
+  entryId: CaveCarve
+  title: Cave Carving
+  bodyText: They watch from below. The ground is hollow, the walls have eyes. The
+    deeper you go, the less you remember who you are.
   portrait: {fileID: 0}
   voiceClip: {fileID: 0}
   playAsSFX: 1

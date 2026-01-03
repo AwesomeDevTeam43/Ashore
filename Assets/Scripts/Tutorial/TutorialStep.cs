@@ -5,6 +5,12 @@ public abstract class TutorialStep : MonoBehaviour
     [TextArea]
     public string instructionText;
 
+    [Header("UI Style")]
+    [Tooltip("If true, use the RPGMaker-style dialogue box instead of the standard tutorial overlay.")]
+    public bool useDialogueBox = false;
+    [Tooltip("Title to show in the dialogue box (only used if useDialogueBox is true).")]
+    public string dialogueTitle = "";
+
     [Header("Overlay Highlight (optional)")]
     [Tooltip("Highlight a UI element while this step is active. Leave null for no highlight.")]
     public RectTransform highlightTarget;
@@ -29,7 +35,17 @@ public abstract class TutorialStep : MonoBehaviour
     {
         manager = mgr;
         if (dimScreen) manager.Overlay?.SetDim(true);
-        manager.ApplyInstructionText(instructionText);
+        
+        // Use dialogue box or standard overlay based on setting
+        if (useDialogueBox)
+        {
+            manager.ShowDialogueText(dialogueTitle, instructionText);
+        }
+        else
+        {
+            manager.ApplyInstructionText(instructionText);
+        }
+        
         manager.Overlay?.SetHighlight(highlightTarget);
         if (freezePlayerMovement) manager.SetPlayerMovementEnabled(false);
         if (freezeGameSeconds > 0f) manager.FreezeGameForSeconds(freezeGameSeconds);
@@ -41,7 +57,16 @@ public abstract class TutorialStep : MonoBehaviour
     public virtual void End()
     {
         manager.Overlay?.SetHighlight(null);
-        manager.ApplyInstructionText(string.Empty);
+        
+        if (useDialogueBox)
+        {
+            manager.HideDialogueText();
+        }
+        else
+        {
+            manager.ApplyInstructionText(string.Empty);
+        }
+        
         manager.Overlay?.SetDim(false);
         if (freezePlayerMovement) manager.SetPlayerMovementEnabled(true);
     }

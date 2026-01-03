@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9f84406ce8d1bc4fb0ac050889e4e8e, type: 3}
+  m_Name: FirstNote 5
+  m_EditorClassIdentifier: 
+  entryId: MetalDoor
+  title: Crumpled Note
+  bodyText: "I found a strange card laying around, the color has long faded. But
+    there\u2019s a door hidden deep into the cave. Metal, old but working. I stuck
+    the card in a strange slot and it opened, i am going in and taking the card with
+    me, don't follow."
+  portrait: {fileID: 0}
+  voiceClip: {fileID: 0}
+  playAsSFX: 1
+  maxCharsPerPage: 0

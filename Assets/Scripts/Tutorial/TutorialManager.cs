@@ -21,6 +21,7 @@ public class TutorialManager : MonoBehaviour
     private Coroutine freezeRoutine;
     private float prevTimeScale = 1f;
     private string currentInstructionRaw = string.Empty;
+    private bool isShowingDialogueBox = false;
 
     [Header("Overlay Dim Settings")]
     [Tooltip("Default dim alpha when a step requests dimming.")]
@@ -184,6 +185,46 @@ public class TutorialManager : MonoBehaviour
             msg = bindingResolver.FormatText(msg);
         }
         overlayInstance.SetMessage(msg);
+    }
+
+    /// <summary>
+    /// Shows tutorial text using the RPGMaker-style dialogue box.
+    /// The dialogue box displays at the bottom of the screen with typewriter effect.
+    /// </summary>
+    public void ShowDialogueText(string title, string body)
+    {
+        // Format the text with current bindings
+        string formattedBody = body ?? string.Empty;
+        if (bindingResolver != null)
+        {
+            formattedBody = bindingResolver.FormatText(formattedBody);
+        }
+
+        // Get or create the dialogue manager
+        var dialogueManager = LoreDialogueManager.Instance ?? LoreDialogueManager.EnsureExists();
+        
+        // Show the text (this will lock player input automatically)
+        dialogueManager.ShowText(title, formattedBody, null, null);
+        isShowingDialogueBox = true;
+        
+        Debug.Log($"[TutorialManager] ShowDialogueText: '{title}' - {formattedBody.Length} chars");
+    }
+
+    /// <summary>
+    /// Hides the RPGMaker-style dialogue box if it's currently showing.
+    /// </summary>
+    public void HideDialogueText()
+    {
+        if (!isShowingDialogueBox) return;
+        
+        var dialogueManager = LoreDialogueManager.Instance;
+        if (dialogueManager != null && dialogueManager.IsDisplaying)
+        {
+            dialogueManager.CloseDialogue();
+        }
+        isShowingDialogueBox = false;
+        
+        Debug.Log("[TutorialManager] HideDialogueText called");
     }
 
     public void SetPlayerMovementEnabled(bool enabledState)
