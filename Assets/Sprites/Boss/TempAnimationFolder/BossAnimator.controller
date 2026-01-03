@@ -23,7 +23,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: c9904ad09e49fd443a47fb0aa70b224e, type: 2}
+  m_Motion: {fileID: 7400000, guid: c24055badff601b488a2f2b7da20f78f, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -267,7 +267,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ebef23f776cff64d97134c5d0d90bea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 3
   attackRange: 2
 --- !u!1101 &2177246854308265847
 AnimatorStateTransition:
