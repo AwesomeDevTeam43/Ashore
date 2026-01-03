@@ -1,7 +1,16 @@
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class BirdBomberEnemy : EnemyBase
 {
+    [Header("Audio")]
+    [SerializeField] private AudioSource idleAudioSource;
+    [SerializeField] private AudioClip idleLoopClip;
+    [SerializeField, Range(0f, 1f)] private float idleVolume = 1f;
+    [SerializeField, Range(0f, 1f)] private float idleSpatialBlend = 0f;
+
     [Header("Movement")]
     [SerializeField] private float patrolSpeed = 2.5f;
     [SerializeField] private float leftX = -5f;
@@ -34,12 +43,14 @@ public class BirdBomberEnemy : EnemyBase
 
     protected override void Awake()
     {
+        base.Awake();
         _enemyHealth = GetComponent<Enemy_Health>();
         CacheStatsFromAssignedAsset();
         _movingRight = startMovingRight;
         _sr = GetComponent<SpriteRenderer>();
         if (dropPoint == null) dropPoint = this.transform;
         InitializeBoundaries();
+        EnsureIdleAudioSource();
     }
 
     private void Start()
@@ -52,6 +63,12 @@ public class BirdBomberEnemy : EnemyBase
             transform.position = p;
         }
         ScheduleNextDrop();
+        StartIdleLoop();
+    }
+
+    private void OnDisable()
+    {
+        StopIdleLoop();
     }
 
     private void Update()
@@ -228,6 +245,53 @@ public class BirdBomberEnemy : EnemyBase
         if (_enemyHealth == null)
         {
             _enemyHealth = GetComponent<Enemy_Health>();
+        }
+    }
+
+    private void EnsureIdleAudioSource()
+    {
+        if (idleAudioSource == null)
+        {
+            idleAudioSource = GetComponent<AudioSource>();
+        }
+        if (idleAudioSource == null)
+        {
+            idleAudioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        idleAudioSource.playOnAwake = false;
+        idleAudioSource.loop = true;
+        idleAudioSource.spatialBlend = idleSpatialBlend;
+
+        if (AudioManager.Instance != null)
+        {
+            var g = AudioManager.Instance.GetSFXGroup();
+            if (g != null) idleAudioSource.outputAudioMixerGroup = g;
+        }
+    }
+
+    private void StartIdleLoop()
+    {
+        if (idleLoopClip == null) return;
+        EnsureIdleAudioSource();
+
+        if (idleAudioSource.clip != idleLoopClip)
+        {
+            idleAudioSource.clip = idleLoopClip;
+        }
+        idleAudioSource.volume = idleVolume;
+
+        if (!idleAudioSource.isPlaying)
+        {
+            idleAudioSource.Play();
+        }
+    }
+
+    private void StopIdleLoop()
+    {
+        if (idleAudioSource != null && idleAudioSource.isPlaying)
+        {
+            idleAudioSource.Stop();
         }
     }
 }

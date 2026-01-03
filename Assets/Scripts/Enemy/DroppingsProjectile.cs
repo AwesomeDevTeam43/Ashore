@@ -11,6 +11,11 @@ public class DroppingsProjectile : MonoBehaviour
     [SerializeField] private float groundCheckRadius = 0.12f;
     [SerializeField] private LayerMask damageLayers;
 
+    [Header("SFX")]
+    [SerializeField] private AudioSource sfxSource;
+    [SerializeField] private AudioClip groundImpactClip;
+    [SerializeField, Range(0f, 1f)] private float groundImpactVolume = 1f;
+
     [Header("Puddle Spawn")]
     [SerializeField] private bool spawnPuddleOnGround = true;
     [SerializeField] private GameObject miasmaPuddlePrefab;
@@ -18,14 +23,27 @@ public class DroppingsProjectile : MonoBehaviour
 
     private float _lifeTimer;
     private float _verticalVelocity;
+    private bool _hasImpacted;
 
     private void Awake()
     {
         _verticalVelocity = -fallSpeed;
+
+        if (sfxSource == null)
+        {
+            sfxSource = GetComponent<AudioSource>();
+        }
+        if (sfxSource != null && AudioManager.Instance != null)
+        {
+            var g = AudioManager.Instance.GetSFXGroup();
+            if (g != null) sfxSource.outputAudioMixerGroup = g;
+        }
     }
 
     private void Update()
     {
+        if (_hasImpacted) return;
+
         // Simple custom gravity (optional)
         if (gravityAcceleration > 0f)
         {
@@ -113,12 +131,45 @@ public class DroppingsProjectile : MonoBehaviour
 
     private void HandleGroundImpact()
     {
+        if (_hasImpacted) return;
+        _hasImpacted = true;
+
+        var sr = GetComponent<SpriteRenderer>();
+        if (sr != null) sr.enabled = false;
+
+        if (groundImpactClip != null)
+        {
+            if (sfxSource == null)
+            {
+                sfxSource = GetComponent<AudioSource>();
+                if (sfxSource == null) sfxSource = gameObject.AddComponent<AudioSource>();
+                if (AudioManager.Instance != null)
+                {
+                    var g = AudioManager.Instance.GetSFXGroup();
+                    if (g != null) sfxSource.outputAudioMixerGroup = g;
+                }
+            }
+            sfxSource.PlayOneShot(groundImpactClip, groundImpactVolume);
+        }
+
+        // Prevent further hits/damage while the audio finishes.
+        var col = GetComponent<Collider2D>();
+        if (col != null) col.enabled = false;
+
         if (spawnPuddleOnGround && miasmaPuddlePrefab != null)
         {
             var pos = transform.position + (Vector3)puddleSpawnOffset;
             Instantiate(miasmaPuddlePrefab, pos, Quaternion.identity);
         }
-        Destroy(gameObject);
+
+        if (groundImpactClip != null)
+        {
+            Destroy(gameObject, groundImpactClip.length + 0.05f);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     private void OnDrawGizmosSelected()
