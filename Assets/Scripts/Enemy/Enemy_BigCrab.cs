@@ -9,6 +9,13 @@ public class BigCrab : EnemyBase
   private Transform player;
   private Rigidbody2D rb;
   private Animator animator;
+
+  [Header("SFX")]
+  [SerializeField] private AudioSource sfxSource;
+  [SerializeField] private AudioClip chasingLoopSfx;
+  [SerializeField] private AudioClip attackSfx;
+  [SerializeField, Range(0f, 1f)] private float sfxVolume = 1f;
+
   [SerializeField] private string walkBoolName = "isWalking";
   [Header("Animation")]
   [SerializeField] private string attackTriggerName = "Attack";
@@ -18,6 +25,7 @@ public class BigCrab : EnemyBase
   private bool hasAttackTrigger = false;
   private bool hasAttackBool = false;
   private bool attackInProgress = false;
+  private bool attackSfxPlayedThisAttack = false;
   private Coroutine attackCommitRoutine;
   public enum EnemyState { Idle, Chasing, Attacking }
   private EnemyState currentState;
@@ -30,6 +38,12 @@ public class BigCrab : EnemyBase
     enemyHealth = GetComponent<Enemy_Health>();
     rb = GetComponent<Rigidbody2D>();
     animator = GetComponentInChildren<Animator>();
+
+    if (sfxSource == null)
+    {
+      sfxSource = GetComponent<AudioSource>();
+      if (sfxSource == null) sfxSource = GetComponentInChildren<AudioSource>();
+    }
     
     if (animator != null)
     {
@@ -59,6 +73,11 @@ public class BigCrab : EnemyBase
       timeBtwAttack = 0f;
     }
     currentState = EnemyState.Idle;
+  }
+
+  private void OnDisable()
+  {
+    StopChaseLoop();
   }
 
   private void Update()
@@ -112,6 +131,25 @@ public class BigCrab : EnemyBase
         }
         break;
     }
+
+    if (oldState != currentState)
+    {
+      OnStateChanged(oldState, currentState);
+    }
+  }
+
+  private void OnStateChanged(EnemyState oldState, EnemyState newState)
+  {
+    // Idle has no SFX
+    if (oldState == EnemyState.Chasing && newState != EnemyState.Chasing)
+    {
+      StopChaseLoop();
+    }
+
+    if (newState == EnemyState.Chasing)
+    {
+      StartChaseLoop();
+    }
   }
 
   private void HandleStateActions()
@@ -161,7 +199,17 @@ public class BigCrab : EnemyBase
       {
         timeBtwAttack = typedStats.startTimeBtwAttack;
       }
+
       BeginAttackCommit(maybeTimedFallback: true);
+
+      // Prefer playing the attack SFX from animation timing (AnimEvent_AttackStart).
+      // Only play it here when we don't expect animation to drive the attack.
+      bool expectAnimEvents = attackUsesAnimationEvent && animator != null && (hasAttackTrigger || hasAttackBool);
+      if (!expectAnimEvents)
+      {
+        PlayAttackSfx();
+      }
+
       if (attackUsesAnimationEvent)
       {
         if (animator != null)
@@ -190,9 +238,43 @@ public class BigCrab : EnemyBase
     }
   }
 
+  private void StartChaseLoop()
+  {
+    if (sfxSource == null || chasingLoopSfx == null) return;
+
+    // If already looping this exact clip, do nothing.
+    if (sfxSource.isPlaying && sfxSource.loop && sfxSource.clip == chasingLoopSfx) return;
+
+    sfxSource.Stop();
+    sfxSource.clip = chasingLoopSfx;
+    sfxSource.loop = true;
+    sfxSource.volume = sfxVolume;
+    sfxSource.Play();
+  }
+
+  private void StopChaseLoop()
+  {
+    if (sfxSource == null) return;
+    if (sfxSource.loop && sfxSource.clip == chasingLoopSfx)
+    {
+      sfxSource.Stop();
+      sfxSource.clip = null;
+      sfxSource.loop = false;
+    }
+  }
+
+  private void PlayAttackSfx()
+  {
+    if (sfxSource == null || attackSfx == null) return;
+    if (attackSfxPlayedThisAttack) return;
+    attackSfxPlayedThisAttack = true;
+    sfxSource.PlayOneShot(attackSfx, sfxVolume);
+  }
+
   private void BeginAttackCommit(bool maybeTimedFallback)
   {
     attackInProgress = true;
+    attackSfxPlayedThisAttack = false;
     bool expectAnimToEnd = attackUsesAnimationEvent && animator != null && (hasAttackTrigger || hasAttackBool);
     if (!expectAnimToEnd && maybeTimedFallback)
     {
@@ -221,6 +303,12 @@ public class BigCrab : EnemyBase
       attackCommitRoutine = null;
     }
     attackInProgress = true;
+  }
+
+  // Animation Event: place this on the attack animation exactly where the SFX should play.
+  public void AnimEvent_PlayAttackSfx()
+  {
+    PlayAttackSfx();
   }
 
   public void AnimEvent_AttackEnd()
