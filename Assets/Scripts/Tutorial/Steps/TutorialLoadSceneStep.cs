@@ -26,8 +26,6 @@ public class TutorialLoadSceneStep : TutorialStep
 
     private bool _complete;
     private Coroutine _loadRoutine;
-    private static string _pendingSaveScene;
-    private static bool _autoSaveOnLoad;
 
     public override void Begin(TutorialManager mgr)
     {
@@ -68,12 +66,12 @@ public class TutorialLoadSceneStep : TutorialStep
         ResetPlayerStateForMainGame();
         GameState.Instance?.ClearAll();
         
-        // Set up auto-save after the scene loads
+        // Set up auto-save after the scene loads (isolated runner so it only applies to this tutorial load)
         if (autoSaveAfterLoad)
         {
-            _pendingSaveScene = sceneName;
-            _autoSaveOnLoad = true;
-            SceneManager.sceneLoaded += OnSceneLoadedAutoSave;
+            var runner = new GameObject("AutoSaveRunner").AddComponent<AutoSaveRunner>();
+            runner.targetScene = sceneName;
+            DontDestroyOnLoad(runner.gameObject);
         }
         
         var overlay = GlobalLoadingOverlay.Instance;
@@ -86,38 +84,42 @@ public class TutorialLoadSceneStep : TutorialStep
         _complete = true;
     }
 
-    private static void OnSceneLoadedAutoSave(Scene scene, LoadSceneMode mode)
-    {
-        // Only trigger for the expected scene
-        if (!_autoSaveOnLoad || scene.name != _pendingSaveScene)
-            return;
-        
-        // Unsubscribe immediately to avoid multiple triggers
-        SceneManager.sceneLoaded -= OnSceneLoadedAutoSave;
-        _autoSaveOnLoad = false;
-        _pendingSaveScene = null;
-        
-        // Use a coroutine runner to delay the save slightly so the scene is fully initialized
-        var runner = new GameObject("AutoSaveRunner").AddComponent<AutoSaveRunner>();
-        runner.StartCoroutine(runner.DelayedAutoSave());
-    }
-
     private class AutoSaveRunner : MonoBehaviour
     {
+        public string targetScene;
+
+        private void OnEnable()
+        {
+            SceneManager.sceneLoaded += HandleSceneLoaded;
+        }
+
+        private void OnDisable()
+        {
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
+        }
+
+        private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (scene.name != targetScene) return;
+            // Unsubscribe and perform the delayed save
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
+            StartCoroutine(DelayedAutoSave());
+        }
+
         public IEnumerator DelayedAutoSave()
         {
             // Wait a couple frames for all scene objects to initialize
             yield return null;
             yield return null;
             yield return new WaitForSecondsRealtime(0.5f);
-            
+
             var player = GameObject.FindGameObjectWithTag("Player");
             if (player != null)
             {
                 var pc = player.GetComponent<Player_Controller>();
                 var xp = player.GetComponent<XP_System>();
                 var health = player.GetComponent<Player_Health>();
-                
+
                 if (pc != null && xp != null && health != null)
                 {
                     int slot = SaveSlotTracker.CurrentSlot;
@@ -133,7 +135,7 @@ public class TutorialLoadSceneStep : TutorialStep
             {
                 Debug.LogWarning("[TutorialLoadSceneStep] Could not auto-save: player not found.");
             }
-            
+
             Destroy(gameObject);
         }
     }
