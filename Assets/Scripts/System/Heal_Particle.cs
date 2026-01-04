@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Heal_Particle : MonoBehaviour
 {
-     [SerializeField] private int healAmount = 2;
+    [SerializeField] private int healAmount = 2;
     [SerializeField] private string playerTag = "Player";
 
     [Header("Floating Settings")]
@@ -12,13 +12,17 @@ public class Heal_Particle : MonoBehaviour
     [SerializeField] private AudioClip healClip;
     [SerializeField] private bool usePersistentAudio = true;
 
+    [Header("Particle Effect")]
+    [SerializeField] private ParticleSystem healParticlePrefab;
+    [SerializeField] private string particleSortingLayer = "Default";
+    [SerializeField] private int particleSortingOrder = 10;
+
     private Vector3 startPosition;
     private float timeOffset;
     private bool hasLanded = false;
     private Rigidbody2D rb;
     private CircleCollider2D groundCollider;
     private CircleCollider2D triggerCollider;
-    
 
     private void Start()
     {
@@ -43,7 +47,6 @@ public class Heal_Particle : MonoBehaviour
         triggerCollider = gameObject.AddComponent<CircleCollider2D>();
         triggerCollider.isTrigger = true;
         triggerCollider.radius = 0.6f;
-
     }
 
     private void Update()
@@ -83,50 +86,51 @@ public class Heal_Particle : MonoBehaviour
     }
 
     private void OnTriggerEnter2D(Collider2D other)
-    { 
-        if (other.CompareTag(playerTag))
-        {   
-            HealthSystem playerHealSystem = other.GetComponent<HealthSystem>();
+    {
+        if (!other.CompareTag(playerTag)) return;
 
-            if (playerHealSystem != null && playerHealSystem.CurrentHealth < playerHealSystem.MaxHealth)
+        HealthSystem playerHealSystem = other.GetComponent<HealthSystem>();
+        if (playerHealSystem == null || playerHealSystem.CurrentHealth >= playerHealSystem.MaxHealth)
+            return;
+
+        // Play particle effect (not as child)
+        ParticleSystem spawnedParticle = null;
+        if (healParticlePrefab != null)
+        {
+            spawnedParticle = Instantiate(healParticlePrefab, transform.position, Quaternion.identity);
+            // Set sorting layer and order on all renderers in the hierarchy
+            var renderers = spawnedParticle.GetComponentsInChildren<Renderer>(true);
+            foreach (var rend in renderers)
             {
-                if (healClip != null)
-                {
-                    if (usePersistentAudio)
-                    {
-                        // Disable visuals and interaction while sound plays
-                        var rends = GetComponentsInChildren<Renderer>();
-                        foreach (var r in rends)
-                            r.enabled = false;
-
-                        if (triggerCollider != null) triggerCollider.enabled = false;
-                        if (groundCollider != null) groundCollider.enabled = false;
-
-                        // Ensure an AudioSource exists on this object and play the clip
-                        AudioSource src = GetComponent<AudioSource>();
-                        if (src == null) src = gameObject.AddComponent<AudioSource>();
-                        src.clip = healClip;
-                        src.spatialBlend = 1f;
-                        src.Play();
-
-                        playerHealSystem.Heal(healAmount);
-                        Destroy(gameObject, healClip.length + 0.1f);
-                    }
-                    else
-                    {
-                        AudioSource.PlayClipAtPoint(healClip, transform.position);
-                        playerHealSystem.Heal(healAmount);
-                        Destroy(gameObject);
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning("Heal_Particle: no healClip assigned.");
-                    playerHealSystem.Heal(healAmount);
-                    Destroy(gameObject);
-                }
+                rend.sortingLayerName = particleSortingLayer;
+                rend.sortingOrder = particleSortingOrder;
             }
+            spawnedParticle.Play();
+            Destroy(spawnedParticle.gameObject, 1.0f);
         }
+
+        // Play sound robustly
+        if (healClip != null)
+        {
+            AudioSource.PlayClipAtPoint(healClip, transform.position);
+        }
+        else
+        {
+            Debug.LogWarning("Heal_Particle: no healClip assigned.");
+        }
+
+        // Heal the player
+        playerHealSystem.Heal(healAmount);
+
+        // Disable visuals and interaction immediately
+        var rends = GetComponentsInChildren<Renderer>();
+        foreach (var r in rends)
+            r.enabled = false;
+        if (triggerCollider != null) triggerCollider.enabled = false;
+        if (groundCollider != null) groundCollider.enabled = false;
+
+        // Destroy this object after 1s (particle lifetime)
+        Destroy(gameObject, 1.0f);
     }
 
     public void SetHealAmount(int amount)

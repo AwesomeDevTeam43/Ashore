@@ -167,11 +167,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   healAmount: 2
   playerTag: Player
-  groundLayers:
-    serializedVersion: 2
-    m_Bits: 64
-  fallGravityScale: 2
-  physicsColliderRadius: 0.35
-  triggerRadius: 0.6
   floatSpeed: 1
   floatAmplitude: 0.3
+  heightAboveGround: 0.5
+  healClip: {fileID: 8300000, guid: 22ae2e1ba22390f48b1eef76ac08aab2, type: 3}
+  usePersistentAudio: 1
+  healParticlePrefab: {fileID: 7525734207782324409, guid: 3884c319a860bb24188e09448992596d, type: 3}
+  particleSortingLayer: Default
+  particleSortingOrder: 70

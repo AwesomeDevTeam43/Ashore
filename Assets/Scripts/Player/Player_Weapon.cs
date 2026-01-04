@@ -13,6 +13,10 @@ public class Weapon : MonoBehaviour
     [SerializeField] private Player_InputHandler player_InputHandler;
     [SerializeField] private Player_Controller playerController;
 
+    [Header("Audio")]
+    public AudioClip rangedAttackClip;
+    private AudioSource audioSource;
+
     private void Awake()
     {
         if (playerController == null)
@@ -21,6 +25,12 @@ public class Weapon : MonoBehaviour
             Player_Movement = GetComponentInParent<Player_Movement>();
         if (player_InputHandler == null)
             player_InputHandler = GetComponentInParent<Player_InputHandler>();
+
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.spatialBlend = 1f;
+        audioSource.playOnAwake = false;
     }
     public Vector2 GetShootDirection()
     {
@@ -78,6 +88,12 @@ public class Weapon : MonoBehaviour
                         bool isCrit = UnityEngine.Random.value * 100f < rangedCritChance;
                         proj.SetDamage(playerController.AttackPower, isCrit);
                     }
+                }
+
+                // Play ranged attack sound
+                if (rangedAttackClip != null && audioSource != null)
+                {
+                    audioSource.PlayOneShot(rangedAttackClip);
                 }
             }
             timeBetweenShots = startTimeBetweenShots;
