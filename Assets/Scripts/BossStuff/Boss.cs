@@ -49,6 +49,44 @@ public class Boss : MonoBehaviour, ISaveable
         bossHealth.OnHealthChanged += OnHealthChanged;
 
         anim = GetComponent<Animator>();
+
+        if (laserSfxSource == null)
+        {
+            laserSfxSource = GetComponent<AudioSource>();
+        }
+    }
+    
+
+    [Range(0f, 1f)]
+    [SerializeField] private float punchSfxVolume = 1f;
+
+    private void PlaySharedSfx(AudioClip clip, float volume)
+    {
+        if (clip == null) return;
+
+        // Use the same AudioSource for all boss SFX.
+        if (laserSfxSource == null)
+        {
+            laserSfxSource = GetComponent<AudioSource>();
+            if (laserSfxSource == null)
+            {
+                laserSfxSource = gameObject.AddComponent<AudioSource>();
+                laserSfxSource.playOnAwake = false;
+            }
+        }
+
+        if (AudioManager.Instance != null && laserSfxSource.outputAudioMixerGroup == null)
+        {
+            var group = AudioManager.Instance.GetSFXGroup();
+            if (group != null) laserSfxSource.outputAudioMixerGroup = group;
+        }
+
+        laserSfxSource.PlayOneShot(clip, Mathf.Clamp01(volume));
+    }
+
+    private void PlayPunchSfx()
+    {
+        PlaySharedSfx(punchSfx, punchSfxVolume);
     }
 
     public object CaptureState()
@@ -77,6 +115,17 @@ public class Boss : MonoBehaviour, ISaveable
 
     [Tooltip("Transform representing the boss's hand where the laser should spawn")]
     public Transform laserHand;
+
+    [Header("Laser SFX")]
+    [Tooltip("AudioSource used to play the laser SFX (if null, will try to use one on this GameObject)")]
+    [SerializeField] private AudioSource laserSfxSource;
+
+    [Tooltip("SFX clip to play when the boss spawns the laser")]
+    [SerializeField] private AudioClip laserSpawnSfx;
+    [SerializeField] private AudioClip punchSfx;
+
+    [Range(0f, 1f)]
+    [SerializeField] private float laserSpawnSfxVolume = 1f;
 
     // Keep a reference to the currently spawned laser so we only resume when it finishes
     private Laser activeSpawnedLaser;
@@ -109,6 +158,9 @@ public class Boss : MonoBehaviour, ISaveable
             activeSpawnedLaser = l;
             l.onFinished = () => ResumeAfterSpawnedLaser(l);
         }
+
+        // Play SFX (one-shot) when the laser spawns
+        PlaySharedSfx(laserSpawnSfx, laserSpawnSfxVolume);
 
         // Pause the boss animator so it remains on the last frame
         if (anim != null)
@@ -158,6 +210,8 @@ public class Boss : MonoBehaviour, ISaveable
 
     public void AttackPlayer()
     {
+        PlayPunchSfx();
+
         Vector3 pos = transform.position;
         pos += transform.right * attackOffset.x;
         pos += transform.up * attackOffset.y;
@@ -203,7 +257,6 @@ public class Boss : MonoBehaviour, ISaveable
         {
             Debug.Log("Boss defeated");
             isDead = true;
-            SceneManager.LoadScene("MainMenu");
             Destroy(gameObject);
         }
     }
