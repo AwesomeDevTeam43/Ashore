@@ -10,6 +10,14 @@ public class Enemy_Salamander : EnemyBase
   private Rigidbody2D rb;
   private Animator animator;
 
+  [Header("SFX")]
+  [SerializeField] private AudioSource sfxSource;
+  [SerializeField] private AudioClip walkLoop;
+  [SerializeField] private AudioClip shootSfx;
+  [SerializeField] private AudioClip biteSfx;
+  [SerializeField, Range(0f, 1f)] private float walkVolume = 1f;
+  [SerializeField, Range(0f, 1f)] private float actionVolume = 1f;
+
   [Header("Animation")]
   [SerializeField] private string walkBoolName = "isWalking"; // only animation parameter used
 
@@ -76,13 +84,16 @@ public class Enemy_Salamander : EnemyBase
   private float ShootRange => (shootRangeOverride > 0f ? shootRangeOverride : typedStats.shootRange);
   private float BiteRange => (biteRangeOverride > 0f ? biteRangeOverride : typedStats.biteRange);
 
-  void Start()
+  protected override void Start()
   {
+    base.Start();
     typedStats = stats as Salamander_Stats;
     enemyHealth = GetComponent<Enemy_Health>();
     rb = GetComponent<Rigidbody2D>();
     animator = GetComponentInChildren<Animator>();
     homePosition = transform.position;
+
+    EnsureAudioSource();
     
     // ADICIONADO: Pegar combatFeedback se não foi atribuído
     if (combatFeedback == null)
@@ -271,6 +282,66 @@ public class Enemy_Salamander : EnemyBase
         if (animator) animator.SetBool(walkBoolName, true);
         break;
     }
+
+    UpdateMovementLoopSfx();
+  }
+
+  private void EnsureAudioSource()
+  {
+    if (sfxSource == null)
+    {
+      sfxSource = GetComponent<AudioSource>();
+    }
+    if (sfxSource == null)
+    {
+      sfxSource = gameObject.AddComponent<AudioSource>();
+    }
+
+    sfxSource.playOnAwake = false;
+    if (AudioManager.Instance != null)
+    {
+      var g = AudioManager.Instance.GetSFXGroup();
+      if (g != null) sfxSource.outputAudioMixerGroup = g;
+    }
+  }
+
+  private void UpdateMovementLoopSfx()
+  {
+    if (sfxSource == null) return;
+
+    bool shouldWalkLoop = state == State.Approach || state == State.Retreat || state == State.ReturnHome;
+    if (!shouldWalkLoop || walkLoop == null)
+    {
+      // Don't call Stop() here because it would also stop any PlayOneShot() currently playing.
+      // We only clear loop/clip, and when we need an immediate stop we do it right before one-shots.
+      if (sfxSource.clip == walkLoop) sfxSource.clip = null;
+      sfxSource.loop = false;
+      return;
+    }
+
+    if (sfxSource.clip != walkLoop)
+    {
+      sfxSource.clip = walkLoop;
+    }
+    sfxSource.loop = true;
+    sfxSource.volume = walkVolume;
+    // If a one-shot is currently playing, isPlaying can be true; avoid restarting the loop mid one-shot.
+    if (!sfxSource.isPlaying)
+    {
+      sfxSource.Play();
+    }
+  }
+
+  private void StopWalkLoopImmediate()
+  {
+    if (sfxSource == null) return;
+    if (walkLoop == null) return;
+    if (sfxSource.loop && sfxSource.clip == walkLoop)
+    {
+      sfxSource.Stop();
+      sfxSource.loop = false;
+      sfxSource.clip = null;
+    }
   }
 
   private void MoveTowardPlayer(float speed)
@@ -322,6 +393,12 @@ public class Enemy_Salamander : EnemyBase
         }
       }
     }
+
+    if (shootSfx != null && sfxSource != null)
+    {
+      StopWalkLoopImmediate();
+      sfxSource.PlayOneShot(shootSfx, actionVolume);
+    }
     shotCooldown = timeBetweenShots;
   }
 
@@ -333,6 +410,13 @@ public class Enemy_Salamander : EnemyBase
       return;
     }
     biteCooldown = timeBetweenBites;
+
+    if (biteSfx != null && sfxSource != null)
+    {
+      StopWalkLoopImmediate();
+      sfxSource.PlayOneShot(biteSfx, actionVolume);
+    }
+
     ApplyBiteDamage();
     DoRetreatHop();
     state = State.Retreat;

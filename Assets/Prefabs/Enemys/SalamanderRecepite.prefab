@@ -213,7 +213,14 @@ MonoBehaviour:
   stats: {fileID: 11400000, guid: 69535cb14c4e6b84eb04184897ce4a09, type: 2}
   currentLevel: 1
   damageVariance: 0.1
+  audioSource: {fileID: 0}
   typedStats: {fileID: 0}
+  sfxSource: {fileID: 0}
+  walkLoop: {fileID: 8300000, guid: c53f268a0bda01b438e37921f83f7ac9, type: 3}
+  shootSfx: {fileID: 8300000, guid: 925434133ed53a34fa22562beb40ddb1, type: 3}
+  biteSfx: {fileID: 8300000, guid: 2955d265960d92f4398fc988ecf9e7c0, type: 3}
+  walkVolume: 1
+  actionVolume: 0.2
   walkBoolName: isWalking
   shootRangeOverride: -1
   biteRangeOverride: -1
