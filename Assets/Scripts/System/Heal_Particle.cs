@@ -9,6 +9,8 @@ public class Heal_Particle : MonoBehaviour
     [SerializeField] private float floatSpeed = 1f;
     [SerializeField] private float floatAmplitude = 0.3f;
     [SerializeField] private float heightAboveGround = 0.5f;
+    [SerializeField] private AudioClip healClip;
+    [SerializeField] private bool usePersistentAudio = true;
 
     private Vector3 startPosition;
     private float timeOffset;
@@ -88,8 +90,41 @@ public class Heal_Particle : MonoBehaviour
 
             if (playerHealSystem != null && playerHealSystem.CurrentHealth < playerHealSystem.MaxHealth)
             {
-                playerHealSystem.Heal(healAmount);
-                Destroy(gameObject);
+                if (healClip != null)
+                {
+                    if (usePersistentAudio)
+                    {
+                        // Disable visuals and interaction while sound plays
+                        var rends = GetComponentsInChildren<Renderer>();
+                        foreach (var r in rends)
+                            r.enabled = false;
+
+                        if (triggerCollider != null) triggerCollider.enabled = false;
+                        if (groundCollider != null) groundCollider.enabled = false;
+
+                        // Ensure an AudioSource exists on this object and play the clip
+                        AudioSource src = GetComponent<AudioSource>();
+                        if (src == null) src = gameObject.AddComponent<AudioSource>();
+                        src.clip = healClip;
+                        src.spatialBlend = 1f;
+                        src.Play();
+
+                        playerHealSystem.Heal(healAmount);
+                        Destroy(gameObject, healClip.length + 0.1f);
+                    }
+                    else
+                    {
+                        AudioSource.PlayClipAtPoint(healClip, transform.position);
+                        playerHealSystem.Heal(healAmount);
+                        Destroy(gameObject);
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("Heal_Particle: no healClip assigned.");
+                    playerHealSystem.Heal(healAmount);
+                    Destroy(gameObject);
+                }
             }
         }
     }

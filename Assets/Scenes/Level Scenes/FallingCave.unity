@@ -3611,7 +3611,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
       propertyPath: targetScene
-      value: ForestMiasma
+      value: Cave
       objectReference: {fileID: 0}
     - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
       propertyPath: targetPortalId
@@ -23253,13 +23253,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 424b14617fe281e4c9e644c78c473f2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pauseKey: 27
   mainMenuSceneName: MainMenu
+  menuActionName: Menu
   overlayColor: {r: 0, g: 0, b: 0, a: 0.85}
-  buttonColor: {r: 0.2, g: 0.6, b: 0.85, a: 1}
-  buttonHoverColor: {r: 0.3, g: 0.75, b: 0.95, a: 1}
-  buttonFontSize: 42
-  titleFontSize: 72
 --- !u!4 &1901864295
 Transform:
   m_ObjectHideFlags: 0

@@ -1286,13 +1286,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 424b14617fe281e4c9e644c78c473f2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pauseKey: 27
   mainMenuSceneName: MainMenu
+  menuActionName: Menu
   overlayColor: {r: 0, g: 0, b: 0, a: 0.85}
-  buttonColor: {r: 0.2, g: 0.6, b: 0.85, a: 1}
-  buttonHoverColor: {r: 0.3, g: 0.75, b: 0.95, a: 1}
-  buttonFontSize: 42
-  titleFontSize: 72
 --- !u!4 &80725909
 Transform:
   m_ObjectHideFlags: 0
@@ -15371,7 +15367,7 @@ Transform:
   m_GameObject: {fileID: 1074514740}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -213, y: -154, z: -10}
+  m_LocalPosition: {x: -210.7, y: -153.7, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -25771,6 +25767,10 @@ PrefabInstance:
       value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
+      propertyPath: targetScene
+      value: CaveAfterFall
+      objectReference: {fileID: 0}
+    - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
       propertyPath: spawnOffset.x
       value: 4.93
       objectReference: {fileID: 0}
@@ -26208,11 +26208,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8023695755857493568, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -213
+      value: -210.7
       objectReference: {fileID: 0}
     - target: {fileID: 8023695755857493568, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -154
+      value: -153.7
       objectReference: {fileID: 0}
     - target: {fileID: 8023695755857493568, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
       propertyPath: m_LocalPosition.z
@@ -28334,6 +28334,10 @@ PrefabInstance:
     - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
       propertyPath: portalId
       value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
+      propertyPath: targetScene
+      value: Forest
       objectReference: {fileID: 0}
     - target: {fileID: 2550590465346291557, guid: 3ee151b46642b3c4e9aaebc72006279a, type: 3}
       propertyPath: targetPortalId
