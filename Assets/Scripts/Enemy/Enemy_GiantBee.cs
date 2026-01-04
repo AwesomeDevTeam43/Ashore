@@ -10,10 +10,7 @@ public class BeeEnemy : EnemyBase
   private HealthSystem playerHealth;
 
   [Header("Audio")]
-  private AudioSource sfxSource;
-  private AudioSource windupSource;
-  private AudioSource lungeSource;
-  private AudioSource retreatSource;
+  [SerializeField] private AudioSource sfxSource;
   [SerializeField] private AudioClip windupSfx;
   [SerializeField] private AudioClip lungeSfx;
   [SerializeField] private AudioClip hitSfx;
@@ -23,7 +20,6 @@ public class BeeEnemy : EnemyBase
   [SerializeField] private Vector2 pitchRange = new Vector2(0.95f, 1.05f);
 
   [Header("Audio - Idle")]
-  [SerializeField] private AudioSource idleSource;
   [SerializeField] private AudioClip idleLoopSfx;
   [SerializeField, Range(0f, 1f)] private float idleVolume = 0.5f;
 
@@ -158,134 +154,6 @@ public class BeeEnemy : EnemyBase
         if (g != null) sfxSource.outputAudioMixerGroup = g;
       }
     }
-    
-    if (idleSource == null)
-    {
-      // Prefer a different AudioSource so one-shots (attack SFX) don't cut the idle loop.
-      var sources = GetComponents<AudioSource>();
-      if (sources != null)
-      {
-        foreach (var src in sources)
-        {
-          if (src != null && src != sfxSource)
-          {
-            idleSource = src;
-            break;
-          }
-        }
-      }
-    }
-    if (idleSource == null)
-    {
-      idleSource = gameObject.AddComponent<AudioSource>();
-    }
-    if (idleSource != null)
-    {
-      idleSource.playOnAwake = false;
-      idleSource.loop = true;
-      idleSource.spatialBlend = 0f;
-      idleSource.volume = idleVolume;
-      if (idleLoopSfx != null) idleSource.clip = idleLoopSfx;
-      if (AudioManager.Instance != null)
-      {
-        var g = AudioManager.Instance.GetSFXGroup();
-        if (g != null) idleSource.outputAudioMixerGroup = g;
-      }
-    }
-
-    if (retreatSource == null)
-    {
-      // Dedicated source so we can Stop() the retreat clip as soon as retreat ends.
-      var sources = GetComponents<AudioSource>();
-      if (sources != null)
-      {
-        foreach (var src in sources)
-        {
-          if (src != null && src != sfxSource && src != idleSource)
-          {
-            retreatSource = src;
-            break;
-          }
-        }
-      }
-    }
-    if (retreatSource == null)
-    {
-      retreatSource = gameObject.AddComponent<AudioSource>();
-    }
-    if (retreatSource != null)
-    {
-      retreatSource.playOnAwake = false;
-      retreatSource.loop = false;
-      retreatSource.spatialBlend = 0f;
-      if (AudioManager.Instance != null)
-      {
-        var g = AudioManager.Instance.GetSFXGroup();
-        if (g != null) retreatSource.outputAudioMixerGroup = g;
-      }
-    }
-
-    if (windupSource == null)
-    {
-      var sources = GetComponents<AudioSource>();
-      if (sources != null)
-      {
-        foreach (var src in sources)
-        {
-          if (src != null && src != sfxSource && src != idleSource && src != retreatSource)
-          {
-            windupSource = src;
-            break;
-          }
-        }
-      }
-    }
-    if (windupSource == null)
-    {
-      windupSource = gameObject.AddComponent<AudioSource>();
-    }
-    if (windupSource != null)
-    {
-      windupSource.playOnAwake = false;
-      windupSource.loop = false;
-      windupSource.spatialBlend = 0f;
-      if (AudioManager.Instance != null)
-      {
-        var g = AudioManager.Instance.GetSFXGroup();
-        if (g != null) windupSource.outputAudioMixerGroup = g;
-      }
-    }
-
-    if (lungeSource == null)
-    {
-      var sources = GetComponents<AudioSource>();
-      if (sources != null)
-      {
-        foreach (var src in sources)
-        {
-          if (src != null && src != sfxSource && src != idleSource && src != retreatSource && src != windupSource)
-          {
-            lungeSource = src;
-            break;
-          }
-        }
-      }
-    }
-    if (lungeSource == null)
-    {
-      lungeSource = gameObject.AddComponent<AudioSource>();
-    }
-    if (lungeSource != null)
-    {
-      lungeSource.playOnAwake = false;
-      lungeSource.loop = false;
-      lungeSource.spatialBlend = 0f;
-      if (AudioManager.Instance != null)
-      {
-        var g = AudioManager.Instance.GetSFXGroup();
-        if (g != null) lungeSource.outputAudioMixerGroup = g;
-      }
-    }
 
     ResolveListenerTransform();
   }
@@ -360,7 +228,6 @@ public class BeeEnemy : EnemyBase
     
     UpdateIdleAudio();
     UpdateRetreatAudio();
-    UpdateStateSfxAudio();
   }
 
   public bool TryAttack()
@@ -377,130 +244,135 @@ public class BeeEnemy : EnemyBase
   
   private void UpdateIdleAudio()
   {
-    if (idleSource == null) return;
+    if (sfxSource == null) return;
 
     float att = GetDistanceAttenuation01();
 
-    // Keep clip/volume in sync with Inspector changes.
-    if (idleSource.clip != idleLoopSfx) idleSource.clip = idleLoopSfx;
-    idleSource.volume = idleVolume * att;
-
-    bool shouldPlay = (enemyState == EnemyState.Roaming);
-    if (idleLoopSfx == null) shouldPlay = false;
-    if (att <= 0.0001f) shouldPlay = false;
-
-    if (shouldPlay)
+    bool shouldPlay = enemyState == EnemyState.Roaming && idleLoopSfx != null && att > 0.0001f;
+    if (!shouldPlay)
     {
-      if (!idleSource.isPlaying)
+      // Only stop if idle is the current loop clip (so we don't cut one-shots).
+      if (sfxSource.loop && sfxSource.clip == idleLoopSfx)
       {
-        idleSource.Play();
+        sfxSource.Stop();
+        sfxSource.loop = false;
+        sfxSource.clip = null;
       }
+      return;
     }
-    else
+
+    // If a different loop was playing (retreat), replace it.
+    if (sfxSource.loop && sfxSource.isPlaying && sfxSource.clip != idleLoopSfx)
     {
-      if (idleSource.isPlaying)
-      {
-        idleSource.Stop();
-      }
+      sfxSource.Stop();
+    }
+
+    if (sfxSource.clip != idleLoopSfx)
+    {
+      sfxSource.clip = idleLoopSfx;
+    }
+
+    sfxSource.loop = true;
+    sfxSource.volume = idleVolume * att;
+    if (!sfxSource.isPlaying)
+    {
+      sfxSource.Play();
     }
   }
 
   private void UpdateRetreatAudio()
   {
-    if (retreatSource == null) return;
-    if (retreatSource.clip != retreatSfx) retreatSource.clip = retreatSfx;
+    if (sfxSource == null) return;
+    if (retreatSfx == null) return;
+    if (!(sfxSource.loop && sfxSource.clip == retreatSfx && sfxSource.isPlaying)) return;
 
     float att = GetDistanceAttenuation01();
-    retreatSource.volume = sfxVolume * att;
+    sfxSource.volume = sfxVolume * att;
 
-    // If it's too far to hear, stop to avoid a long clip continuing silently.
-    if (retreatSource.isPlaying && att <= 0.0001f)
+    if (att <= 0.0001f)
     {
-      retreatSource.Stop();
+      sfxSource.Stop();
+      sfxSource.loop = false;
+      sfxSource.clip = null;
     }
   }
 
   private void PlayRetreatSfx()
   {
-    if (retreatSfx == null || retreatSource == null) return;
+    if (retreatSfx == null || sfxSource == null) return;
 
     float att = GetDistanceAttenuation01();
     if (att <= 0.0001f) return;
 
-    retreatSource.Stop();
-    retreatSource.clip = retreatSfx;
-    retreatSource.volume = sfxVolume * att;
-    retreatSource.Play();
+    // Stop idle loop if it's currently active (avoid affecting one-shots).
+    if (sfxSource.loop && sfxSource.clip == idleLoopSfx)
+    {
+      sfxSource.Stop();
+    }
+
+    // Replace any previous loop clip with retreat.
+    if (sfxSource.loop && sfxSource.isPlaying && sfxSource.clip != retreatSfx)
+    {
+      sfxSource.Stop();
+    }
+
+    sfxSource.clip = retreatSfx;
+    sfxSource.loop = true;
+    sfxSource.volume = sfxVolume * att;
+    sfxSource.Play();
   }
 
   private void StopRetreatSfx()
   {
-    if (retreatSource == null) return;
-    if (retreatSource.isPlaying) retreatSource.Stop();
-  }
-
-  private void UpdateStateSfxAudio()
-  {
-    float att = GetDistanceAttenuation01();
-
-    if (windupSource != null)
+    if (sfxSource == null) return;
+    if (sfxSource.loop && sfxSource.clip == retreatSfx)
     {
-      if (windupSource.clip != windupSfx) windupSource.clip = windupSfx;
-      windupSource.volume = sfxVolume * att;
-      if (windupSource.isPlaying && att <= 0.0001f) windupSource.Stop();
-    }
-
-    if (lungeSource != null)
-    {
-      if (lungeSource.clip != lungeSfx) lungeSource.clip = lungeSfx;
-      lungeSource.volume = sfxVolume * att;
-      if (lungeSource.isPlaying && att <= 0.0001f) lungeSource.Stop();
+      sfxSource.Stop();
+      sfxSource.loop = false;
+      sfxSource.clip = null;
     }
   }
 
   private void PlayWindupSfx()
   {
-    if (windupSfx == null || windupSource == null) return;
-
-    float att = GetDistanceAttenuation01();
-    if (att <= 0.0001f) return;
-
-    windupSource.Stop();
-    windupSource.clip = windupSfx;
-    windupSource.volume = sfxVolume * att;
-    windupSource.Play();
+    // Single AudioSource setup: play as one-shot.
+    StopRetreatSfx();
+    if (sfxSource != null && sfxSource.loop && sfxSource.clip == idleLoopSfx)
+    {
+      sfxSource.Stop();
+      sfxSource.loop = false;
+      sfxSource.clip = null;
+    }
+    PlaySfx(windupSfx);
   }
 
   private void StopWindupSfx()
   {
-    if (windupSource == null) return;
-    if (windupSource.isPlaying) windupSource.Stop();
+    // no-op (windup plays as one-shot)
   }
 
   private void PlayLungeSfx()
   {
-    if (lungeSfx == null || lungeSource == null) return;
-
-    float att = GetDistanceAttenuation01();
-    if (att <= 0.0001f) return;
-
-    lungeSource.Stop();
-    lungeSource.clip = lungeSfx;
-    lungeSource.volume = sfxVolume * att;
-    lungeSource.Play();
+    // Single AudioSource setup: play as one-shot.
+    StopRetreatSfx();
+    if (sfxSource != null && sfxSource.loop && sfxSource.clip == idleLoopSfx)
+    {
+      sfxSource.Stop();
+      sfxSource.loop = false;
+      sfxSource.clip = null;
+    }
+    PlaySfx(lungeSfx);
   }
 
   private void StopLungeSfx()
   {
-    if (lungeSource == null) return;
-    if (lungeSource.isPlaying) lungeSource.Stop();
+    // no-op (lunge plays as one-shot)
   }
 
   private void OnDisable()
   {
-    StopWindupSfx();
-    StopLungeSfx();
     StopRetreatSfx();
+    if (sfxSource != null) sfxSource.Stop();
   }
 
   private void FixedUpdate()
