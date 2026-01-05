@@ -737199,46 +737199,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Boss
       objectReference: {fileID: 0}
-    - target: {fileID: 3780426584638177732, guid: 285992d330efca44fbe93b45688a5a1d, type: 3}
-      propertyPath: moveWithTransform
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3780426584638177732, guid: 285992d330efca44fbe93b45688a5a1d, type: 3}
-      propertyPath: InitialModule.startRotation.minScalar
-      value: 6.283185
-      objectReference: {fileID: 0}
-    - target: {fileID: 3780426584638177732, guid: 285992d330efca44fbe93b45688a5a1d, type: 3}
-      propertyPath: InitialModule.startRotation.minMaxState
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 3780426584638177732, guid: 285992d330efca44fbe93b45688a5a1d, type: 3}
-      propertyPath: InitialModule.startRotationX.minMaxState
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 3780426584638177732, guid: 285992d330efca44fbe93b45688a5a1d, type: 3}
-      propertyPath: InitialModule.startRotationY.minMaxState
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 3869426938924665430, guid: 285992d330efca44fbe93b45688a5a1d, type: 3}
-      propertyPath: moveWithTransform
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3869426938924665430, guid: 285992d330efca44fbe93b45688a5a1d, type: 3}
-      propertyPath: InitialModule.startRotation.minScalar
-      value: 6.283185
-      objectReference: {fileID: 0}
-    - target: {fileID: 3869426938924665430, guid: 285992d330efca44fbe93b45688a5a1d, type: 3}
-      propertyPath: InitialModule.startRotation.minMaxState
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 3869426938924665430, guid: 285992d330efca44fbe93b45688a5a1d, type: 3}
-      propertyPath: InitialModule.startRotationX.minMaxState
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 3869426938924665430, guid: 285992d330efca44fbe93b45688a5a1d, type: 3}
-      propertyPath: InitialModule.startRotationY.minMaxState
-      value: 3
-      objectReference: {fileID: 0}
     - target: {fileID: 9123409369196889961, guid: 285992d330efca44fbe93b45688a5a1d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 58.73921
