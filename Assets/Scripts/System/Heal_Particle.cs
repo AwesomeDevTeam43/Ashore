@@ -93,11 +93,14 @@ public class Heal_Particle : MonoBehaviour
         if (playerHealSystem == null || playerHealSystem.CurrentHealth >= playerHealSystem.MaxHealth)
             return;
 
-        // Play particle effect (not as child)
+        // Play particle effect as a child of the player (so it appears on the player)
         ParticleSystem spawnedParticle = null;
         if (healParticlePrefab != null)
         {
-            spawnedParticle = Instantiate(healParticlePrefab, transform.position, Quaternion.identity);
+            // Parent to the player so it follows them visually
+            spawnedParticle = Instantiate(healParticlePrefab, other.transform);
+            spawnedParticle.transform.localPosition = Vector3.zero;
+
             // Set sorting layer and order on all renderers in the hierarchy
             var renderers = spawnedParticle.GetComponentsInChildren<Renderer>(true);
             foreach (var rend in renderers)
@@ -109,10 +112,10 @@ public class Heal_Particle : MonoBehaviour
             Destroy(spawnedParticle.gameObject, 1.0f);
         }
 
-        // Play sound robustly
+        // Play sound robustly at the player's position
         if (healClip != null)
         {
-            AudioSource.PlayClipAtPoint(healClip, transform.position);
+            AudioSource.PlayClipAtPoint(healClip, other.transform.position);
         }
         else
         {
@@ -121,6 +124,16 @@ public class Heal_Particle : MonoBehaviour
 
         // Heal the player
         playerHealSystem.Heal(healAmount);
+
+        // Flash the player green for a short moment (run on player's HealthSystem)
+        try
+        {
+            playerHealSystem.StartCoroutine(playerHealSystem.FlashColor(Color.green, 0.12f));
+        }
+        catch (System.Exception)
+        {
+            // If player's HealthSystem doesn't expose FlashColor, ignore silently
+        }
 
         // Disable visuals and interaction immediately
         var rends = GetComponentsInChildren<Renderer>();

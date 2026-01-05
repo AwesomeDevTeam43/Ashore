@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections;
 
 public class HealthSystem : MonoBehaviour
 {
@@ -52,6 +53,32 @@ public class HealthSystem : MonoBehaviour
         _currentHealth = Mathf.Min(_maxHealth, _currentHealth + heal);
 
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+    }
+
+    // Temporarily tint all child SpriteRenderers to a color then revert.
+    public IEnumerator FlashColor(Color flashColor, float duration = 0.12f)
+    {
+        var renderers = GetComponentsInChildren<SpriteRenderer>(true);
+        if (renderers == null || renderers.Length == 0)
+            yield break;
+
+        Color[] originals = new Color[renderers.Length];
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (renderers[i] != null)
+            {
+                originals[i] = renderers[i].color;
+                renderers[i].color = flashColor;
+            }
+        }
+
+        yield return new WaitForSeconds(duration);
+
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (renderers[i] != null)
+                renderers[i].color = originals[i];
+        }
     }
 
     public int CurrentHealth => _currentHealth;
