@@ -33467,7 +33467,7 @@ Camera:
   far clip plane: 1000
   field of view: 80
   orthographic: 1
-  orthographic size: 10
+  orthographic size: 5
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -33492,7 +33492,6 @@ Transform:
   m_GameObject: {fileID: 1074514740}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 230.6, y: -306.9, z: -10}
   m_LocalPosition: {x: 229.2, y: -313.2, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -729979,7 +729978,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2020787387774704812, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2020787387774704812, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
       propertyPath: m_LocalPosition.z
@@ -730007,11 +730006,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5917779576430905407, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
       propertyPath: TargetOffset.y
-      value: 5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6186789781944809722, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
       propertyPath: Lens.OrthographicSize
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 6252809459483690441, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
       propertyPath: m_Name
