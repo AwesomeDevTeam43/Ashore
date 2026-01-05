@@ -24,6 +24,9 @@ public class OldFriend_Boss : EnemyBase
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private Transform projectileSpawn;
     [SerializeField] private Transform projectileSpawnSecondary;
+    [SerializeField] private ParticleSystem idlevfx1;
+    [SerializeField] private ParticleSystem idlevfx2;
+    [SerializeField] private ParticleSystem injuredvfx;
 
     [Header("Timing")]
     [SerializeField] private float injuredStopDuration = 10f;
@@ -388,6 +391,10 @@ public class OldFriend_Boss : EnemyBase
         {
             idleAudioSource.Pause();
         }
+        // Switch VFX
+        if (idlevfx1 != null) idlevfx1.gameObject.SetActive(false);
+        if (idlevfx2 != null) idlevfx2.gameObject.SetActive(false);
+        if (injuredvfx != null) injuredvfx.gameObject.SetActive(true);
 
         try
         {
@@ -548,6 +555,13 @@ public class OldFriend_Boss : EnemyBase
             audioSource.Stop();
             audioSource.loop = false;
         }
+        // Switch VFX back
+        if (injuredvfx != null) injuredvfx.gameObject.SetActive(false);
+        if (bossActive)
+        {
+            if (idlevfx1 != null) idlevfx1.gameObject.SetActive(true);
+            if (idlevfx2 != null) idlevfx2.gameObject.SetActive(true);
+        }
 
         if (animator != null)
         {
@@ -614,6 +628,10 @@ public class OldFriend_Boss : EnemyBase
             {
                 idleAudioSource.Stop();
             }
+            // Stop VFX
+            if (idlevfx1 != null) idlevfx1.gameObject.SetActive(false);
+            if (idlevfx2 != null) idlevfx2.gameObject.SetActive(false);
+            if (injuredvfx != null) injuredvfx.gameObject.SetActive(false);
         }
         else
         {
@@ -630,6 +648,19 @@ public class OldFriend_Boss : EnemyBase
                     idleAudioSource.loop = true;
                     idleAudioSource.Play();
                 }
+            }
+            // Start VFX
+            if (!isStopped)
+            {
+                if (idlevfx1 != null) idlevfx1.gameObject.SetActive(true);
+                if (idlevfx2 != null) idlevfx2.gameObject.SetActive(true);
+                if (injuredvfx != null) injuredvfx.gameObject.SetActive(false);
+            }
+            else
+            {
+                if (idlevfx1 != null) idlevfx1.gameObject.SetActive(false);
+                if (idlevfx2 != null) idlevfx2.gameObject.SetActive(false);
+                if (injuredvfx != null) injuredvfx.gameObject.SetActive(true);
             }
         }
 
