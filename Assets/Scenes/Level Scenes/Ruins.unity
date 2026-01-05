@@ -20862,7 +20862,7 @@ Transform:
   m_GameObject: {fileID: 1074514740}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 737.9, y: -151.6, z: -10}
+  m_LocalPosition: {x: 662.7, y: -160.3, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -29157,14 +29157,6 @@ PrefabInstance:
       value: RuinsBoss
       objectReference: {fileID: 0}
     - target: {fileID: 6983019105936822673, guid: 05bca7a32b636d64191cff408ca27619, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6983019105936822673, guid: 05bca7a32b636d64191cff408ca27619, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6983019105936822673, guid: 05bca7a32b636d64191cff408ca27619, type: 3}
       propertyPath: m_LocalPosition.x
       value: 311.136
       objectReference: {fileID: 0}
@@ -29207,31 +29199,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3912505023045689532, guid: 05bca7a32b636d64191cff408ca27619, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1627270361}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 05bca7a32b636d64191cff408ca27619, type: 3}
---- !u!1 &1627270360 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3912505023045689532, guid: 05bca7a32b636d64191cff408ca27619, type: 3}
-  m_PrefabInstance: {fileID: 1627270359}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1627270361
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1627270360}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9dbb3231910b6fc4281aa6de1d34fb16, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemData: {fileID: 11400000, guid: ecbaa7ac669a8074fb513752026c7231, type: 2}
-  amount: 1
-  material_particle: {fileID: 3009273275518452482, guid: 4faa844a12452a64982a14b05e65a988, type: 3}
 --- !u!4 &1627270362 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6983019105936822673, guid: 05bca7a32b636d64191cff408ca27619, type: 3}
@@ -32538,11 +32507,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8023695755857493568, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 737.9
+      value: 662.7
       objectReference: {fileID: 0}
     - target: {fileID: 8023695755857493568, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -151.6
+      value: -160.3
       objectReference: {fileID: 0}
     - target: {fileID: 8023695755857493568, guid: 1bce3c4cbdc8be947ac48898b7ae6ad0, type: 3}
       propertyPath: m_LocalPosition.z
