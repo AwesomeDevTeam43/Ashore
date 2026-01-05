@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8931430275862391257
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8135736049681669862}
+  - component: {fileID: 7351600681608355942}
+  - component: {fileID: 6514187836016215126}
+  m_Layer: 0
+  m_Name: GlobalGeneticEvolver
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8135736049681669862
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8931430275862391257}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.0422555, y: -34.90611, z: 0.066928945}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7351600681608355942
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8931430275862391257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6b6cc36f91b19844958cff17ed71347, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  populationSize: 20
+  evolveTriggerCount: 5
+  eliteCount: 4
+  tournamentSize: 3
+  mutationRate: 0.15
+  mutationStrength: 0.2
+  crossoverRate: 0.7
+  absoluteMaxDifficulty: 2.5
+  maxGeneValue: 0.9
+  generationScaling: 1.02
+  maxScalingGeneration: 50
+  adaptiveDifficulty: 1
+  deathsBeforeReduction: 3
+  deathPenaltyStrength: 0.1
+  killsBeforeIncrease: 20
+  dominationBonusStrength: 0.05
+  useTargetDifficulty: 0
+  targetFitness: 50
+  persistProgress: 1
+  saveFileName: genetic_evolution_save.json
+  debugMode: 1
+  logEveryKill: 0
+  _totalKills: 0
+  _playerDeaths: 0
+  _killsSinceLastDeath: 0
+  _currentDifficultyModifier: 1
+--- !u!114 &6514187836016215126
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8931430275862391257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17928b0f7cbf4424d886dd2623b396f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  showUI: 1
+  toggleKey: 103
+  showDetailedStats: 1
+  xPos: 10
+  yPos: 10
