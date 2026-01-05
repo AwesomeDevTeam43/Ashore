@@ -16,7 +16,7 @@ public abstract class EnemyBase : MonoBehaviour
     protected Enemy_Health enemyHealth; // Tornar protected para classes filhas usarem
 
     [Header("Audio")]
-    [SerializeField] private AudioSource audioSource;
+    [SerializeField] protected AudioSource audioSource;
 
     protected virtual void Awake() // Mudar para protected virtual
     {

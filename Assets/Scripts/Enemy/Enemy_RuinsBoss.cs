@@ -40,6 +40,10 @@ public class Enemy_RuinsBoss : EnemyBase
     private bool hasAttackBool = false;
     private bool attackInProgress = false;
     private Coroutine attackCommitRoutine;
+    public AudioClip attackSound;
+    public float attackVolume = 1f;
+    public AudioClip walkSound;
+    public float walkVolume = 1f;
 
     public enum EnemyState { Idle, Chasing, Attacking, Returning }
     private EnemyState currentState;
@@ -48,7 +52,7 @@ public class Enemy_RuinsBoss : EnemyBase
     private float hopCooldown;
     private float stuckTimer;
     private float lastX;
-        private Vector3 spawnPosition;
+    private Vector3 spawnPosition;
     private const float stuckEpsilon = 0.01f;
     private PhysicsMaterial2D originalMaterial;
     private PhysicsMaterial2D lowFrictionMaterial;
@@ -168,6 +172,7 @@ public class Enemy_RuinsBoss : EnemyBase
             case EnemyState.Chasing:
                 if (distanceToPlayer <= typedStats.attackRange)
                 {
+                    Debug.Log("State transition: Entering Attacking state.");
                     currentState = EnemyState.Attacking;
                 }
                 else if (distanceToPlayer > typedStats.followPlayerRange)
@@ -189,6 +194,7 @@ public class Enemy_RuinsBoss : EnemyBase
             case EnemyState.Returning:
                 if (distanceToPlayer <= typedStats.attackRange)
                 {
+                    Debug.Log("State transition: Returning to Attacking state.");
                     currentState = EnemyState.Attacking;
                 }
                 else if (distanceToPlayer <= typedStats.followPlayerRange)
@@ -266,6 +272,7 @@ public class Enemy_RuinsBoss : EnemyBase
     {
         if (timeBtwAttack <= 0)
         {
+            Debug.Log("AttemptAttack: Triggering attack animation.");
             timeBtwAttack = (typedStats.startTimeBtwAttack <= 0) ? 2f : typedStats.startTimeBtwAttack;
             BeginAttackCommit(maybeTimedFallback: true);
             if (attackUsesAnimationEvent)
@@ -676,4 +683,58 @@ public class Enemy_RuinsBoss : EnemyBase
         }
         lastX = transform.position.x;
     }
+
+    // Animation event: play the attack SFX
+    public void PlayAttackSFX()
+    {
+        var clip = typedStats != null ? attackSound : null;
+        float vol = typedStats != null ? attackVolume : 1f;
+        if (audioSource != null)
+        {
+            audioSource.PlayOneShot(clip, Mathf.Clamp01(vol));
+        }
+        else
+        {
+            // Fallback: create a temporary AudioSource to play the clip
+            var temp = gameObject.AddComponent<AudioSource>();
+            temp.playOnAwake = false;
+            temp.spatialBlend = 0f; // 2D by default; adjust if needed
+            temp.volume = Mathf.Clamp01(vol);
+            temp.clip = clip;
+            if (AudioManager.Instance != null)
+            {
+                var g = AudioManager.Instance.GetSFXGroup();
+                if (g != null) temp.outputAudioMixerGroup = g;
+            }
+            temp.Play();
+            Destroy(temp, clip.length + 0.05f);
+        }
+    }
+
+    public void PlayWalkingSFX()
+    {
+        var clip = typedStats != null ? walkSound : null;
+        float vol = typedStats != null ? walkVolume : 1f;
+        if (audioSource != null)
+        {
+            audioSource.PlayOneShot(clip, Mathf.Clamp01(vol));
+        }
+        else
+        {
+            // Fallback: create a temporary AudioSource to play the clip
+            var temp = gameObject.AddComponent<AudioSource>();
+            temp.playOnAwake = false;
+            temp.spatialBlend = 0f; // 2D by default; adjust if needed
+            temp.volume = Mathf.Clamp01(vol);
+            temp.clip = clip;
+            if (AudioManager.Instance != null)
+            {
+                var g = AudioManager.Instance.GetSFXGroup();
+                if (g != null) temp.outputAudioMixerGroup = g;
+            }
+            temp.Play();
+            Destroy(temp, clip.length + 0.05f);
+        }
+    }
+
 }
