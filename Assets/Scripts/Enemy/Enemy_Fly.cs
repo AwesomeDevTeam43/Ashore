@@ -15,6 +15,11 @@ public class Enemy_Fly : EnemyBase
     private Vector2 startPosition;
     private Vector2 centerPoint;
 
+    [SerializeField] private AudioClip idleFly;
+
+    [Header("Audio Settings")]
+    public float maxIdleDelay = 3f;
+
     void Start()
     {
         typedStats = stats as Fly_Stats;
@@ -24,11 +29,31 @@ public class Enemy_Fly : EnemyBase
         rb.gravityScale = 0;
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
 
+        if(audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+        }
+        
+        if (audioSource != null && idleFly != null)
+        {
+            Invoke("PlayIdleSound", Random.Range(0f, maxIdleDelay));
+        }
+
         startPosition = transform.position;
         centerPoint = startPosition;
         PickNewDirection();
 
         damageTimer = 0f;
+    }
+
+    void PlayIdleSound()
+    {
+        if (audioSource != null && idleFly != null)
+        {
+            audioSource.clip = idleFly;
+            audioSource.loop = true;
+            audioSource.Play();
+        }
     }
 
     void Update()
