@@ -65,6 +65,14 @@ public class OldFriend_Boss : EnemyBase
     [SerializeField] private string animIdleParam = "Idle";
     [SerializeField] private string animInjuredParam = "Injured";
 
+    [Header("Audio")]
+	public AudioClip shootSound;
+    [Range(0.0f, 1.0f)] public float shootVolume = 1f;
+    public AudioClip injuredSound;
+    [Range(0.0f, 1.0f)] public float injuredVolume = 1f;
+    public AudioClip idleSound;
+    [Range(0.0f, 1.0f)] public float idleVolume = 1f;
+
     private int animIdleHash;
     private int animInjuredHash;
 
@@ -77,6 +85,7 @@ public class OldFriend_Boss : EnemyBase
     private Coroutine injuredCoroutine;
     private bool injuredPhaseEnded = false;
     private int pendingStageTarget = -1;
+    private AudioSource idleAudioSource;
 
     private readonly float[] thresholds = new float[] { 0.75f, 0.5f, 0.25f };
     private bool[] thresholdTriggered;
@@ -172,6 +181,16 @@ public class OldFriend_Boss : EnemyBase
         }
 
         ApplyBossActivationState();
+
+        // Setup idle audio source
+        idleAudioSource = gameObject.AddComponent<AudioSource>();
+        idleAudioSource.playOnAwake = false;
+        idleAudioSource.spatialBlend = 0f; // 2D
+        if (AudioManager.Instance != null)
+        {
+            var g = AudioManager.Instance.GetSFXGroup();
+            if (g != null) idleAudioSource.outputAudioMixerGroup = g;
+        }
     }
 
     private void FixedUpdate()
@@ -309,6 +328,7 @@ public class OldFriend_Boss : EnemyBase
             SpawnProjectileAt(spawnA);
             if (spawnB != null && spawnB != spawnA)
                 SpawnProjectileAt(spawnB);
+            PlayShootSFX();
             return;
         }
 
@@ -321,6 +341,7 @@ public class OldFriend_Boss : EnemyBase
 
         Debug.Log($"{name}: Shooting projectile from {chosen.position} towards player at {player.position} (stage={currentStage})");
         SpawnProjectileAt(chosen);
+        PlayShootSFX();
     }
 
 	private void SpawnProjectileAt(Transform spawn)
@@ -361,6 +382,12 @@ public class OldFriend_Boss : EnemyBase
         injuredPhaseEnded = false;
         pendingStageTarget = Mathf.Clamp(stageIndex + 2, 1, 4);
         Debug.Log($"{name}: Entering InjuredPhase stage {stageIndex}. Unprotecting cores for {injuredStopDuration}s or until one is destroyed.");
+        PlayInjuredSFX();
+        // Pause idle sound
+        if (idleAudioSource != null && idleAudioSource.isPlaying)
+        {
+            idleAudioSource.Pause();
+        }
 
         try
         {
@@ -462,6 +489,12 @@ public class OldFriend_Boss : EnemyBase
                 shootDouble = true;
                 break;
         }
+
+        // Update idle sound pitch based on stage
+        if (bossActive && !isStopped && idleAudioSource != null)
+        {
+            idleAudioSource.pitch = 1.0f + (currentStage - 1) * 0.5f;
+        }
     }
 
     private void HandleCoreDestroyed(ShieldedCore core)
@@ -502,6 +535,19 @@ public class OldFriend_Boss : EnemyBase
 		}
 
 		isStopped = false;
+
+        // Resume idle sound
+        if (idleAudioSource != null && !idleAudioSource.isPlaying)
+        {
+            idleAudioSource.UnPause();
+        }
+
+        // Stop the injured SFX
+        if (audioSource != null)
+        {
+            audioSource.Stop();
+            audioSource.loop = false;
+        }
 
         if (animator != null)
         {
@@ -563,6 +609,28 @@ public class OldFriend_Boss : EnemyBase
         if (!bossActive)
         {
             shootTimer = 0f;
+            // Stop idle sound
+            if (idleAudioSource != null)
+            {
+                idleAudioSource.Stop();
+            }
+        }
+        else
+        {
+            // Start idle sound if not injured
+            if (!isStopped && idleAudioSource != null)
+            {
+                var clip = TypedStats != null ? idleSound : null;
+                float vol = TypedStats != null ? idleVolume : 1f;
+                if (clip != null)
+                {
+                    idleAudioSource.clip = clip;
+                    idleAudioSource.volume = Mathf.Clamp01(vol);
+                    idleAudioSource.pitch = 1.0f + (currentStage - 1) * 0.5f;
+                    idleAudioSource.loop = true;
+                    idleAudioSource.Play();
+                }
+            }
         }
 
         if (animator != null)
@@ -609,5 +677,51 @@ public class OldFriend_Boss : EnemyBase
         outMaxX = anchor.x + localMaxX;
         outMinY = anchor.y + localMinY;
         outMaxY = anchor.y + localMaxY;
+    }
+
+    private void PlayShootSFX()
+    {
+        var clip = TypedStats != null ? shootSound : null;
+        float vol = TypedStats != null ? shootVolume : 1f;
+        if (clip == null)
+        {
+            return;
+        }
+        if (audioSource != null)
+        {
+            audioSource.PlayOneShot(clip, Mathf.Clamp01(vol));
+        }
+        else
+        {
+            // Fallback: create a temporary AudioSource to play the clip
+            var temp = gameObject.AddComponent<AudioSource>();
+            temp.playOnAwake = false;
+            temp.spatialBlend = 0f; // 2D by default; adjust if needed
+            temp.volume = Mathf.Clamp01(vol);
+            temp.clip = clip;
+            if (AudioManager.Instance != null)
+            {
+                var g = AudioManager.Instance.GetSFXGroup();
+                if (g != null) temp.outputAudioMixerGroup = g;
+            }
+            temp.Play();
+            Destroy(temp, clip.length + 0.05f);
+        }
+    }
+
+    // Play the injured SFX
+    // Play the injured SFX (looping)
+    private void PlayInjuredSFX()
+    {
+        var clip = TypedStats != null ? injuredSound : null;
+        float vol = TypedStats != null ? injuredVolume : 1f;
+        if (clip == null || audioSource == null)
+        {
+            return;
+        }
+        audioSource.clip = clip;
+        audioSource.volume = Mathf.Clamp01(vol);
+        audioSource.loop = true;
+        audioSource.Play();
     }
 }
