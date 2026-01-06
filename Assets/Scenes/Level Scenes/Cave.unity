@@ -23627,6 +23627,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1269824419}
     m_Modifications:
+    - target: {fileID: -3568142314728436910, guid: bfd5a785fb537bc4d9f15d9015e2535b, type: 3}
+      propertyPath: uniqueId
+      value: 181f0622-3ba1-4d21-ab1b-ffd3e5b3d216
+      objectReference: {fileID: 0}
     - target: {fileID: 2149504193949386446, guid: bfd5a785fb537bc4d9f15d9015e2535b, type: 3}
       propertyPath: m_Name
       value: RestPointShit

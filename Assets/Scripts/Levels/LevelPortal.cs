@@ -14,6 +14,10 @@ public class LevelPortal : MonoBehaviour
   [Tooltip("ID of the destination portal in the target scene (or current scene if targetScene is empty).")]
   public string targetPortalId;
 
+  [Header("Persistence")]
+  [Tooltip("If true, this portal will persist the world via the SaveSystem before transitioning.")]
+  [SerializeField] private bool saveOnTransition;
+
   [Tooltip("Optional spawn offset applied at destination relative to target portal position.")]
   public Vector2 spawnOffset;
 
@@ -41,6 +45,8 @@ public class LevelPortal : MonoBehaviour
   public float portalStickyFieldOfView = 40f;
 
   private Collider2D col;
+
+  public bool SaveOnTransition => saveOnTransition;
 
   private void Reset()
   {

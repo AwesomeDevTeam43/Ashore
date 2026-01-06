@@ -122,7 +122,10 @@ public class LevelTransitionManager : MonoBehaviour
 
     _isTransitioning = true;
 
-    PersistWorldViaSaveSystem();
+    if (from.SaveOnTransition)
+    {
+      PersistWorldViaSaveSystem();
+    }
 
     GameState.Instance?.CaptureAll();
 

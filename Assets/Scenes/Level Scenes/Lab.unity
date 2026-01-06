@@ -11906,6 +11906,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1662756553}
     m_Modifications:
+    - target: {fileID: -3568142314728436910, guid: bfd5a785fb537bc4d9f15d9015e2535b, type: 3}
+      propertyPath: uniqueId
+      value: da4dae20-3fb1-4670-8937-8592dd90c11f
+      objectReference: {fileID: 0}
     - target: {fileID: 2149504193949386446, guid: bfd5a785fb537bc4d9f15d9015e2535b, type: 3}
       propertyPath: m_Name
       value: RestPointShit
@@ -20430,6 +20434,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1662756553}
     m_Modifications:
+    - target: {fileID: -3568142314728436910, guid: bfd5a785fb537bc4d9f15d9015e2535b, type: 3}
+      propertyPath: uniqueId
+      value: b9d507a0-c1be-469c-823f-e9a8611d8aed
+      objectReference: {fileID: 0}
     - target: {fileID: 2149504193949386446, guid: bfd5a785fb537bc4d9f15d9015e2535b, type: 3}
       propertyPath: m_Name
       value: RestPointShit
@@ -33090,6 +33098,7 @@ MonoBehaviour:
   portalId: GameObject
   targetScene: 
   targetPortalId: 
+  saveOnTransition: 0
   spawnOffset: {x: 0, y: 0}
   stickEnabled: 1
   stickAreaCenter: {x: 0, y: 0}

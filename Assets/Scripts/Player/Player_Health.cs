@@ -146,11 +146,11 @@ public class Player_Health : MonoBehaviour
             processingDeath = true;
             IsAlive = false;
             
-            Debug.Log("Player_Health: Player morreu - voltando ao menu");
+            Debug.Log("Player_Health: Player morreu - recarregando o último save");
             
-            // Destroy the persistent player so the menu/new game spawns a fresh one
+            // Destroy the persistent player so the reload spawns it cleanly
             PlayerPersistence.DestroyPersistentPlayer();
-            SceneManager.LoadScene("MainMenu");
+            ReloadLastSave();
         }
     }
 
@@ -178,6 +178,16 @@ public class Player_Health : MonoBehaviour
         }
 
         Debug.Log(godMode ? "God Mode ENABLED" : "God Mode DISABLED");
+    }
+
+    private void ReloadLastSave()
+    {
+        string savedScene = SaveSystem.GetSavedSceneName(SaveSlotTracker.CurrentSlot);
+        string targetScene = string.IsNullOrEmpty(savedScene) ? SceneManager.GetActiveScene().name : savedScene;
+
+        GameFlowState.LoadGameOnStart = true;
+        GameFlowState.IsLoading = true;
+        SceneManager.LoadScene(targetScene);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

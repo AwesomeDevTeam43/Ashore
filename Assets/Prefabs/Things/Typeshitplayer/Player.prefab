@@ -77,7 +77,7 @@ GameObject:
   - component: {fileID: 5917779576430905407}
   - component: {fileID: 4813488610503824168}
   m_Layer: 0
-  m_Name: Camera
+  m_Name: CineCamera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.Cinemachine;
@@ -27,8 +26,7 @@ public class CameraPortalStick : MonoBehaviour
 
   private void Reset()
   {
-    if (cinemachineCamera == null)
-      cinemachineCamera = GetComponent<CinemachineCamera>();
+    EnsureCinemachineCamera();
   }
 
   private void Awake()
@@ -46,9 +44,8 @@ public class CameraPortalStick : MonoBehaviour
 
   private void Start()
   {
-    if (cinemachineCamera == null)
-      cinemachineCamera = GetComponent<CinemachineCamera>();
-    _originalFollow = cinemachineCamera != null ? cinemachineCamera.Follow : null;
+    EnsureCinemachineCamera();
+    EnsureOriginalFollowTarget();
   }
 
   private void OnDestroy()
@@ -64,24 +61,8 @@ public class CameraPortalStick : MonoBehaviour
   {
     // Force rebind of player and original follow target after scene change
     _player = null;
-    if (cinemachineCamera == null)
-      cinemachineCamera = GetComponent<CinemachineCamera>();
-    // If the previous follow target was destroyed, clear and reacquire
-    if (_originalFollow == null || _originalFollow.gameObject == null)
-    {
-      _originalFollow = cinemachineCamera != null ? cinemachineCamera.Follow : null;
-      if (_originalFollow == null)
-      {
-        // Try to assign player as follow if nothing set
-        var playerGo = GameObject.FindGameObjectWithTag(playerTag);
-        if (playerGo != null)
-        {
-          _originalFollow = playerGo.transform;
-          if (cinemachineCamera != null)
-            cinemachineCamera.Follow = _originalFollow;
-        }
-      }
-    }
+    EnsureCinemachineCamera();
+    EnsureOriginalFollowTarget();
     // Release sticky state across scenes; camera will re-stick if in area
     ReleaseSticky();
   }
@@ -94,6 +75,8 @@ public class CameraPortalStick : MonoBehaviour
       if (go != null) _player = go.transform;
       if (_player == null) return;
     }
+    if (cinemachineCamera == null)
+      EnsureCinemachineCamera();
 
     // Ignore sticky right after teleport
     if (LevelTransitionManager.Instance != null &&
@@ -176,6 +159,40 @@ public class CameraPortalStick : MonoBehaviour
       cinemachineCamera.Follow = _originalFollow;
     _stickyActive = false;
     _currentPortal = null;
+  }
+
+  private void EnsureCinemachineCamera()
+  {
+    if (cinemachineCamera != null && cinemachineCamera.gameObject != null) return;
+    cinemachineCamera = FindSceneCinemachineCamera();
+  }
+
+  private void EnsureOriginalFollowTarget()
+  {
+    if (cinemachineCamera == null) return;
+    var follow = cinemachineCamera.Follow;
+    if (follow == null)
+    {
+      var playerGo = GameObject.FindGameObjectWithTag(playerTag);
+      if (playerGo != null)
+      {
+        follow = playerGo.transform;
+        cinemachineCamera.Follow = follow;
+      }
+    }
+    if (follow != null)
+      _originalFollow = follow;
+  }
+
+  private CinemachineCamera FindSceneCinemachineCamera()
+  {
+    var cameras = Object.FindObjectsByType<CinemachineCamera>(FindObjectsSortMode.None);
+    foreach (var cam in cameras)
+    {
+      if (cam != null && cam.gameObject.activeInHierarchy)
+        return cam;
+    }
+    return null;
   }
 
   private bool IsInsideStickArea(LevelPortal p, Vector3 worldPos, float padding)

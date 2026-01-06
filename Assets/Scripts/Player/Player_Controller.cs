@@ -233,6 +233,8 @@ public class Player_Controller : MonoBehaviour
     {
       SaveGame();
     }
+
+    SaveSystem.AddPlayTime(Time.deltaTime, SaveSlotTracker.CurrentSlot);
   }
 
   private void UpdateAnimationParameters()

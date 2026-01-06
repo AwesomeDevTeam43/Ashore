@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour
 {
@@ -28,7 +29,9 @@ public class AudioManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            RemoveDuplicateAudioManagers();
+
             InitializeAudioSources();
             
             if (audioMixer == null)
@@ -61,6 +64,19 @@ public class AudioManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        RemoveDuplicateAudioManagers();
     }
     
     private void InitializeAudioSources()
@@ -222,6 +238,16 @@ public class AudioManager : MonoBehaviour
             SetMusicVolume(music);
             SetSFXVolume(sfx);
             Debug.Log($"[AudioManager] Reapplied volumes attempt {i + 1}: Master={master}, Music={music}, SFX={sfx}");
+        }
+    }
+
+    private void RemoveDuplicateAudioManagers()
+    {
+        var managers = Object.FindObjectsByType<AudioManager>(FindObjectsSortMode.None);
+        foreach (var manager in managers)
+        {
+            if (manager == null || manager == this) continue;
+            Destroy(manager.gameObject);
         }
     }
 }
