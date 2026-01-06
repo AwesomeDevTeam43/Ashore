@@ -30,6 +30,16 @@ public class LevelPortal : MonoBehaviour
   [Tooltip("Camera will follow this anchor while the player is inside the stick area.")]
   public Transform cameraStickAnchor;
 
+  [Header("Sticky Zoom Override")]
+  [Tooltip("If true, this portal supplies a custom zoom value while the camera is stuck.")]
+  public bool overrideStickyZoom = false;
+
+  [Tooltip("Target orthographic size for the camera while stuck (ignored if the main camera is perspective).")]
+  public float portalStickyOrthographicSize = 4.5f;
+
+  [Tooltip("Target field of view for the camera while stuck (ignored if the main camera is orthographic).")]
+  public float portalStickyFieldOfView = 40f;
+
   private Collider2D col;
 
   private void Reset()

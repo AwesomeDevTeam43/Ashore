@@ -2,6 +2,16 @@ using UnityEngine;
 
 public abstract class TutorialStep : MonoBehaviour
 {
+    [Header("Gatekeeping")]
+    [Tooltip("Gatekeepers that unlock once this step starts (used to allow the next interaction).")]
+    public TutorialGatekeeper[] gatekeepersToUnlockOnBegin;
+    [Tooltip("Gatekeepers that should stay locked for the duration of this step.")]
+    public TutorialGatekeeper[] gatekeepersToHoldDuringStep;
+    [Tooltip("Tutorial buttons that should unlock when this step starts.")]
+    public TutorialButton[] buttonsToUnlockOnBegin;
+    [Tooltip("Tutorial buttons that should stay locked while this step runs.")]
+    public TutorialButton[] buttonsToHoldDuringStep;
+
     [TextArea]
     public string instructionText;
 
@@ -33,6 +43,35 @@ public abstract class TutorialStep : MonoBehaviour
 
     public virtual void Begin(TutorialManager mgr)
     {
+        if (gatekeepersToUnlockOnBegin != null)
+        {
+            foreach (var gate in gatekeepersToUnlockOnBegin)
+            {
+                gate?.Unlock();
+            }
+        }
+        if (buttonsToUnlockOnBegin != null)
+        {
+            foreach (var button in buttonsToUnlockOnBegin)
+            {
+                button?.Unlock();
+            }
+        }
+        if (gatekeepersToHoldDuringStep != null)
+        {
+            foreach (var gate in gatekeepersToHoldDuringStep)
+            {
+                gate?.Lock();
+            }
+        }
+        if (buttonsToHoldDuringStep != null)
+        {
+            foreach (var button in buttonsToHoldDuringStep)
+            {
+                button?.Lock();
+            }
+        }
+
         manager = mgr;
         if (dimScreen) manager.Overlay?.SetDim(true);
         
@@ -56,6 +95,21 @@ public abstract class TutorialStep : MonoBehaviour
 
     public virtual void End()
     {
+        if (gatekeepersToHoldDuringStep != null)
+        {
+            foreach (var gate in gatekeepersToHoldDuringStep)
+            {
+                gate?.Unlock();
+            }
+        }
+        if (buttonsToHoldDuringStep != null)
+        {
+            foreach (var button in buttonsToHoldDuringStep)
+            {
+                button?.Unlock();
+            }
+        }
+
         manager.Overlay?.SetHighlight(null);
         
         if (useDialogueBox)

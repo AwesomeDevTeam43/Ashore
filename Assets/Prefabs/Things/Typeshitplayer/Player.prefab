@@ -372,6 +372,7 @@ MonoBehaviour:
   rangeAttack: RangeAttack
   interact: Interact
   inventory: Inventory
+  menu: Menu
   keyboardMouseSchemeName: Keyboard&Mouse
   gamepadSchemeName: Gamepad
   defaultSchemeName: Keyboard&Mouse
@@ -663,6 +664,7 @@ MonoBehaviour:
   Player_Movement: {fileID: 0}
   player_InputHandler: {fileID: 0}
   playerController: {fileID: 0}
+  rangedAttackClip: {fileID: 8300000, guid: 38611da83b458e842be4a075304b3168, type: 3}
 --- !u!114 &7486078452629930489
 MonoBehaviour:
   m_ObjectHideFlags: 0

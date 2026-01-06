@@ -1,6 +1,8 @@
-using UnityEngine;
-using UnityEngine.InputSystem;
+using System;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// Attach to any object (note on the ground, body, terminal, etc.) that the player can interact with
@@ -306,6 +308,9 @@ public class LoreInteractable : MonoBehaviour
             readLoreIds.Add(persistenceId);
         }
 
+        onLoreSequenceComplete?.Invoke();
+        SequenceCompleted?.Invoke();
+
         // Re-show prompt if player still in range and can interact again
         if (playerInRange && !hasBeenRead && showInteractPrompt)
         {
@@ -458,4 +463,9 @@ public class LoreInteractable : MonoBehaviour
     }
 
     #endregion
+
+    [Header("Events")]
+    [SerializeField] private UnityEvent onLoreSequenceComplete;
+
+    public event Action SequenceCompleted;
 }

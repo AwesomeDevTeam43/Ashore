@@ -1,13 +1,12 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-public class Pressure_Plate : MonoBehaviour
+[DisallowMultipleComponent]
+public class TutorialButton : MonoBehaviour
 {
-    [Header("Gatekeeper")]
-    [Tooltip("Optional gatekeeper that prevents this plate from firing while locked.")]
-    [SerializeField] private TutorialGatekeeper gatekeeper;
-
-    private bool IsLockedByGate => gatekeeper != null && gatekeeper.IsLocked;
+    [Header("Gatekeeping")]
+    [Tooltip("Start in the locked state until a tutorial step explicitly unlocks this button.")]
+    [SerializeField] private bool startLocked = true;
 
     [Header("References")]
     [SerializeField] private Transform buttonTransform = null;
@@ -36,6 +35,12 @@ public class Pressure_Plate : MonoBehaviour
     private int presserCount = 0;
     private Coroutine moveRoutine = null;
     private Coroutine autoResetRoutine = null;
+    private bool isLocked;
+
+    private void Awake()
+    {
+        isLocked = startLocked;
+    }
 
     void Reset()
     {
@@ -47,7 +52,7 @@ public class Pressure_Plate : MonoBehaviour
     {
         if (buttonTransform == null)
         {
-            Debug.LogWarning($"Pressure_Plate '{name}' has no Button transform assigned.", this);
+            Debug.LogWarning($"TutorialButton '{name}' has no Button transform assigned.", this);
             buttonTransform = transform;
         }
 
@@ -55,9 +60,24 @@ public class Pressure_Plate : MonoBehaviour
         pressedLocalPos = initialLocalPos + pressedLocalOffset;
     }
 
+    public void Unlock()
+    {
+        isLocked = false;
+    }
+
+    public void Lock()
+    {
+        isLocked = true;
+    }
+
+    public void ResetLock()
+    {
+        isLocked = startLocked;
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (IsLockedByGate) return;
+        if (isLocked) return;
         if (!other.CompareTag(presserTag)) return;
 
         presserCount++;
@@ -84,7 +104,7 @@ public class Pressure_Plate : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (IsLockedByGate) return;
+        if (isLocked) return;
         if (!other.CompareTag(presserTag)) return;
 
         presserCount = Mathf.Max(0, presserCount - 1);
