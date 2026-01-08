@@ -9,15 +9,15 @@ using UnityEngine;
 [RequireComponent(typeof(PersistentKillable))]
 public class OldFriend_Boss : EnemyBase
 {
-        protected override void Awake()
+    protected override void Awake()
+    {
+        base.Awake();
+        var guid = GetComponent<GuidComponent>();
+        if (guid != null && string.IsNullOrEmpty(guid.GetGuid()))
         {
-            base.Awake();
-            var guid = GetComponent<GuidComponent>();
-            if (guid != null && string.IsNullOrEmpty(guid.GetGuid()))
-            {
-                Debug.LogWarning($"OldFriend_Boss '{name}' has empty GUID. Please generate a GUID in the editor for persistence.", this);
-            }
+            Debug.LogWarning($"OldFriend_Boss '{name}' has empty GUID. Please generate a GUID in the editor for persistence.", this);
         }
+    }
     private FinalBoss_Stats TypedStats => stats as FinalBoss_Stats;
 
     [Header("References")]
@@ -27,6 +27,7 @@ public class OldFriend_Boss : EnemyBase
     [SerializeField] private ParticleSystem idlevfx1;
     [SerializeField] private ParticleSystem idlevfx2;
     [SerializeField] private ParticleSystem injuredvfx;
+    [SerializeField] private FinalBoss_Room finalBoss_Room;
 
     [Header("Timing")]
     [SerializeField] private float injuredStopDuration = 10f;
@@ -61,6 +62,7 @@ public class OldFriend_Boss : EnemyBase
 
     [Header("Activation")]
     [SerializeField] private bool bossActive = false;
+    private bool bossDeathHandled = false;
 
     [Header("Contact")]
     [SerializeField] private int contactDamage = 1;
@@ -69,7 +71,7 @@ public class OldFriend_Boss : EnemyBase
     [SerializeField] private string animInjuredParam = "Injured";
 
     [Header("Audio")]
-	public AudioClip shootSound;
+    public AudioClip shootSound;
     [Range(0.0f, 1.0f)] public float shootVolume = 1f;
     public AudioClip injuredSound;
     [Range(0.0f, 1.0f)] public float injuredVolume = 1f;
@@ -235,7 +237,7 @@ public class OldFriend_Boss : EnemyBase
             return;
         }
 
-        if (!allowSceneFallback) 
+        if (!allowSceneFallback)
         {
             cores = new ShieldedCore[0];
             return;
@@ -347,24 +349,36 @@ public class OldFriend_Boss : EnemyBase
         PlayShootSFX();
     }
 
-	private void SpawnProjectileAt(Transform spawn)
-	{
+    private void SpawnProjectileAt(Transform spawn)
+    {
         if (!bossActive) return;
-		GameObject go = Instantiate(projectilePrefab, spawn.position, Quaternion.identity);
-		var proj = go.GetComponent<BossProjectile>();
-		if (proj != null)
-		{
-			Vector2 dir = (player.position - spawn.position);
-			float speedMult = 1f;
-			proj.Initialize(dir, projectileStopFollow, speedMult, TypedStats != null ? TypedStats.projectileDamage : 1);
-			proj.speed = TypedStats != null ? TypedStats.projectileSpeed : proj.speed;
-		}
-	}
+        GameObject go = Instantiate(projectilePrefab, spawn.position, Quaternion.identity);
+        var proj = go.GetComponent<BossProjectile>();
+        if (proj != null)
+        {
+            Vector2 dir = (player.position - spawn.position);
+            float speedMult = 1f;
+            proj.Initialize(dir, projectileStopFollow, speedMult, TypedStats != null ? TypedStats.projectileDamage : 1);
+            proj.speed = TypedStats != null ? TypedStats.projectileSpeed : proj.speed;
+        }
+    }
 
     private void OnHealthChanged(int currentHealth, int maxHealth)
     {
         if (!bossActive) return;
         float pct = (float)currentHealth / maxHealth;
+
+        if (!bossDeathHandled && currentHealth <= 0)
+        {
+            audioSource.gameObject.SetActive(false);
+
+            bossDeathHandled = true;
+            if (finalBoss_Room != null)
+            {
+                finalBoss_Room.OnBossDied();
+            }
+            return;
+        }
 
         for (int i = 0; i < thresholds.Length; i++)
         {
@@ -408,7 +422,7 @@ public class OldFriend_Boss : EnemyBase
             }
 
             RefreshCores(true);
-            Debug.Log($"{name}: InjuredPhase - cores count={(cores!=null?cores.Length:0)}");
+            Debug.Log($"{name}: InjuredPhase - cores count={(cores != null ? cores.Length : 0)}");
 
             if (injuredCoreUnlockDelay > 0f)
             {
@@ -518,30 +532,30 @@ public class OldFriend_Boss : EnemyBase
         pendingStageTarget = -1;
     }
 
-	private void ExitInjuredPhaseCleanup()
-	{
-		if (injuredPhaseEnded) return;
-		injuredPhaseEnded = true;
+    private void ExitInjuredPhaseCleanup()
+    {
+        if (injuredPhaseEnded) return;
+        injuredPhaseEnded = true;
 
-		foreach (var c in cores)
-		{
-			if (c != null)
-				c.SetProtected(true);
-		}
+        foreach (var c in cores)
+        {
+            if (c != null)
+                c.SetProtected(true);
+        }
 
-		if (enemyHealth != null)
-			enemyHealth.SetDamageable(true);
+        if (enemyHealth != null)
+            enemyHealth.SetDamageable(true);
 
-		if (spriteRenderers != null && originalColors != null)
-		{
-			for (int i = 0; i < spriteRenderers.Length && i < originalColors.Length; i++)
-			{
-				if (spriteRenderers[i] != null)
-					spriteRenderers[i].color = originalColors[i];
-			}
-		}
+        if (spriteRenderers != null && originalColors != null)
+        {
+            for (int i = 0; i < spriteRenderers.Length && i < originalColors.Length; i++)
+            {
+                if (spriteRenderers[i] != null)
+                    spriteRenderers[i].color = originalColors[i];
+            }
+        }
 
-		isStopped = false;
+        isStopped = false;
 
         // Resume idle sound
         if (idleAudioSource != null && !idleAudioSource.isPlaying)
@@ -568,7 +582,7 @@ public class OldFriend_Boss : EnemyBase
             animator.SetBool(animInjuredHash, false);
             animator.SetBool(animIdleHash, true);
         }
-	}
+    }
 
     private void OnDestroy()
     {
