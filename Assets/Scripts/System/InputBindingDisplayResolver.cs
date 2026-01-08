@@ -32,6 +32,8 @@ public class InputBindingDisplayResolver : MonoBehaviour
     private string _currentScheme;
     private Dictionary<string, BindingAlias> _aliasLookup = new Dictionary<string, BindingAlias>(StringComparer.OrdinalIgnoreCase);
     private Dictionary<string, InputAction> _actionLookup;
+    [SerializeField] private bool highlightBindingTokens = true;
+    [SerializeField] private Color bindingHighlightColor = Color.yellow;
     private static readonly Regex TokenRegex = new Regex(@"\{([^{}]+)\}", RegexOptions.Compiled);
 
     public event Action OnBindingsChanged;
@@ -122,8 +124,15 @@ public class InputBindingDisplayResolver : MonoBehaviour
             string token = match.Groups[1].Value.Trim();
             if (string.IsNullOrEmpty(token)) return match.Value;
             string replacement = ResolveTokenReplacement(token);
-            return string.IsNullOrEmpty(replacement) ? match.Value : replacement;
+            return string.IsNullOrEmpty(replacement) ? match.Value : ApplyBindingHighlight(replacement);
         });
+    }
+
+    private string ApplyBindingHighlight(string text)
+    {
+        if (!highlightBindingTokens || string.IsNullOrEmpty(text)) return text;
+        var colorString = ColorUtility.ToHtmlStringRGBA(bindingHighlightColor);
+        return $"<color=#{colorString}>{text}</color>";
     }
 
     private string ResolveTokenReplacement(string token)

@@ -1,3 +1,4 @@
+using Unity.Cinemachine;
 using UnityEngine;
 
 // Keeps the final boss encounter dormant until the player enters the room trigger.
@@ -12,8 +13,16 @@ public class FinalBoss_Room : MonoBehaviour
 	[Tooltip("Disable this trigger collider after the encounter starts to prevent re-entry events.")]
 	[SerializeField] private bool destroyTriggerAfterActivation = true;
 
+	[Header("Camera Lock")]
+	[SerializeField] private CinemachineCamera cinemachineCamera;
+	[SerializeField] private float lens = 7.25f;
+	[SerializeField] private Vector3 offset = new Vector3(0, 5.65f, 0);
 	private bool encounterStarted;
 	private BoxCollider2D triggerCollider;
+	private Transform originalFollow;
+	private Transform offsetFollowTarget;
+	private LensSettings originalLens;
+	private bool lensOverridden;
 
 	private void Awake()
 	{
@@ -50,6 +59,80 @@ public class FinalBoss_Room : MonoBehaviour
 		if (destroyTriggerAfterActivation && triggerCollider != null)
 		{
 			triggerCollider.enabled = false;
+		}
+
+		CameraLock();
+		ApplyCameraOffset(other.transform);
+	}
+
+	private void CameraLock()
+	{
+		if (cinemachineCamera == null) return;
+
+		if (!lensOverridden)
+		{
+			originalLens = cinemachineCamera.Lens;
+			lensOverridden = true;
+		}
+
+		var lensSettings = cinemachineCamera.Lens;
+		lensSettings.FieldOfView = lens;
+		lensSettings.OrthographicSize = lens;
+		cinemachineCamera.Lens = lensSettings;
+	}
+
+	private void ApplyCameraOffset(Transform player)
+	{
+		if (cinemachineCamera == null || player == null) return;
+
+		// Remember current follow target
+		originalFollow = cinemachineCamera.Follow;
+
+		// Create or reuse an offset follow target parented to the player
+		if (offsetFollowTarget == null)
+		{
+			var go = new GameObject("FinalBoss_CameraOffsetTarget");
+			offsetFollowTarget = go.transform;
+		}
+
+		offsetFollowTarget.SetParent(player, worldPositionStays: false);
+		offsetFollowTarget.localPosition = offset;
+		offsetFollowTarget.localRotation = Quaternion.identity;
+
+		// Make the camera follow the offset child (still effectively following the player)
+		cinemachineCamera.Follow = offsetFollowTarget;
+	}
+
+	private void RestoreCameraFollow()
+	{
+		if (cinemachineCamera == null) return;
+		if (originalFollow != null)
+			cinemachineCamera.Follow = originalFollow;
+	}
+
+	private void OnDisable()
+	{
+		RestoreCameraFollow();
+	}
+
+	public void OnBossDied()
+	{
+		// Restore camera to the original follow target
+		RestoreCameraFollow();
+
+		// Restore original lens settings
+		if (cinemachineCamera != null && lensOverridden)
+		{
+			cinemachineCamera.Lens = originalLens;
+			lensOverridden = false;
+		}
+
+		// Cleanup the temporary offset target
+		if (offsetFollowTarget != null)
+		{
+			offsetFollowTarget.SetParent(null);
+			Destroy(offsetFollowTarget.gameObject);
+			offsetFollowTarget = null;
 		}
 	}
 }
