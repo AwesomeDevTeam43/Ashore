@@ -417,6 +417,7 @@ public class MenuController : MonoBehaviour
         menuRoot.SetActive(false);
         Debug.Log($"[MenuController] menuRoot activeSelf after SetActive(false)={menuRoot.activeSelf}, activeInHierarchy={menuRoot.activeInHierarchy}");
         DisableUIShortcuts();
+        InventoryOpen = false;
         // Enforce correct input map
         EnforceInputMap();
         // Ensure built-in navigation is on

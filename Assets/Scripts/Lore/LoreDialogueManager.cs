@@ -302,11 +302,24 @@ public class LoreDialogueManager : MonoBehaviour
     private IEnumerator TypewriterEffect(string text)
     {
         isTyping = true;
-        bodyText.text = "";
+        bodyText.text = string.Empty;
 
-        foreach (char c in text)
+        int index = 0;
+        while (index < text.Length)
         {
-            bodyText.text += c;
+            if (text[index] == '<')
+            {
+                int tagEnd = text.IndexOf('>', index);
+                if (tagEnd >= 0)
+                {
+                    bodyText.text += text.Substring(index, tagEnd - index + 1);
+                    index = tagEnd + 1;
+                    continue;
+                }
+            }
+
+            bodyText.text += text[index];
+            index++;
             yield return new WaitForSecondsRealtime(typewriterSpeed);
         }
 
