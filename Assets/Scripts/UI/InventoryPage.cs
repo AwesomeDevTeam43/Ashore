@@ -155,6 +155,7 @@ public class InventoryPage : MonoBehaviour
             {
                 slots = itemsParent.GetComponentsInChildren<InventorySlot>(true);
                 WireSlotButtons();
+                SetupGridNavigation();
             }
         }
     }
@@ -225,7 +226,29 @@ public class InventoryPage : MonoBehaviour
         slots = itemsParent.GetComponentsInChildren<InventorySlot>(true);
         gridBuilt = true;
         WireSlotButtons();
-        RebuildNavScope();
+        SetupGridNavigation();
+    }
+
+    /// <summary>
+    /// Sets up navigation so keyboard/controller nav works correctly.
+    /// Uses Automatic mode which handles grid navigation natively.
+    /// </summary>
+    private void SetupGridNavigation()
+    {
+        if (slots == null || slots.Length == 0) return;
+
+        for (int i = 0; i < slots.Length; i++)
+        {
+            var slot = slots[i];
+            if (slot == null) continue;
+            var btn = slot.GetComponent<Button>();
+            if (btn == null) continue;
+
+            // Use Automatic navigation - Unity handles grid layout automatically
+            var nav = btn.navigation;
+            nav.mode = Navigation.Mode.Automatic;
+            btn.navigation = nav;
+        }
     }
 
     private void WireSlotButtons()
@@ -258,12 +281,6 @@ public class InventoryPage : MonoBehaviour
             {
                 btn = slot.gameObject.AddComponent<Button>();
                 btn.targetGraphic = rootImg;
-            }
-
-            // Mark as allowed navigation target (works with UINavScope whitelist)
-            if (slot.GetComponent<UINavTarget>() == null)
-            {
-                slot.gameObject.AddComponent<UINavTarget>();
             }
 
             // Add/ensure selection highlight behavior
@@ -316,7 +333,6 @@ public class InventoryPage : MonoBehaviour
                 if (es != null) es.SetSelectedGameObject(s.gameObject);
             };
         }
-        RebuildNavScope();
     }
 
     public void Refresh()
@@ -354,19 +370,9 @@ public class InventoryPage : MonoBehaviour
         {
             detailsPanel.Clear();
         }
-
-        RebuildNavScope();
     }
 
-    private void RebuildNavScope()
-    {
-        // Ensure UINavScope (if present up the hierarchy) includes freshly built/generated slots
-        var scope = GetComponentInParent<UINavScope>();
-        if (scope != null && scope.isActiveAndEnabled)
-        {
-            scope.Rebuild();
-        }
-    }
+
 
     public GameObject GetFirstSelectable()
     {

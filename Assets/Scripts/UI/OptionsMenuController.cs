@@ -262,10 +262,6 @@ public class OptionsMenuController : MonoBehaviour
             audioTabButton.GetComponent<Image>().color = isAudioTab ? activeColor : inactiveColor;
         if (controlsTabButton != null)
             controlsTabButton.GetComponent<Image>().color = isAudioTab ? inactiveColor : activeColor;
-        
-        // Rebuild UINavScope
-        var scope = optionsPanel?.GetComponent<UINavScope>();
-        scope?.Rebuild();
     }
 
     private void SelectFirstInCurrentTab()

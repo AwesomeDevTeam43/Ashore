@@ -75,8 +75,7 @@ public static class PauseMenuUIFactory
         nav.mode = Navigation.Mode.Automatic;
         button.navigation = nav;
         
-        // Add UINavTarget and SelectionHighlight for inventory-style navigation
-        buttonGO.AddComponent<UINavTarget>();
+        // Add SelectionHighlight for selection feedback
         buttonGO.AddComponent<SelectionHighlight>();
         
         // Button text
@@ -124,8 +123,7 @@ public static class PauseMenuUIFactory
         nav.mode = Navigation.Mode.Automatic;
         button.navigation = nav;
         
-        // Add UINavTarget and SelectionHighlight
-        buttonGO.AddComponent<UINavTarget>();
+        // Add SelectionHighlight for selection feedback
         buttonGO.AddComponent<SelectionHighlight>();
         
         // Tab text
@@ -179,8 +177,7 @@ public static class PauseMenuUIFactory
         nav.mode = Navigation.Mode.Automatic;
         button.navigation = nav;
         
-        // Add UINavTarget and SelectionHighlight
-        buttonGO.AddComponent<UINavTarget>();
+        // Add SelectionHighlight for selection feedback
         buttonGO.AddComponent<SelectionHighlight>();
         
         GameObject textGO = new GameObject("Text");
@@ -213,9 +210,6 @@ public static class PauseMenuUIFactory
         
         Image bgImage = panel.AddComponent<Image>();
         bgImage.color = backgroundColor;
-        
-        // Add UINavScope for inventory-style navigation
-        panel.AddComponent<UINavScope>();
         
         return panel;
     }

@@ -96,10 +96,6 @@ public class SaveSlotStyler : MonoBehaviour
         }
         
         // Add navigation components for gamepad support
-        if (button.GetComponent<UINavTarget>() == null)
-        {
-            button.gameObject.AddComponent<UINavTarget>();
-        }
         if (button.GetComponent<SelectionHighlight>() == null)
         {
             button.gameObject.AddComponent<SelectionHighlight>();

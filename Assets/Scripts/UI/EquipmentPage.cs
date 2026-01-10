@@ -30,8 +30,6 @@ public class EquipmentPage : MonoBehaviour
             // Ensure visual highlight on hover/selection
             var hi = disableButton.GetComponent<SelectionHighlight>();
             if (hi == null) disableButton.gameObject.AddComponent<SelectionHighlight>();
-            // Ensure it's a navigable target
-            if (disableButton.GetComponent<UINavTarget>() == null) disableButton.gameObject.AddComponent<UINavTarget>();
         }
 
         if (setMeleeButton != null)
@@ -40,7 +38,6 @@ public class EquipmentPage : MonoBehaviour
             setMeleeButton.onClick.AddListener(() => SetMainWeapon(Player_Controller.MainWeaponType.Melee));
             var hi = setMeleeButton.GetComponent<SelectionHighlight>();
             if (hi == null) setMeleeButton.gameObject.AddComponent<SelectionHighlight>();
-            if (setMeleeButton.GetComponent<UINavTarget>() == null) setMeleeButton.gameObject.AddComponent<UINavTarget>();
         }
         if (setRangedButton != null)
         {
@@ -48,7 +45,6 @@ public class EquipmentPage : MonoBehaviour
             setRangedButton.onClick.AddListener(() => SetMainWeapon(Player_Controller.MainWeaponType.Ranged));
             var hi = setRangedButton.GetComponent<SelectionHighlight>();
             if (hi == null) setRangedButton.gameObject.AddComponent<SelectionHighlight>();
-            if (setRangedButton.GetComponent<UINavTarget>() == null) setRangedButton.gameObject.AddComponent<UINavTarget>();
         }
 
         if (toggleMainWeaponButton != null)
@@ -57,7 +53,6 @@ public class EquipmentPage : MonoBehaviour
             toggleMainWeaponButton.onClick.AddListener(ToggleMainWeapon);
             var hi = toggleMainWeaponButton.GetComponent<SelectionHighlight>();
             if (hi == null) toggleMainWeaponButton.gameObject.AddComponent<SelectionHighlight>();
-            if (toggleMainWeaponButton.GetComponent<UINavTarget>() == null) toggleMainWeaponButton.gameObject.AddComponent<UINavTarget>();
         }
     }
 
@@ -189,7 +184,20 @@ public class EquipmentPage : MonoBehaviour
 
     private void RebuildNavScope()
     {
-        var scope = GetComponentInParent<UINavScope>();
-        if (scope != null && scope.isActiveAndEnabled) scope.Rebuild();
+        // Set up navigation between available buttons
+        SetupButtonNavigation();
+    }
+
+    private void SetupButtonNavigation()
+    {
+        // Use Automatic navigation - Unity handles it well for simple button lists
+        Button[] buttons = { toggleMainWeaponButton, setMeleeButton, setRangedButton, disableButton };
+        foreach (var btn in buttons)
+        {
+            if (btn == null) continue;
+            var nav = btn.navigation;
+            nav.mode = Navigation.Mode.Automatic;
+            btn.navigation = nav;
+        }
     }
 }

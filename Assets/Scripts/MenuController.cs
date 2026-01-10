@@ -3,6 +3,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 
 public class MenuController : MonoBehaviour
@@ -85,15 +86,8 @@ public class MenuController : MonoBehaviour
     EnsureSelectionHighlight(inventoryTab != null ? inventoryTab.gameObject : null);
     EnsureSelectionHighlight(equipmentTab != null ? equipmentTab.gameObject : null);
     EnsureSelectionHighlight(mapTab != null ? mapTab.gameObject : null);
-        // Mark tabs as navigation targets so they remain reachable
-        EnsureNavTarget(inventoryTab != null ? inventoryTab.gameObject : null);
-        EnsureNavTarget(equipmentTab != null ? equipmentTab.gameObject : null);
-        EnsureNavTarget(mapTab != null ? mapTab.gameObject : null);
         EnsureSelectionHighlight(defaultEquipmentFocus);
     EnsureSelectionHighlight(defaultMapFocus);
-        // Ensure default focus objects are also nav targets
-        EnsureNavTarget(defaultEquipmentFocus);
-        EnsureNavTarget(defaultMapFocus);
         // Ensure header tabs have symmetric left/right navigation
         WireHeaderHorizontalNavigation();
     // no gadgets tab
@@ -145,6 +139,9 @@ public class MenuController : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Q)) PrevTab();
             if (Input.GetKeyDown(KeyCode.E)) NextTab();
+            
+            // Manual navigation handling as fallback if InputSystemUIInputModule isn't working
+            HandleManualNavigation();
 
             // Update footer with currently selected inventory item (if any)
             if (footerText != null && es != null)
@@ -389,21 +386,17 @@ public class MenuController : MonoBehaviour
         // Defensive UI visibility check: ensure Canvas/CanvasGroup aren't hiding the UI
         EnsureUIVisible(menuRoot);
         if (pauseOnOpen) { Debug.Log("[MenuController] Setting Time.timeScale = 0"); Time.timeScale = 0f; }
-        // Ensure a selection guard exists so navigation cannot lose focus or select non-interactive elements
-        var guard = menuRoot.GetComponent<UISelectionGuard>();
-        if (guard == null) guard = menuRoot.AddComponent<UISelectionGuard>();
         // Enforce correct input map
         EnforceInputMap();
         EnableUIShortcuts();
         EnsureHighlightsForAllInteractables();
-        // Re-enable built-in navigation and disable any forced cycler
+        // Re-enable built-in navigation
         if (es == null) es = EventSystem.current;
         if (es != null) es.sendNavigationEvents = true;
-        var cycler = menuRoot.GetComponent<UINavForceCycle>();
-        if (cycler != null) cycler.enabled = false;
-        // Ensure any existing root-level scope is disabled so it doesn't filter navigation
-        var rootScope = menuRoot.GetComponent<UINavScope>();
-        if (rootScope != null) rootScope.enabled = false;
+        // Ensure InputSystemUIInputModule's navigation actions are enabled
+        EnsureUIModuleNavigationEnabled();
+        // Ensure all menu selectables are interactable (in case a context menu trap didn't restore properly)
+        EnsureMenuSelectablesInteractable();
         ShowPage(currentTabIndex);
     }
 
@@ -445,6 +438,156 @@ public class MenuController : MonoBehaviour
             try { playerInput.actions.FindActionMap("UI").Disable(); Debug.Log("[MenuController] Disabled UI map"); } catch (System.Exception ex) { Debug.LogWarning($"[MenuController] Failed to disable UI map: {ex.Message}"); }
             try { playerInput.actions.FindActionMap("Player").Enable(); Debug.Log("[MenuController] Enabled Player map"); } catch (System.Exception ex) { Debug.LogWarning($"[MenuController] Failed to enable Player map: {ex.Message}"); }
             try { playerInput.SwitchCurrentActionMap("Player"); Debug.Log("[MenuController] Switched to Player map"); } catch (System.Exception ex) { Debug.LogWarning($"[MenuController] Failed to switch to Player map: {ex.Message}"); }
+        }
+    }
+
+    /// <summary>
+    /// Ensures the InputSystemUIInputModule's navigation actions (move, submit, cancel) are enabled.
+    /// This is crucial because the UI module uses its own action references (from DefaultInputActions),
+    /// which are separate from the PlayerInput's action maps.
+    /// </summary>
+    private void EnsureUIModuleNavigationEnabled()
+    {
+        Debug.Log("[MenuController] EnsureUIModuleNavigationEnabled called");
+        var uiModule = Object.FindFirstObjectByType<InputSystemUIInputModule>();
+        if (uiModule == null)
+        {
+            Debug.LogWarning("[MenuController] EnsureUIModuleNavigationEnabled: No InputSystemUIInputModule found");
+            return;
+        }
+        Debug.Log($"[MenuController] Found InputSystemUIInputModule on '{uiModule.gameObject.name}'");
+        
+        try
+        {
+            // Enable move action for navigation
+            var moveAction = uiModule.move?.action;
+            if (moveAction != null)
+            {
+                if (!moveAction.enabled)
+                {
+                    moveAction.Enable();
+                    Debug.Log("[MenuController] Enabled UI move action");
+                }
+                else
+                {
+                    Debug.Log($"[MenuController] UI move action already enabled: {moveAction.name}");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[MenuController] UI move action is null");
+            }
+            
+            // Enable submit action
+            var submitAction = uiModule.submit?.action;
+            if (submitAction != null && !submitAction.enabled)
+            {
+                submitAction.Enable();
+                Debug.Log("[MenuController] Enabled UI submit action");
+            }
+            
+            // Enable cancel action
+            var cancelAction = uiModule.cancel?.action;
+            if (cancelAction != null && !cancelAction.enabled)
+            {
+                cancelAction.Enable();
+                Debug.Log("[MenuController] Enabled UI cancel action");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[MenuController] EnsureUIModuleNavigationEnabled failed: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Ensures all Selectable components under the menu root are interactable.
+    /// This recovers from situations where a context menu or other system disabled selectables
+    /// and didn't properly restore them.
+    /// </summary>
+    private void EnsureMenuSelectablesInteractable()
+    {
+        if (menuRoot == null) return;
+        var selectables = menuRoot.GetComponentsInChildren<Selectable>(true);
+        foreach (var sel in selectables)
+        {
+            if (sel == null) continue;
+            // Only re-enable if it's not intentionally disabled (e.g., empty equipment slot)
+            // We check if navigation mode is not None, which typically indicates it should be navigable
+            if (!sel.interactable && sel.navigation.mode != Navigation.Mode.None)
+            {
+                sel.interactable = true;
+            }
+        }
+    }
+
+    // Cooldown to prevent navigation repeating too fast
+    private float _navCooldown = 0f;
+    private const float NAV_REPEAT_DELAY = 0.15f;
+
+    /// <summary>
+    /// Manual navigation handling as fallback when InputSystemUIInputModule doesn't work.
+    /// Reads keyboard/gamepad input directly and moves selection accordingly.
+    /// </summary>
+    private void HandleManualNavigation()
+    {
+        // Respect cooldown (use unscaled time since game is paused)
+        if (_navCooldown > 0f)
+        {
+            _navCooldown -= Time.unscaledDeltaTime;
+            return;
+        }
+
+        if (es == null) es = EventSystem.current;
+        if (es == null) return;
+
+        var current = es.currentSelectedGameObject;
+        if (current == null) return;
+
+        var sel = current.GetComponent<Selectable>();
+        if (sel == null) return;
+
+        // Read input from keyboard and gamepad
+        Vector2 input = Vector2.zero;
+        
+        var kb = Keyboard.current;
+        if (kb != null)
+        {
+            if (kb.wKey.isPressed || kb.upArrowKey.isPressed) input.y = 1;
+            else if (kb.sKey.isPressed || kb.downArrowKey.isPressed) input.y = -1;
+            if (kb.aKey.isPressed || kb.leftArrowKey.isPressed) input.x = -1;
+            else if (kb.dKey.isPressed || kb.rightArrowKey.isPressed) input.x = 1;
+        }
+
+        var gp = Gamepad.current;
+        if (gp != null && input == Vector2.zero)
+        {
+            var stick = gp.leftStick.ReadValue();
+            var dpad = gp.dpad.ReadValue();
+            if (Mathf.Abs(stick.x) > 0.5f || Mathf.Abs(dpad.x) > 0.5f)
+                input.x = stick.x > 0.5f || dpad.x > 0.5f ? 1 : -1;
+            if (Mathf.Abs(stick.y) > 0.5f || Mathf.Abs(dpad.y) > 0.5f)
+                input.y = stick.y > 0.5f || dpad.y > 0.5f ? 1 : -1;
+        }
+
+        if (input == Vector2.zero) return;
+
+        Selectable next = null;
+        if (input.y > 0) next = sel.FindSelectableOnUp();
+        else if (input.y < 0) next = sel.FindSelectableOnDown();
+        else if (input.x < 0) next = sel.FindSelectableOnLeft();
+        else if (input.x > 0) next = sel.FindSelectableOnRight();
+
+        if (next != null && next.gameObject != current)
+        {
+            Debug.Log($"[MenuController] Manual nav: {current.name} -> {next.gameObject.name}");
+            es.SetSelectedGameObject(next.gameObject);
+            _navCooldown = NAV_REPEAT_DELAY;
+        }
+        else if (next == null)
+        {
+            // Log when we can't find a next selectable - helps debug navigation setup
+            Debug.Log($"[MenuController] Manual nav: No selectable found in direction {input} from {current.name}");
         }
     }
 
@@ -603,11 +746,7 @@ public class MenuController : MonoBehaviour
         if (equipmentPageGO != null) equipmentPageGO.SetActive(currentTabIndex == 1);
         if (mapPageGO != null) mapPageGO.SetActive(currentTabIndex == 2);
         // Ensure any page/root scopes are disabled to let Unity's directional navigation work
-        DisablePageScope(inventoryPageGO);
-        DisablePageScope(equipmentPageGO);
-        DisablePageScope(mapPageGO);
-        var rootScope = menuRoot != null ? menuRoot.GetComponent<UINavScope>() : null;
-        if (rootScope != null) rootScope.enabled = false;
+
 
         // Focus
         if (es == null) es = EventSystem.current;
@@ -617,27 +756,15 @@ public class MenuController : MonoBehaviour
             case 0:
                 if (inventoryPage != null) inventoryPage.Refresh();
                 focus = inventoryPage != null ? inventoryPage.GetFirstSelectable() : (inventoryTab != null ? inventoryTab.gameObject : null);
-                if (inventoryTab != null && focus != null)
-                {
-                    EnsureExplicitDown(inventoryTab, focus);
-                }
                 break;
             case 1:
                 if (equipmentPage != null) equipmentPage.Refresh();
                 focus = defaultEquipmentFocus != null ? defaultEquipmentFocus 
                     : (equipmentPage != null ? equipmentPage.GetFirstSelectable() 
                     : (equipmentTab != null ? equipmentTab.gameObject : null));
-                if (equipmentTab != null && focus != null)
-                {
-                    EnsureExplicitDown(equipmentTab, focus);
-                }
                 break;
             case 2:
                 focus = defaultMapFocus != null ? defaultMapFocus : (mapTab != null ? mapTab.gameObject : null);
-                if (mapTab != null && focus != null)
-                {
-                    EnsureExplicitDown(mapTab, focus);
-                }
                 break;
         }
         // After setting explicit Down on the active tab, (re)wire header left/right so Explicit mode doesn't break L/R
@@ -645,59 +772,39 @@ public class MenuController : MonoBehaviour
         if (es != null && focus != null)
         {
             es.SetSelectedGameObject(focus);
+            Debug.Log($"[MenuController] ShowPage: Set focus to '{focus.name}', interactable={focus.GetComponent<Selectable>()?.interactable}");
         }
-    }
-
-    private void DisablePageScope(GameObject pageGO)
-    {
-        if (pageGO == null) return;
-        var scope = pageGO.GetComponent<UINavScope>();
-        if (scope != null) scope.enabled = false;
-    }
-
-    private void EnsureNavTarget(GameObject go)
-    {
-        if (go == null) return;
-        if (go.GetComponent<UINavTarget>() == null) go.AddComponent<UINavTarget>();
-    }
-
-    private void EnsureExplicitDown(Selectable from, GameObject toGO)
-    {
-        if (from == null || toGO == null) return;
-        var nav = from.navigation;
-        nav.mode = Navigation.Mode.Explicit;
-        var to = toGO.GetComponent<Selectable>();
-        if (to == null)
+        else
         {
-            to = toGO.GetComponentInChildren<Selectable>();
+            Debug.LogWarning($"[MenuController] ShowPage: Could not set focus. es={es}, focus={focus}");
         }
-        nav.selectOnDown = to;
-        from.navigation = nav;
     }
+
+
 
     /// <summary>
-    /// Ensures the header tab buttons have explicit left/right links so navigation is symmetric
-    /// even when we switch nav.mode to Explicit to force Down behavior.
+    /// Ensures the header tab buttons have proper navigation.
     /// </summary>
     private void WireHeaderHorizontalNavigation()
     {
-        // Build ordered list of existing tabs
-        var tabsList = new System.Collections.Generic.List<Selectable>();
-        if (inventoryTab != null) tabsList.Add(inventoryTab);
-        if (equipmentTab != null) tabsList.Add(equipmentTab);
-        if (mapTab != null) tabsList.Add(mapTab);
-        int n = tabsList.Count;
-        for (int i = 0; i < n; i++)
+        // Use Automatic navigation - Unity handles horizontal layout well
+        if (inventoryTab != null)
         {
-            var s = tabsList[i];
-            var left = (i - 1) >= 0 ? tabsList[i - 1] : null;
-            var right = (i + 1) < n ? tabsList[i + 1] : null;
-            // Preserve existing Up/Down; only set L/R and ensure mode is Explicit
-            var nav = s.navigation;
-            nav.mode = Navigation.Mode.Explicit;
-            nav.selectOnLeft = left;
-            nav.selectOnRight = right;
-            s.navigation = nav;
+            var nav = inventoryTab.navigation;
+            nav.mode = Navigation.Mode.Automatic;
+            inventoryTab.navigation = nav;
+        }
+        if (equipmentTab != null)
+        {
+            var nav = equipmentTab.navigation;
+            nav.mode = Navigation.Mode.Automatic;
+            equipmentTab.navigation = nav;
+        }
+        if (mapTab != null)
+        {
+            var nav = mapTab.navigation;
+            nav.mode = Navigation.Mode.Automatic;
+            mapTab.navigation = nav;
         }
     }
 

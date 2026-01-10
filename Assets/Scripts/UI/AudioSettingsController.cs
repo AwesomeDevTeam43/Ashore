@@ -203,8 +203,7 @@ public class AudioSettingsController
         nav.mode = Navigation.Mode.Automatic;
         slider.navigation = nav;
 
-        // Add UINavTarget and SelectionHighlight
-        sliderGO.AddComponent<UINavTarget>();
+        // Add SelectionHighlight for selection feedback
         sliderGO.AddComponent<SelectionHighlight>();
 
         return slider;

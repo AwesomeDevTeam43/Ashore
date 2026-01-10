@@ -38,6 +38,8 @@ public abstract class TutorialStep : MonoBehaviour
     public bool freezeUntilPlayerInput = false;
     [Tooltip("Realtime cooldown before input can unfreeze, when using 'freezeUntilPlayerInput'.")]
     public float inputUnfreezeCooldown = 0.25f;
+    [Tooltip("If true, this step cannot be skipped by the Escape key. The tutorial must complete this step.")]
+    public bool isEssential = false;
 
     protected TutorialManager manager;
 

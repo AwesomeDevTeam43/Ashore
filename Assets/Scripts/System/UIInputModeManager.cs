@@ -82,7 +82,10 @@ public class UIInputModeManager : MonoBehaviour
             var rc = uiModule.rightClick.action; if (rc != null) { if (mouseKeyboard && !rc.enabled) rc.Enable(); else if (!mouseKeyboard && rc.enabled) rc.Disable(); }
             var mc = uiModule.middleClick.action; if (mc != null) { if (mouseKeyboard && !mc.enabled) mc.Enable(); else if (!mouseKeyboard && mc.enabled) mc.Disable(); }
             var sw = uiModule.scrollWheel.action; if (sw != null) { if (mouseKeyboard && !sw.enabled) sw.Enable(); else if (!mouseKeyboard && sw.enabled) sw.Disable(); }
-            // Keep move/submit/cancel enabled in both modes so keyboard/controller keep working
+            // Ensure move/submit/cancel are ALWAYS enabled in both modes so keyboard/controller navigation works
+            var mv = uiModule.move.action; if (mv != null && !mv.enabled) mv.Enable();
+            var sb = uiModule.submit.action; if (sb != null && !sb.enabled) sb.Enable();
+            var cn = uiModule.cancel.action; if (cn != null && !cn.enabled) cn.Enable();
         }
         catch (System.Exception ex)
         {

@@ -277,9 +277,7 @@ public class GamePauseManager : MonoBehaviour
 
     private void RebuildNavScope(GameObject panel)
     {
-        if (panel == null) return;
-        var scope = panel.GetComponent<UINavScope>();
-        scope?.Rebuild();
+        // No custom navigation scope management - Unity handles it
     }
 
     #endregion
