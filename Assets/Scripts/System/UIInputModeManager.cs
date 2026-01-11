@@ -29,14 +29,22 @@ public class UIInputModeManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         SceneManager.sceneLoaded += OnSceneLoaded;
         FindUIModule();
-    Apply(UIInputMode.CurrentScheme);
-    UIInputMode.OnSchemeChanged += Apply;
+        Apply(UIInputMode.CurrentScheme);
+        UIInputMode.OnSchemeChanged += Apply;
+        UIInputMode.OnChanged += OnModeChanged;
     }
 
     private void OnDestroy()
     {
-    UIInputMode.OnSchemeChanged -= Apply;
+        UIInputMode.OnSchemeChanged -= Apply;
+        UIInputMode.OnChanged -= OnModeChanged;
         SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+    
+    private void OnModeChanged(UIInputMode.Mode mode)
+    {
+        // Apply cursor visibility when mode changes
+        Apply(UIInputMode.CurrentScheme);
     }
 
     private void Update()
@@ -60,13 +68,19 @@ public class UIInputModeManager : MonoBehaviour
     private void Apply(UIInputMode.Scheme scheme)
     {
         bool mouseKeyboard = scheme == UIInputMode.Scheme.MouseKeyboard;
+        bool isPointerMode = UIInputMode.Current == UIInputMode.Mode.Pointer;
 
-        // Cursor handling (optional): hide in controller/keyboard mode
-        Cursor.visible = mouseKeyboard;
-        if (mouseKeyboard)
+        // Cursor handling: hide when using keyboard/controller navigation
+        Cursor.visible = isPointerMode;
+        if (isPointerMode)
+        {
             Cursor.lockState = CursorLockMode.None;
+        }
         else
-            Cursor.lockState = CursorLockMode.Locked; // hide and keep centered for stick navigation
+        {
+            // Use Confined instead of Locked to avoid issues in menus
+            Cursor.lockState = CursorLockMode.Confined;
+        }
 
         if (uiModule == null)
         {

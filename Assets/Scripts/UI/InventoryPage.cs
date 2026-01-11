@@ -40,6 +40,12 @@ public class InventoryPage : MonoBehaviour
         }
     private InventorySlot[] slots;
     private bool gridBuilt = false;
+    
+    // State tracking for submit buttons to work when Time.timeScale = 0
+    private bool prevEnterPressed = false;
+    private bool prevNumpadEnterPressed = false;
+    private bool prevGamepadSouthPressed = false;
+    private bool prevMouseLeftPressed = false;
 
     private void OnValidate()
     {
@@ -402,9 +408,23 @@ public class InventoryPage : MonoBehaviour
         // Global cursor visibility is managed by UIInputModeManager. No per-page toggling here.
 
         // Open context menu on Enter (keyboard) or South (gamepad)
-            bool open = (kb != null && (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame))
-                        || (gp != null && gp.buttonSouth.wasPressedThisFrame);
-            if (InventoryContextMenu.IsOpenBlocked()) open = false;
+        // Use manual state tracking instead of wasPressedThisFrame because it doesn't work when Time.timeScale = 0
+        bool enterPressed = kb != null && kb.enterKey.isPressed;
+        bool numpadEnterPressed = kb != null && kb.numpadEnterKey.isPressed;
+        bool gamepadSouthPressed = gp != null && gp.buttonSouth.isPressed;
+        
+        // Detect transition from not-pressed to pressed
+        bool enterJustPressed = enterPressed && !prevEnterPressed;
+        bool numpadEnterJustPressed = numpadEnterPressed && !prevNumpadEnterPressed;
+        bool gamepadSouthJustPressed = gamepadSouthPressed && !prevGamepadSouthPressed;
+        
+        // Update previous states for next frame
+        prevEnterPressed = enterPressed;
+        prevNumpadEnterPressed = numpadEnterPressed;
+        prevGamepadSouthPressed = gamepadSouthPressed;
+        
+        bool open = enterJustPressed || numpadEnterJustPressed || gamepadSouthJustPressed;
+        if (InventoryContextMenu.IsOpenBlocked()) open = false;
 
         if (open)
         {
@@ -448,7 +468,11 @@ public class InventoryPage : MonoBehaviour
 
         // Mouse left click outside any item -> unselect and hide details panel
         var mouse = UnityEngine.InputSystem.Mouse.current;
-        if (mouse != null && mouse.leftButton.wasPressedThisFrame)
+        bool mouseLeftPressed = mouse != null && mouse.leftButton.isPressed;
+        bool mouseLeftJustPressed = mouseLeftPressed && !prevMouseLeftPressed;
+        prevMouseLeftPressed = mouseLeftPressed;
+        
+        if (mouseLeftJustPressed)
         {
             if (!PointerHitsInventoryItem(mouse.position.ReadValue()))
             {

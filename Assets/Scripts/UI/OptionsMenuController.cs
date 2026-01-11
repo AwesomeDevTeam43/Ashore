@@ -68,12 +68,92 @@ public class OptionsMenuController : MonoBehaviour
         controlsController?.Dispose();
         if (instance == this) instance = null;
     }
+    
+    // State tracking for left/right slider control
+    private bool _prevLeftPressed = false;
+    private bool _prevRightPressed = false;
+    private float _sliderAdjustCooldown = 0f;
+    private const float SLIDER_ADJUST_DELAY = 0.1f;
+    private const float SLIDER_STEP = 0.05f;
 
     private void Update()
     {
         if (isVisible)
         {
             UIInputMode.DetectThisFrame();
+            HandleSliderAdjustment();
+        }
+    }
+    
+    /// <summary>
+    /// Handles left/right input to adjust sliders in the Audio tab.
+    /// </summary>
+    private void HandleSliderAdjustment()
+    {
+        // Only handle in audio tab
+        if (!isAudioTabActive) return;
+        if (audioController == null) return;
+        
+        var es = EventSystem.current;
+        if (es == null) return;
+        
+        var current = es.currentSelectedGameObject;
+        if (current == null) return;
+        
+        // Check if we're on a slider
+        var slider = current.GetComponent<Slider>();
+        if (slider == null)
+        {
+            // Maybe we're on a slider's child
+            slider = current.GetComponentInParent<Slider>();
+        }
+        if (slider == null) return;
+        
+        // Check for left/right input with state tracking (works when Time.timeScale = 0)
+        var kb = Keyboard.current;
+        var gp = Gamepad.current;
+        
+        bool leftPressed = false;
+        bool rightPressed = false;
+        
+        if (kb != null)
+        {
+            leftPressed = kb.leftArrowKey.isPressed || kb.aKey.isPressed;
+            rightPressed = kb.rightArrowKey.isPressed || kb.dKey.isPressed;
+        }
+        
+        if (gp != null)
+        {
+            var dpad = gp.dpad.ReadValue();
+            var stick = gp.leftStick.ReadValue();
+            if (dpad.x < -0.5f || stick.x < -0.5f) leftPressed = true;
+            if (dpad.x > 0.5f || stick.x > 0.5f) rightPressed = true;
+        }
+        
+        // Detect just pressed for immediate response
+        bool leftJustPressed = leftPressed && !_prevLeftPressed;
+        bool rightJustPressed = rightPressed && !_prevRightPressed;
+        
+        _prevLeftPressed = leftPressed;
+        _prevRightPressed = rightPressed;
+        
+        // Handle cooldown for held input (continuous adjustment)
+        _sliderAdjustCooldown -= Time.unscaledDeltaTime;
+        
+        bool canAdjust = leftJustPressed || rightJustPressed || _sliderAdjustCooldown <= 0f;
+        
+        if (canAdjust)
+        {
+            if (leftPressed)
+            {
+                slider.value = Mathf.Max(slider.minValue, slider.value - SLIDER_STEP);
+                _sliderAdjustCooldown = SLIDER_ADJUST_DELAY;
+            }
+            else if (rightPressed)
+            {
+                slider.value = Mathf.Min(slider.maxValue, slider.value + SLIDER_STEP);
+                _sliderAdjustCooldown = SLIDER_ADJUST_DELAY;
+            }
         }
     }
 

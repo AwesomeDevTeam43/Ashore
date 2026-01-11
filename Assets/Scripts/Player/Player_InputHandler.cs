@@ -174,13 +174,34 @@ public class Player_InputHandler : MonoBehaviour
         jumpAction.performed += inputInfo => { JumpTriggered = true; UpdateControlScheme(inputInfo); };
         jumpAction.canceled += inputInfo => { JumpTriggered = false; };
 
-        attackAction.performed += inputInfo => { AttackTriggered = true; UpdateControlScheme(inputInfo); };
+        attackAction.performed += inputInfo => { 
+            // Block attacks when paused or in menu
+            if (!IsGameplayBlocked())
+            {
+                AttackTriggered = true; 
+                UpdateControlScheme(inputInfo); 
+            }
+        };
         attackAction.canceled += inputInfo => { AttackTriggered = false; };
 
-        rangeAttackAction.performed += inputInfo => { RangeAttackTriggered = true; UpdateControlScheme(inputInfo); };
+        rangeAttackAction.performed += inputInfo => { 
+            // Block range attacks when paused or in menu
+            if (!IsGameplayBlocked())
+            {
+                RangeAttackTriggered = true; 
+                UpdateControlScheme(inputInfo); 
+            }
+        };
         rangeAttackAction.canceled += inputInfo => { RangeAttackTriggered = false; };
 
-        interactAction.performed += inputInfo => { InteractActionTriggered = true; UpdateControlScheme(inputInfo); };
+        interactAction.performed += inputInfo => { 
+            // Block interactions when paused or in menu
+            if (!IsGameplayBlocked())
+            {
+                InteractActionTriggered = true; 
+                UpdateControlScheme(inputInfo); 
+            }
+        };
         interactAction.canceled += inputInfo => { InteractActionTriggered = false; };
 
         inventoryAction.performed += inputInfo => { InventoryActionTriggered = true; OnInventoryPressed?.Invoke(); UpdateControlScheme(inputInfo); };
@@ -188,6 +209,27 @@ public class Player_InputHandler : MonoBehaviour
 
         menuAction.performed += inputInfo => { MenuActionTriggered = true; UpdateControlScheme(inputInfo); };
         menuAction.canceled += inputInfo => { MenuActionTriggered = false; };
+    }
+    
+    /// <summary>
+    /// Returns true if gameplay actions (attack, interact, etc.) should be blocked.
+    /// This happens when the game is paused or a menu is open.
+    /// </summary>
+    private bool IsGameplayBlocked()
+    {
+        // Check if pause menu is open
+        if (GamePauseManager.Instance != null && GamePauseManager.Instance.IsPaused)
+            return true;
+        
+        // Check if inventory/menu is open
+        if (InventoryOpen)
+            return true;
+        
+        // Check if time is stopped (backup check)
+        if (Time.timeScale == 0f)
+            return true;
+        
+        return false;
     }
 
     private void Handle8Directions()

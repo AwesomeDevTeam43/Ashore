@@ -360,6 +360,14 @@ public class MenuController : MonoBehaviour
     {
         Debug.Log($"[MenuController] ToggleMenu called. menuRoot.activeSelf={(menuRoot != null ? menuRoot.activeSelf : "null")}");
         if (menuRoot == null) return;
+        
+        // Don't open inventory if pause menu is open
+        if (!menuRoot.activeSelf && GamePauseManager.Instance != null && GamePauseManager.Instance.IsPaused)
+        {
+            Debug.Log("[MenuController] Cannot open inventory - pause menu is active");
+            return;
+        }
+        
         bool newState = !menuRoot.activeSelf;
         if (newState)
         {
@@ -524,6 +532,12 @@ public class MenuController : MonoBehaviour
     // Cooldown to prevent navigation repeating too fast
     private float _navCooldown = 0f;
     private const float NAV_REPEAT_DELAY = 0.15f;
+    
+    // State tracking for submit buttons to work when Time.timeScale = 0
+    private bool _prevEnterPressed = false;
+    private bool _prevNumpadEnterPressed = false;
+    private bool _prevSpacePressed = false;
+    private bool _prevGamepadSouthPressed = false;
 
     /// <summary>
     /// Manual navigation handling as fallback when InputSystemUIInputModule doesn't work.
@@ -531,13 +545,6 @@ public class MenuController : MonoBehaviour
     /// </summary>
     private void HandleManualNavigation()
     {
-        // Respect cooldown (use unscaled time since game is paused)
-        if (_navCooldown > 0f)
-        {
-            _navCooldown -= Time.unscaledDeltaTime;
-            return;
-        }
-
         if (es == null) es = EventSystem.current;
         if (es == null) return;
 
@@ -547,10 +554,44 @@ public class MenuController : MonoBehaviour
         var sel = current.GetComponent<Selectable>();
         if (sel == null) return;
 
+        var kb = Keyboard.current;
+        var gp = Gamepad.current;
+        
+        // Handle submit with manual state tracking (works when Time.timeScale = 0)
+        bool enterPressed = kb != null && kb.enterKey.isPressed;
+        bool numpadEnterPressed = kb != null && kb.numpadEnterKey.isPressed;
+        bool spacePressed = kb != null && kb.spaceKey.isPressed;
+        bool gamepadSouthPressed = gp != null && gp.buttonSouth.isPressed;
+        
+        bool enterJustPressed = enterPressed && !_prevEnterPressed;
+        bool numpadEnterJustPressed = numpadEnterPressed && !_prevNumpadEnterPressed;
+        bool spaceJustPressed = spacePressed && !_prevSpacePressed;
+        bool gamepadSouthJustPressed = gamepadSouthPressed && !_prevGamepadSouthPressed;
+        
+        _prevEnterPressed = enterPressed;
+        _prevNumpadEnterPressed = numpadEnterPressed;
+        _prevSpacePressed = spacePressed;
+        _prevGamepadSouthPressed = gamepadSouthPressed;
+        
+        bool submit = enterJustPressed || numpadEnterJustPressed || spaceJustPressed || gamepadSouthJustPressed;
+        
+        if (submit && sel is Button btn)
+        {
+            Debug.Log($"[MenuController] Manual submit on: {current.name}");
+            btn.onClick.Invoke();
+            return;
+        }
+
+        // Respect cooldown for navigation (use unscaled time since game is paused)
+        if (_navCooldown > 0f)
+        {
+            _navCooldown -= Time.unscaledDeltaTime;
+            return;
+        }
+
         // Read input from keyboard and gamepad
         Vector2 input = Vector2.zero;
         
-        var kb = Keyboard.current;
         if (kb != null)
         {
             if (kb.wKey.isPressed || kb.upArrowKey.isPressed) input.y = 1;
@@ -559,7 +600,6 @@ public class MenuController : MonoBehaviour
             else if (kb.dKey.isPressed || kb.rightArrowKey.isPressed) input.x = 1;
         }
 
-        var gp = Gamepad.current;
         if (gp != null && input == Vector2.zero)
         {
             var stick = gp.leftStick.ReadValue();
