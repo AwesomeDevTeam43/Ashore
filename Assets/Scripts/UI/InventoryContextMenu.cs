@@ -25,8 +25,6 @@ public class InventoryContextMenu : MonoBehaviour
     private InventorySlot currentSlot;
     private System.Collections.Generic.List<Selectable> _disabledOutsideSelectables = new System.Collections.Generic.List<Selectable>();
     private GameObject _prevSelected;
-    private System.Collections.Generic.List<UINavScope> _suspendedScopes = new System.Collections.Generic.List<UINavScope>();
-    private System.Collections.Generic.List<InventoryContextMenuNavigator> _disabledNavigators = new System.Collections.Generic.List<InventoryContextMenuNavigator>();
     // Track last shown menu so other systems (e.g., MenuController) can close it first on Cancel
     private static InventoryContextMenu s_LastShown;
     private static float s_BlockOpenUntilTime = 0f;
@@ -209,8 +207,6 @@ public class InventoryContextMenu : MonoBehaviour
     // Trap focus BEFORE choosing selection so EventSystem doesn't clear selection due to disabled previous object
     TrapFocus();
     ConfigureNavigation();
-    SuspendNavScopes();
-    SuspendMenuNavigators();
 
     // Ensure buttons are interactable
     if (primaryBtn != null) primaryBtn.interactable = true;
@@ -236,8 +232,6 @@ public class InventoryContextMenu : MonoBehaviour
         currentItem = null; currentSlot = null;
         if (s_LastShown == this) s_LastShown = null;
         RestoreFocus();
-        RestoreNavScopes();
-        RestoreMenuNavigators();
     }
 
     private void DoUse()
@@ -529,10 +523,6 @@ public class InventoryContextMenu : MonoBehaviour
         {
             btn.gameObject.AddComponent<SelectionHighlight>();
         }
-        if (btn.GetComponent<UINavTarget>() == null)
-        {
-            btn.gameObject.AddComponent<UINavTarget>();
-        }
         // Improve visibility via colorBlock tweaks
         var cb = btn.colors;
         cb.normalColor = new Color(1f,1f,1f,0.15f);
@@ -543,62 +533,10 @@ public class InventoryContextMenu : MonoBehaviour
         btn.colors = cb;
     }
 
-    private void SuspendNavScopes()
-    {
-        _suspendedScopes.Clear();
-        // Find active scopes in ancestors (inventory page) and disable them so they don't override selection
-        var scopes = GameObject.FindObjectsByType<UINavScope>(FindObjectsSortMode.None);
-        foreach (var sc in scopes)
-        {
-            if (sc == null) continue;
-            if (!sc.isActiveAndEnabled) continue;
-            // Disable only if menuRoot is not under that scope (to avoid breaking slot nav inside menu)
-            if (menuRoot != null && !menuRoot.IsChildOf(sc.transform))
-            {
-                sc.enabled = false;
-                _suspendedScopes.Add(sc);
-            }
-        }
-    }
-
-    private void RestoreNavScopes()
-    {
-        foreach (var sc in _suspendedScopes)
-        {
-            if (sc != null) sc.enabled = true;
-        }
-        _suspendedScopes.Clear();
-    }
-
-    private void SuspendMenuNavigators()
-    {
-        _disabledNavigators.Clear();
-        // Disable any InventoryContextMenuNavigator to avoid double-handling of inputs
-        var navs = GameObject.FindObjectsByType<InventoryContextMenuNavigator>(FindObjectsSortMode.None);
-        foreach (var n in navs)
-        {
-            if (n == null) continue;
-            if (!n.isActiveAndEnabled) continue;
-            n.enabled = false;
-            _disabledNavigators.Add(n);
-        }
-    }
-
-    private void RestoreMenuNavigators()
-    {
-        foreach (var n in _disabledNavigators)
-        {
-            if (n != null) n.enabled = true;
-        }
-        _disabledNavigators.Clear();
-    }
-
     private void ForceRestoreState()
     {
         // When the menu root is disabled/destroyed (e.g., scene transition), ensure we undo any focus/nav overrides
         RestoreFocus();
-        RestoreNavScopes();
-        RestoreMenuNavigators();
         currentSlot = null;
         currentItem = null;
         if (s_LastShown == this) s_LastShown = null;

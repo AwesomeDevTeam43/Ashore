@@ -16,6 +16,13 @@ public static class UIInputMode
 
     public static event Action<Mode> OnChanged;
     public static event Action<Scheme> OnSchemeChanged;
+    
+    // State tracking for button presses (needed when Time.timeScale = 0)
+    private static bool _prevMouseLeft, _prevMouseRight, _prevMouseMiddle;
+    private static bool _prevGamepadSouth, _prevGamepadNorth, _prevGamepadEast, _prevGamepadWest;
+    private static bool _prevGamepadLB, _prevGamepadRB, _prevGamepadStart, _prevGamepadSelect;
+    private static bool _prevAnyKey;
+    private static Vector2 _prevMousePos;
 
     public static void Set(Mode m)
     {
@@ -36,6 +43,7 @@ public static class UIInputMode
     }
 
     // Helper: detect and set mode and scheme based on current frame device activity
+    // Uses manual state tracking to work when Time.timeScale = 0
     public static void DetectThisFrame()
     {
         bool mouseActive = false;
@@ -44,21 +52,86 @@ public static class UIInputMode
 
         if (Mouse.current != null)
         {
-            var delta = Mouse.current.delta.ReadValue();
-            mouseActive |= delta.sqrMagnitude > 0.0001f;
-            mouseActive |= (Mouse.current.leftButton.wasPressedThisFrame || Mouse.current.rightButton.wasPressedThisFrame || Mouse.current.middleButton.wasPressedThisFrame);
-            mouseActive |= Mathf.Abs(Mouse.current.scroll.ReadValue().y) > 0.01f;
+            var mouse = Mouse.current;
+            var pos = mouse.position.ReadValue();
+            
+            // Check mouse movement
+            if ((_prevMousePos - pos).sqrMagnitude > 1f)
+            {
+                mouseActive = true;
+            }
+            _prevMousePos = pos;
+            
+            // Check mouse buttons with state tracking
+            bool leftPressed = mouse.leftButton.isPressed;
+            bool rightPressed = mouse.rightButton.isPressed;
+            bool middlePressed = mouse.middleButton.isPressed;
+            
+            if ((leftPressed && !_prevMouseLeft) || (rightPressed && !_prevMouseRight) || (middlePressed && !_prevMouseMiddle))
+            {
+                mouseActive = true;
+            }
+            
+            _prevMouseLeft = leftPressed;
+            _prevMouseRight = rightPressed;
+            _prevMouseMiddle = middlePressed;
+            
+            // Check scroll
+            if (Mathf.Abs(mouse.scroll.ReadValue().y) > 0.01f)
+            {
+                mouseActive = true;
+            }
         }
+        
         if (Gamepad.current != null)
         {
             var gp = Gamepad.current;
-            gamepadActive |= gp.buttonSouth.wasPressedThisFrame || gp.buttonNorth.wasPressedThisFrame || gp.buttonEast.wasPressedThisFrame || gp.buttonWest.wasPressedThisFrame
-                              || gp.leftShoulder.wasPressedThisFrame || gp.rightShoulder.wasPressedThisFrame || gp.startButton.wasPressedThisFrame || gp.selectButton.wasPressedThisFrame
-                              || gp.leftStick.ReadValue().sqrMagnitude > 0.1f || gp.rightStick.ReadValue().sqrMagnitude > 0.1f || gp.dpad.ReadValue().sqrMagnitude > 0.1f;
+            
+            // Check buttons with state tracking
+            bool south = gp.buttonSouth.isPressed;
+            bool north = gp.buttonNorth.isPressed;
+            bool east = gp.buttonEast.isPressed;
+            bool west = gp.buttonWest.isPressed;
+            bool lb = gp.leftShoulder.isPressed;
+            bool rb = gp.rightShoulder.isPressed;
+            bool start = gp.startButton.isPressed;
+            bool select = gp.selectButton.isPressed;
+            
+            if ((south && !_prevGamepadSouth) || (north && !_prevGamepadNorth) || 
+                (east && !_prevGamepadEast) || (west && !_prevGamepadWest) ||
+                (lb && !_prevGamepadLB) || (rb && !_prevGamepadRB) ||
+                (start && !_prevGamepadStart) || (select && !_prevGamepadSelect))
+            {
+                gamepadActive = true;
+            }
+            
+            _prevGamepadSouth = south;
+            _prevGamepadNorth = north;
+            _prevGamepadEast = east;
+            _prevGamepadWest = west;
+            _prevGamepadLB = lb;
+            _prevGamepadRB = rb;
+            _prevGamepadStart = start;
+            _prevGamepadSelect = select;
+            
+            // Check sticks and dpad (these work even when paused)
+            if (gp.leftStick.ReadValue().sqrMagnitude > 0.1f || 
+                gp.rightStick.ReadValue().sqrMagnitude > 0.1f || 
+                gp.dpad.ReadValue().sqrMagnitude > 0.1f)
+            {
+                gamepadActive = true;
+            }
         }
+        
         if (Keyboard.current != null)
         {
-            keyboardActive |= Keyboard.current.anyKey.wasPressedThisFrame;
+            // Check any key with state tracking
+            bool anyKey = Keyboard.current.anyKey.isPressed;
+            if (anyKey && !_prevAnyKey)
+            {
+                keyboardActive = true;
+            }
+            _prevAnyKey = anyKey;
         }
 
         if (mouseActive)

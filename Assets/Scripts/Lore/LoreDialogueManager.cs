@@ -43,11 +43,13 @@ public class LoreDialogueManager : MonoBehaviour
     // State
     private LoreEntry currentEntry;
     private string[] currentPages;
+    private string[] currentPagesRaw; // Stores unformatted pages for re-formatting when bindings change
     private int currentPageIndex;
     private bool isDisplaying;
     private bool isTyping;
     private Coroutine typewriterCoroutine;
     private Action onDialogueComplete;
+    private InputBindingDisplayResolver _bindingResolver;
 
     public bool IsDisplaying => isDisplaying;
 
@@ -79,6 +81,9 @@ public class LoreDialogueManager : MonoBehaviour
             cancelAction.action.performed += OnCancelPressed;
             cancelAction.action.Enable();
         }
+        
+        // Subscribe to binding changes for dynamic input prompt updates
+        SubscribeToBindingResolver();
     }
 
     private void OnDisable()
@@ -90,6 +95,59 @@ public class LoreDialogueManager : MonoBehaviour
         if (cancelAction != null && cancelAction.action != null)
         {
             cancelAction.action.performed -= OnCancelPressed;
+        }
+        
+        // Unsubscribe from binding changes
+        UnsubscribeFromBindingResolver();
+    }
+    
+    private void SubscribeToBindingResolver()
+    {
+        if (_bindingResolver == null)
+        {
+            _bindingResolver = InputBindingDisplayResolver.Instance;
+            if (_bindingResolver == null)
+            {
+                _bindingResolver = FindFirstObjectByType<InputBindingDisplayResolver>(FindObjectsInactive.Include);
+            }
+        }
+        if (_bindingResolver != null)
+        {
+            _bindingResolver.OnBindingsChanged += HandleBindingsChanged;
+        }
+    }
+    
+    private void UnsubscribeFromBindingResolver()
+    {
+        if (_bindingResolver != null)
+        {
+            _bindingResolver.OnBindingsChanged -= HandleBindingsChanged;
+        }
+    }
+    
+    private void HandleBindingsChanged()
+    {
+        // Re-format and re-display current page when input bindings change
+        if (!isDisplaying || currentPagesRaw == null || currentPageIndex >= currentPagesRaw.Length) return;
+        
+        // Re-format all pages with new bindings
+        if (_bindingResolver != null)
+        {
+            for (int i = 0; i < currentPagesRaw.Length; i++)
+            {
+                currentPages[i] = _bindingResolver.FormatText(currentPagesRaw[i]);
+            }
+        }
+        
+        // Refresh the current page display (skip typewriter, just update)
+        if (bodyText != null && currentPageIndex < currentPages.Length)
+        {
+            // If we're typing, complete it first and show the updated text
+            if (isTyping)
+            {
+                CompleteTyping();
+            }
+            bodyText.text = currentPages[currentPageIndex];
         }
     }
 
@@ -130,7 +188,16 @@ public class LoreDialogueManager : MonoBehaviour
 
         currentEntry = entry;
         onDialogueComplete = onComplete;
-        currentPages = entry.GetPages(defaultCharsPerPage);
+        
+        // Store raw unformatted pages, then format with binding resolver
+        currentPagesRaw = entry.GetPages(defaultCharsPerPage);
+        currentPages = new string[currentPagesRaw.Length];
+        for (int i = 0; i < currentPagesRaw.Length; i++)
+        {
+            currentPages[i] = _bindingResolver != null 
+                ? _bindingResolver.FormatText(currentPagesRaw[i]) 
+                : currentPagesRaw[i];
+        }
         currentPageIndex = 0;
 
         Debug.Log($"[LoreDialogueManager] Entry has {currentPages.Length} page(s)");

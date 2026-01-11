@@ -29,14 +29,22 @@ public class UIInputModeManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         SceneManager.sceneLoaded += OnSceneLoaded;
         FindUIModule();
-    Apply(UIInputMode.CurrentScheme);
-    UIInputMode.OnSchemeChanged += Apply;
+        Apply(UIInputMode.CurrentScheme);
+        UIInputMode.OnSchemeChanged += Apply;
+        UIInputMode.OnChanged += OnModeChanged;
     }
 
     private void OnDestroy()
     {
-    UIInputMode.OnSchemeChanged -= Apply;
+        UIInputMode.OnSchemeChanged -= Apply;
+        UIInputMode.OnChanged -= OnModeChanged;
         SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+    
+    private void OnModeChanged(UIInputMode.Mode mode)
+    {
+        // Apply cursor visibility when mode changes
+        Apply(UIInputMode.CurrentScheme);
     }
 
     private void Update()
@@ -60,13 +68,19 @@ public class UIInputModeManager : MonoBehaviour
     private void Apply(UIInputMode.Scheme scheme)
     {
         bool mouseKeyboard = scheme == UIInputMode.Scheme.MouseKeyboard;
+        bool isPointerMode = UIInputMode.Current == UIInputMode.Mode.Pointer;
 
-        // Cursor handling (optional): hide in controller/keyboard mode
-        Cursor.visible = mouseKeyboard;
-        if (mouseKeyboard)
+        // Cursor handling: hide when using keyboard/controller navigation
+        Cursor.visible = isPointerMode;
+        if (isPointerMode)
+        {
             Cursor.lockState = CursorLockMode.None;
+        }
         else
-            Cursor.lockState = CursorLockMode.Locked; // hide and keep centered for stick navigation
+        {
+            // Use Confined instead of Locked to avoid issues in menus
+            Cursor.lockState = CursorLockMode.Confined;
+        }
 
         if (uiModule == null)
         {
@@ -82,7 +96,10 @@ public class UIInputModeManager : MonoBehaviour
             var rc = uiModule.rightClick.action; if (rc != null) { if (mouseKeyboard && !rc.enabled) rc.Enable(); else if (!mouseKeyboard && rc.enabled) rc.Disable(); }
             var mc = uiModule.middleClick.action; if (mc != null) { if (mouseKeyboard && !mc.enabled) mc.Enable(); else if (!mouseKeyboard && mc.enabled) mc.Disable(); }
             var sw = uiModule.scrollWheel.action; if (sw != null) { if (mouseKeyboard && !sw.enabled) sw.Enable(); else if (!mouseKeyboard && sw.enabled) sw.Disable(); }
-            // Keep move/submit/cancel enabled in both modes so keyboard/controller keep working
+            // Ensure move/submit/cancel are ALWAYS enabled in both modes so keyboard/controller navigation works
+            var mv = uiModule.move.action; if (mv != null && !mv.enabled) mv.Enable();
+            var sb = uiModule.submit.action; if (sb != null && !sb.enabled) sb.Enable();
+            var cn = uiModule.cancel.action; if (cn != null && !cn.enabled) cn.Enable();
         }
         catch (System.Exception ex)
         {

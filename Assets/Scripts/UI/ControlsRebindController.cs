@@ -176,7 +176,6 @@ public class ControlsRebindController
         confirmBtn.colors = confirmColors;
         confirmBtn.onClick.AddListener(OnConflictConfirmClicked);
         
-        confirmBtnGO.AddComponent<UINavTarget>();
         confirmBtnGO.AddComponent<SelectionHighlight>();
         
         GameObject confirmTextGO = new GameObject("Text");
@@ -212,7 +211,6 @@ public class ControlsRebindController
         cancelBtn.colors = cancelColors;
         cancelBtn.onClick.AddListener(OnConflictCancelClicked);
         
-        cancelBtnGO.AddComponent<UINavTarget>();
         cancelBtnGO.AddComponent<SelectionHighlight>();
         
         GameObject cancelTextGO = new GameObject("Text");
@@ -410,8 +408,7 @@ public class ControlsRebindController
         nav.mode = Navigation.Mode.Automatic;
         button.navigation = nav;
         
-        // Add UINavTarget and SelectionHighlight
-        buttonGO.AddComponent<UINavTarget>();
+        // Add SelectionHighlight for selection feedback
         buttonGO.AddComponent<SelectionHighlight>();
         
         // Button text

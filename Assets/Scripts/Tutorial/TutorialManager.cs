@@ -124,6 +124,17 @@ public class TutorialManager : MonoBehaviour
     {
         if (loadSceneStepIndex >= 0 && loadSceneStepIndex < (steps?.Length ?? 0))
         {
+            // Check if any steps between current and load scene are essential
+            int startCheck = Mathf.Max(currentIndex + 1, 0);
+            for (int i = startCheck; i < loadSceneStepIndex; i++)
+            {
+                if (steps[i] != null && steps[i].isEssential)
+                {
+                    Debug.Log($"[TutorialManager] Cannot skip: step {i} is essential.");
+                    return; // Cannot skip past an essential step
+                }
+            }
+            
             // End current step
             if (currentIndex >= 0 && currentIndex < (steps?.Length ?? 0))
             {
