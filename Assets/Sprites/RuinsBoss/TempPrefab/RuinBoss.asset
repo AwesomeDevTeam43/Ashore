@@ -12,12 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a6be8cefcb44ca45b0251212381635f, type: 3}
   m_Name: RuinBoss
   m_EditorClassIdentifier: 
-  maxHealth: 20
+  maxHealth: 40
+  damage: 2
   xpOnDeath: 20
-  dropA: 5
-  dropB: 0
-  dropC: 5
+  woodDrop: 5
+  stoneDrop: 0
+  ropeDrop: 5
   baseScale: {x: 1.5, y: 1.5, z: 1}
+  meleeResistance: 0
+  rangedResistance: 0
+  hitSound: {fileID: 0}
+  hitVolume: 1
+  deathSound: {fileID: 0}
+  deathVolume: 1
   moveSpeed: 2
   followPlayerRange: 8
   attackRange: 2.5
@@ -25,3 +32,15 @@ MonoBehaviour:
   attackDamage: 1
   knockbackForce: 6
   knockbackDuration: 0.35
+  hopCheckDistance: 0.45
+  maxStepHeight: 0.6
+  minStepRise: 0.08
+  hopForceY: 6
+  hopForceX: 2.5
+  groundCheckDistance: 0.18
+  tallJumpForceY: 10
+  tallJumpForceX: 3.5
+  chestHeight: 0.8
+  headClearanceCheck: 0.4
+  returnStuckJumpDelay: 0.25
+  debugJumpLogs: 0

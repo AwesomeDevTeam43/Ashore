@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 
 public class Boss : MonoBehaviour, ISaveable
 {
-    [SerializeField] public int enemyHealth = 5;
+    [SerializeField] public int enemyHealth = 25;
     private HealthSystem bossHealth;
     bool isDead = false;
     
