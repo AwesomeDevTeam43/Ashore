@@ -35,6 +35,35 @@ public class MenuController : MonoBehaviour
     [Header("Footer")]
     [SerializeField] private TextMeshProUGUI footerText; // Displays selected item info
 
+    [Header("HUD Disable (Optional)")]
+    [Tooltip("If enabled, hides/disables the player's HUD while this menu is open.")]
+    [SerializeField] private bool disablePlayerHUDWhenMenuOpen = true;
+    [Tooltip("Optional: assign a HUD root GameObject to SetActive(false) when menu opens.")]
+    [SerializeField] private GameObject playerHUDRoot;
+    [Tooltip("Optional: assign a CanvasGroup to fade/disable HUD when menu opens.")]
+    [SerializeField] private CanvasGroup playerHUDCanvasGroup;
+
+    private bool hudWasHidden = false;
+
+    private static GameObject FindSceneObjectByName(string exactOrPrefix)
+    {
+        if (string.IsNullOrWhiteSpace(exactOrPrefix)) return null;
+
+        // Includes inactive objects; works for both scene objects and disabled prefabs.
+        var all = Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var t in all)
+        {
+            if (t == null) continue;
+            var n = t.name;
+            if (string.Equals(n, exactOrPrefix, System.StringComparison.OrdinalIgnoreCase) ||
+                n.StartsWith(exactOrPrefix, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return t.gameObject;
+            }
+        }
+        return null;
+    }
+
     [Header("UI Actions (for closing while Player map is disabled)")]
     [Tooltip("UI action that should toggle/close the inventory while the menu is open (e.g., UI/Inventory).")]
     [SerializeField] private InputActionReference uiInventoryAction;
@@ -388,6 +417,7 @@ public class MenuController : MonoBehaviour
     {
         Debug.Log("[MenuController] OpenMenu called.");
         if (menuRoot == null) return;
+        if (disablePlayerHUDWhenMenuOpen) SetPlayerHUDVisible(false);
         Debug.Log($"[MenuController] Opening menuRoot '{menuRoot.name}' (activeSelf before={menuRoot.activeSelf})");
         menuRoot.SetActive(true);
         Debug.Log($"[MenuController] menuRoot activeSelf after SetActive(true)={menuRoot.activeSelf}, activeInHierarchy={menuRoot.activeInHierarchy}");
@@ -419,11 +449,90 @@ public class MenuController : MonoBehaviour
         Debug.Log($"[MenuController] menuRoot activeSelf after SetActive(false)={menuRoot.activeSelf}, activeInHierarchy={menuRoot.activeInHierarchy}");
         DisableUIShortcuts();
         InventoryOpen = false;
+        if (disablePlayerHUDWhenMenuOpen) SetPlayerHUDVisible(true);
         // Enforce correct input map
         EnforceInputMap();
         // Ensure built-in navigation is on
         if (es == null) es = EventSystem.current;
         if (es != null) es.sendNavigationEvents = true;
+    }
+
+    private void ResolveHUDReferencesIfNeeded()
+    {
+        if (playerHUDRoot != null || playerHUDCanvasGroup != null) return;
+
+        // First choice: a scene object explicitly named "Player UI" (common prefab/root name).
+        var named = FindSceneObjectByName("Player UI");
+        if (named != null)
+        {
+            // Don't pick something that also owns the menu.
+            if (menuRoot == null || (named != menuRoot && !menuRoot.transform.IsChildOf(named.transform)))
+            {
+                playerHUDRoot = named;
+                return;
+            }
+        }
+
+        // Best-effort auto-wire: look for the persistent HUD root and its Manage_UI.
+        var hudRoot = Object.FindFirstObjectByType<PersistentHUDRoot>();
+        if (hudRoot == null) return;
+
+        var manageUI = hudRoot.GetComponentInChildren<Manage_UI>(includeInactive: true);
+        if (manageUI == null) return;
+
+        // Prefer disabling a CanvasGroup if present on the Manage_UI object or parents.
+        var cg = manageUI.GetComponentInParent<CanvasGroup>();
+        if (cg != null)
+        {
+            playerHUDCanvasGroup = cg;
+            return;
+        }
+
+        // Otherwise disable the Manage_UI container (or its parent if it won't hide the menuRoot).
+        var candidate = manageUI.gameObject;
+        var parent = manageUI.transform.parent;
+        if (parent != null)
+        {
+            // Don't pick a parent that also contains menuRoot.
+            if (menuRoot == null || !menuRoot.transform.IsChildOf(parent))
+            {
+                candidate = parent.gameObject;
+            }
+        }
+        playerHUDRoot = candidate;
+    }
+
+    private void SetPlayerHUDVisible(bool visible)
+    {
+        ResolveHUDReferencesIfNeeded();
+
+        if (!visible)
+        {
+            if (hudWasHidden) return;
+            hudWasHidden = true;
+        }
+        else
+        {
+            hudWasHidden = false;
+        }
+
+        if (playerHUDCanvasGroup != null)
+        {
+            playerHUDCanvasGroup.alpha = visible ? 1f : 0f;
+            playerHUDCanvasGroup.interactable = visible;
+            playerHUDCanvasGroup.blocksRaycasts = visible;
+            return;
+        }
+
+        if (playerHUDRoot != null)
+        {
+            // Don't accidentally hide the menu itself.
+            if (menuRoot != null && (playerHUDRoot == menuRoot || menuRoot.transform.IsChildOf(playerHUDRoot.transform)))
+            {
+                return;
+            }
+            playerHUDRoot.SetActive(visible);
+        }
     }
 
     private void EnforceInputMap()

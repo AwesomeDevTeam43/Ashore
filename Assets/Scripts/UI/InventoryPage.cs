@@ -15,11 +15,15 @@ public class InventoryPage : MonoBehaviour
     [Tooltip("How many columns in the grid.")]
     [SerializeField] private int columns = 5;
     [Tooltip("Cell size for each slot in the grid.")]
-    [SerializeField] private Vector2 cellSize = new Vector2(96, 96);
+    [SerializeField] private Vector2 cellSize = new Vector2(130, 130);
     [Tooltip("Spacing between slots in the grid.")]
     [SerializeField] private Vector2 spacing = new Vector2(8, 8);
     [Tooltip("Padding for the grid inside its RectTransform bounds.")]
     [SerializeField] private RectOffset padding; // set default in OnValidate/Awake
+
+    [Header("Grid Positioning")]
+    [Tooltip("If true, the runtime-created ItemsGrid is sized to its content and anchored to the center of this page.")]
+    [SerializeField] private bool centerRuntimeGrid = true;
 
     [Header("UI References (optional)")]
     [Tooltip("If not set and autoBuildGrid is on, a child named 'ItemsGrid' will be created.")]
@@ -36,10 +40,11 @@ public class InventoryPage : MonoBehaviour
             if (inventory == null)
             {
                 Debug.LogWarning("InventoryPage: Inventory.instance is null in Awake. This may indicate script execution order issues.");
-            }
+            }   
         }
     private InventorySlot[] slots;
     private bool gridBuilt = false;
+    private bool itemsParentWasAutoCreated = false;
     
     // State tracking for submit buttons to work when Time.timeScale = 0
     private bool prevEnterPressed = false;
@@ -55,6 +60,65 @@ public class InventoryPage : MonoBehaviour
         if (spacing.x < 0 || spacing.y < 0) spacing = new Vector2(8, 8);
         if (slotCount <= 0) slotCount = 20;
         if (padding == null) padding = new RectOffset(16, 16, 16, 16);
+
+        // Push Inspector changes into an already-existing grid (edit mode or play mode).
+        ApplyGridSettings(forceRebuild: true);
+        if (centerRuntimeGrid)
+        {
+            UpdateItemsParentRect(slotCount, force: false);
+        }
+    }
+
+    private void ApplyGridSettings(bool forceRebuild)
+    {
+        if (itemsParent == null) return;
+        var grid = itemsParent.GetComponent<GridLayoutGroup>();
+        if (grid == null) return;
+
+        grid.cellSize = cellSize;
+        grid.spacing = spacing;
+        grid.padding = padding;
+        grid.startAxis = GridLayoutGroup.Axis.Horizontal;
+        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        grid.constraintCount = Mathf.Max(1, columns);
+        grid.childAlignment = TextAnchor.UpperLeft;
+
+        if (forceRebuild && itemsParent is RectTransform rt)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+        }
+    }
+
+    private Vector2 ComputeGridContentSize(int capacity)
+    {
+        int cols = Mathf.Max(1, columns);
+        int rows = Mathf.CeilToInt(capacity / (float)cols);
+        rows = Mathf.Max(1, rows);
+
+        float w = (padding != null ? padding.left + padding.right : 0)
+                  + (cols * cellSize.x)
+                  + ((cols - 1) * spacing.x);
+
+        float h = (padding != null ? padding.top + padding.bottom : 0)
+                  + (rows * cellSize.y)
+                  + ((rows - 1) * spacing.y);
+
+        return new Vector2(Mathf.Max(0, w), Mathf.Max(0, h));
+    }
+
+    private void UpdateItemsParentRect(int capacity, bool force)
+    {
+        if (itemsParent == null) return;
+        if (!centerRuntimeGrid) return;
+        if (!force && !itemsParentWasAutoCreated) return;
+
+        if (itemsParent is not RectTransform rt) return;
+
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = Vector2.zero;
+        rt.sizeDelta = ComputeGridContentSize(capacity);
     }
 
     private void OnEnable()
@@ -174,11 +238,8 @@ public class InventoryPage : MonoBehaviour
             var gridGO = new GameObject("ItemsGrid", typeof(RectTransform));
             var rt = gridGO.GetComponent<RectTransform>();
             rt.SetParent(this.transform, false);
-            rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
-            rt.offsetMin = Vector2.zero;
-            rt.offsetMax = Vector2.zero;
             itemsParent = gridGO.transform;
+            itemsParentWasAutoCreated = true;
         }
 
         // Ensure GridLayoutGroup exists/configured
@@ -195,13 +256,10 @@ public class InventoryPage : MonoBehaviour
             capacity = Mathf.Max(capacity, inventory.space);
         }
 
-        grid.cellSize = cellSize;
-        grid.spacing = spacing;
-        grid.padding = padding;
-        grid.startAxis = GridLayoutGroup.Axis.Horizontal;
-        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        grid.constraintCount = Mathf.Max(1, columns);
-        grid.childAlignment = TextAnchor.UpperLeft;
+        ApplyGridSettings(forceRebuild: false);
+
+        // If we created the grid at runtime, size it to content and center it.
+        UpdateItemsParentRect(capacity, force: false);
 
         // Clear existing children (optional) to avoid duplicates
         for (int i = itemsParent.childCount - 1; i >= 0; i--)
@@ -233,6 +291,8 @@ public class InventoryPage : MonoBehaviour
         gridBuilt = true;
         WireSlotButtons();
         SetupGridNavigation();
+
+        ApplyGridSettings(forceRebuild: true);
     }
 
     /// <summary>

@@ -8,8 +8,6 @@ public class VenomShooting : EnemyBase
     private Transform player;
 
     [Header("Audio")]
-    [SerializeField] private AudioSource idleAudioSource;
-    [SerializeField] private AudioSource sfxAudioSource;
     [SerializeField] private AudioClip idleClip;
     [Tooltip("Usado tanto para PreparingToShoot quanto Shooting (mesmo clip).")]
     [SerializeField] private AudioClip shootClip;
@@ -37,8 +35,9 @@ public class VenomShooting : EnemyBase
     public const float chargeDuration = 0.5f;
     public float animationAttackCooldown = 1.0f;
 
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         typedStats = stats as Serpent_Stats;
         enemyHealth = GetComponent<Enemy_Health>();
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
@@ -230,11 +229,10 @@ public class VenomShooting : EnemyBase
 
     private void HandleIdleAudio(float distanceToPlayer)
     {
-        if (idleAudioSource == null) return;
+        if (audioSource == null) return;
 
         bool canHear = distanceToPlayer <= hearDistance;
-        UpdateAudioSourceDistance(idleAudioSource);
-        UpdateAudioSourceDistance(sfxAudioSource);
+        UpdateAudioSourceDistance(audioSource);
 
         if (!canHear || currentState != EnemyState.Idle)
         {
@@ -247,43 +245,42 @@ public class VenomShooting : EnemyBase
         idleTimer -= Time.deltaTime;
         if (idleTimer > 0f) return;
 
-        idleAudioSource.clip = idleClip;
-        idleAudioSource.volume = idleVolume;
-        idleAudioSource.Play();
+        // Play idle as the main clip so we can stop it cleanly when state changes.
+        audioSource.clip = idleClip;
+        audioSource.volume = idleVolume;
+        audioSource.loop = false;
+        audioSource.Play();
         idleTimer = Mathf.Max(0.01f, idleIntervalSeconds);
     }
 
     private void StopIdleAudio()
     {
-        if (idleAudioSource != null && idleAudioSource.isPlaying)
+        // Only stop if we're currently playing the idle clip, so we don't cut off other SFX.
+        if (audioSource != null && audioSource.isPlaying && audioSource.clip == idleClip)
         {
-            idleAudioSource.Stop();
+            audioSource.Stop();
         }
     }
 
     private void PlaySfx(AudioClip clip)
     {
-        if (clip == null || sfxAudioSource == null || player == null) return;
+        if (clip == null || audioSource == null || player == null) return;
         float distance = Vector2.Distance(player.position, transform.position);
         if (distance > hearDistance) return;
 
-        sfxAudioSource.volume = sfxVolume;
-        sfxAudioSource.PlayOneShot(clip);
+        // Prioritize SFX over idle (single AudioSource).
+        StopIdleAudio();
+        audioSource.PlayOneShot(clip, sfxVolume);
     }
 
     private void EnsureAudioSources()
     {
-        if (idleAudioSource == null)
+        if (audioSource == null)
         {
-            idleAudioSource = gameObject.AddComponent<AudioSource>();
-        }
-        if (sfxAudioSource == null)
-        {
-            sfxAudioSource = gameObject.AddComponent<AudioSource>();
+            audioSource = gameObject.AddComponent<AudioSource>();
         }
 
-        ConfigureAudioSource(idleAudioSource);
-        ConfigureAudioSource(sfxAudioSource);
+        ConfigureAudioSource(audioSource);
     }
 
     private void ConfigureAudioSource(AudioSource source)

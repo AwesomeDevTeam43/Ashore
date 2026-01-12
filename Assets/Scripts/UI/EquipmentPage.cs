@@ -21,8 +21,57 @@ public class EquipmentPage : MonoBehaviour
 
     private Player_Controller player;
 
+    private void OnValidate()
+    {
+        // Best-effort auto-wire to reduce Inspector setup errors.
+        AutoWireMissingRefs();
+    }
+
+    private void AutoWireMissingRefs()
+    {
+        // Prefer explicit child names to avoid grabbing background images.
+        if (icon == null)
+        {
+            var t = FindChildByName("Icon");
+            if (t != null) icon = t.GetComponent<Image>();
+        }
+
+        if (mainWeaponIconUI == null)
+        {
+            var t = FindChildByName("MainWeaponIcon") ?? FindChildByName("WeaponIcon");
+            if (t != null) mainWeaponIconUI = t.GetComponent<Image>();
+        }
+
+        if (nameText == null)
+        {
+            var t = FindChildByName("Name") ?? FindChildByName("ItemName");
+            if (t != null) nameText = t.GetComponent<TextMeshProUGUI>();
+        }
+
+        if (descriptionText == null)
+        {
+            var t = FindChildByName("Description") ?? FindChildByName("ItemDescription");
+            if (t != null) descriptionText = t.GetComponent<TextMeshProUGUI>();
+        }
+    }
+
+    private Transform FindChildByName(string childName)
+    {
+        if (string.IsNullOrWhiteSpace(childName)) return null;
+        var all = GetComponentsInChildren<Transform>(true);
+        foreach (var t in all)
+        {
+            if (t == null) continue;
+            if (string.Equals(t.name, childName, System.StringComparison.OrdinalIgnoreCase))
+                return t;
+        }
+        return null;
+    }
+
     private void Awake()
     {
+        AutoWireMissingRefs();
+
         if (disableButton != null)
         {
             disableButton.onClick.RemoveAllListeners();
@@ -58,6 +107,8 @@ public class EquipmentPage : MonoBehaviour
 
     private void OnEnable()
     {
+        AutoWireMissingRefs();
+
         if (player == null)
         {
             var go = GameObject.FindGameObjectWithTag("Player");
@@ -69,6 +120,8 @@ public class EquipmentPage : MonoBehaviour
 
     public void Refresh()
     {
+        AutoWireMissingRefs();
+
         if (player == null)
         {
             SetNone();
@@ -78,7 +131,18 @@ public class EquipmentPage : MonoBehaviour
         var eq = player.CurrentEquipment;
         if (eq != null && eq.equipmentData != null)
         {
-            if (icon != null) icon.sprite = eq.equipmentData.icon;
+            if (icon != null)
+            {
+                icon.sprite = eq.equipmentData.icon;
+                icon.enabled = icon.sprite != null;
+                // If alpha was accidentally set to 0 in prefab, make sure it is visible when sprite exists.
+                if (icon.enabled && icon.color.a < 0.01f)
+                {
+                    var c = icon.color;
+                    c.a = 1f;
+                    icon.color = c;
+                }
+            }
             if (nameText != null) nameText.text = eq.equipmentData.itemName;
             if (descriptionText != null) descriptionText.text = eq.equipmentData.description;
             if (disableButton != null)
@@ -111,8 +175,15 @@ public class EquipmentPage : MonoBehaviour
         }
         if (mainWeaponIconUI != null)
         {
-            mainWeaponIconUI.enabled = true;
-            mainWeaponIconUI.sprite = player.CurrentMainWeapon == Player_Controller.MainWeaponType.Melee ? meleeIcon : rangedIcon;
+            var mwSprite = player.CurrentMainWeapon == Player_Controller.MainWeaponType.Melee ? meleeIcon : rangedIcon;
+            mainWeaponIconUI.sprite = mwSprite;
+            mainWeaponIconUI.enabled = mwSprite != null;
+            if (mainWeaponIconUI.enabled && mainWeaponIconUI.color.a < 0.01f)
+            {
+                var c = mainWeaponIconUI.color;
+                c.a = 1f;
+                mainWeaponIconUI.color = c;
+            }
         }
 
         RebuildNavScope();
@@ -120,7 +191,11 @@ public class EquipmentPage : MonoBehaviour
 
     private void SetNone()
     {
-        if (icon != null) icon.sprite = null;
+        if (icon != null)
+        {
+            icon.sprite = null;
+            icon.enabled = false;
+        }
         if (nameText != null) nameText.text = "None";
         if (descriptionText != null) descriptionText.text = "";
         if (disableButton != null)
@@ -128,6 +203,16 @@ public class EquipmentPage : MonoBehaviour
             var label = disableButton.GetComponentInChildren<TextMeshProUGUI>();
             if (label != null) label.text = "Unequip";
             disableButton.interactable = false;
+        }
+
+        if (mainWeaponIconUI != null)
+        {
+            // Still show main weapon icon if configured; if not, hide it.
+            var mwSprite = player != null
+                ? (player.CurrentMainWeapon == Player_Controller.MainWeaponType.Melee ? meleeIcon : rangedIcon)
+                : null;
+            mainWeaponIconUI.sprite = mwSprite;
+            mainWeaponIconUI.enabled = mwSprite != null;
         }
     }
 
