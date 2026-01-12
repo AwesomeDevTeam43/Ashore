@@ -62,7 +62,16 @@ public class AudioManager : MonoBehaviour
         }
         else
         {
+            // Stop any audio that might be playing on this duplicate before destroying
+            // Use GetComponentsInChildren to catch all audio sources
+            var sources = GetComponentsInChildren<AudioSource>(true);
+            foreach (var source in sources)
+            {
+                source.Stop();
+                source.enabled = false;
+            }
             Destroy(gameObject);
+            return; // Important: exit immediately to prevent any further initialization
         }
     }
 
