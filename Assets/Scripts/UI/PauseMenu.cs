@@ -93,6 +93,10 @@ public class PauseMenu : MonoBehaviour
 
     private void Update()
     {
+        // If GamePauseManager is present, let it handle pausing instead
+        if (GamePauseManager.Instance != null)
+            return;
+            
         // Don't process pause in main menu
         if (SceneManager.GetActiveScene().name == mainMenuSceneName)
             return;

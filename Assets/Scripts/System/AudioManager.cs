@@ -174,16 +174,15 @@ public class AudioManager : MonoBehaviour
     // These methods are called by your UI sliders
     public void SetMusicVolume(float value)
     {
-        // Guardar o valor normalizado para uso interno
-        float normalizedValue = Mathf.Clamp01(value);
+        currentMusicVolume = Mathf.Clamp01(value);
         
-        // Aplicar diretamente no AudioSource (sempre funciona)
+        // Apply combined master + music volume to AudioSource
         if (musicSource != null)
         {
-            musicSource.volume = normalizedValue;
+            musicSource.volume = currentMasterVolume * currentMusicVolume;
         }
         
-        // Também aplicar no AudioMixer se disponível
+        // Also apply to AudioMixer if available
         if (audioMixer != null)
         {
             float volume = value <= 0.0001f ? -80f : Mathf.Log10(value) * 20f;
@@ -195,16 +194,15 @@ public class AudioManager : MonoBehaviour
 
     public void SetSFXVolume(float value)
     {
-        // Guardar o valor normalizado para uso interno
-        float normalizedValue = Mathf.Clamp01(value);
+        currentSFXVolume = Mathf.Clamp01(value);
         
-        // Aplicar diretamente no AudioSource (sempre funciona)
+        // Apply combined master + sfx volume to AudioSource
         if (sfxSource != null)
         {
-            sfxSource.volume = normalizedValue;
+            sfxSource.volume = currentMasterVolume * currentSFXVolume;
         }
         
-        // Também aplicar no AudioMixer se disponível
+        // Also apply to AudioMixer if available
         if (audioMixer != null)
         {
             float volume = value <= 0.0001f ? -80f : Mathf.Log10(value) * 20f;
@@ -214,14 +212,42 @@ public class AudioManager : MonoBehaviour
         Debug.Log($"[AudioManager] SetSFXVolume({value})");
     }
 
+    // Track master volume for applying to sources that might bypass mixer
+    private float currentMasterVolume = 1f;
+    private float currentMusicVolume = 1f;
+    private float currentSFXVolume = 1f;
+
     public void SetMasterVolume(float value)
     {
+        currentMasterVolume = Mathf.Clamp01(value);
+        
         if (audioMixer != null)
         {
             float volume = value <= 0.0001f ? -80f : Mathf.Log10(value) * 20f;
             audioMixer.SetFloat("MasterVolume", volume);
         }
+        
+        // Also apply master volume to audio sources directly to ensure it affects all audio
+        // This handles cases where the mixer routing might not properly chain Master -> Music/SFX
+        ApplyVolumesToSources();
+        
         Debug.Log($"[AudioManager] SetMasterVolume({value})");
+    }
+    
+    /// <summary>
+    /// Applies the combined master + channel volumes directly to AudioSources.
+    /// This ensures master volume always affects all audio regardless of mixer routing.
+    /// </summary>
+    private void ApplyVolumesToSources()
+    {
+        if (musicSource != null)
+        {
+            musicSource.volume = currentMasterVolume * currentMusicVolume;
+        }
+        if (sfxSource != null)
+        {
+            sfxSource.volume = currentMasterVolume * currentSFXVolume;
+        }
     }
 
     private System.Collections.IEnumerator ReapplySavedVolumes()

@@ -77,6 +77,24 @@ public class GamePauseManager : MonoBehaviour
 
     private void Update()
     {
+        // If menu action is not set up yet, try to find input actions again
+        if (menuAction == null && inputActions == null)
+        {
+            FindInputActionAsset();
+        }
+        
+        // Fallback: use legacy Input for Escape key if menu action isn't set up
+        if (menuAction == null)
+        {
+            if (SceneManager.GetActiveScene().name != mainMenuSceneName && !MenuController.InventoryOpen)
+            {
+                if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    TogglePause();
+                }
+            }
+        }
+        
         if (isPaused)
         {
             UIInputMode.DetectThisFrame();

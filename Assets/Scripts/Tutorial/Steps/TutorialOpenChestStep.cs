@@ -49,6 +49,7 @@ public class TutorialOpenChestStep : TutorialStep
 
     public override bool IsComplete()
     {
+        if (!HasMinimumFramesPassed()) return false;
         if (target == null || player == null) return false;
 
         // If we already detected interact, optionally wait for animator open state

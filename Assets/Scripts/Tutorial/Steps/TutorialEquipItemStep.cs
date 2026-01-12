@@ -32,6 +32,7 @@ public class TutorialEquipItemStep : TutorialStep
 
     public override bool IsComplete()
     {
+        if (!HasMinimumFramesPassed()) return false;
         if (player == null) return false;
         var eq = player.CurrentEquipment;
         if (eq == null || eq.equipmentData == null) return false;

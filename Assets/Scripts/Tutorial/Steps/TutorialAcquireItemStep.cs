@@ -13,6 +13,7 @@ public class TutorialAcquireItemStep : TutorialStep
 
     public override bool IsComplete()
     {
+        if (!HasMinimumFramesPassed()) return false;
         if (Inventory.instance == null || item == null) return false;
         return Inventory.instance.GetItemQuantity(item) >= Mathf.Max(1, quantity);
     }

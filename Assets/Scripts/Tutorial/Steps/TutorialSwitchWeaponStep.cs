@@ -18,6 +18,7 @@ public class TutorialSwitchWeaponStep : TutorialStep
 
     public override bool IsComplete()
     {
+        if (!HasMinimumFramesPassed()) return false;
         if (player == null) return false;
         return player.CurrentMainWeapon == requiredType;
     }

@@ -46,11 +46,29 @@ public class EquipmentManager : MonoBehaviour
             }
         }
 
-        // Do not equip if something is already equipped
+        // If something is already equipped, unequip it first and return it to inventory
         if (playerController != null && playerController.CurrentEquipment != null)
         {
-            Debug.Log("EquipmentManager: cannot equip, player already has equipment equipped.");
-            return;
+            Equipment currentEq = playerController.CurrentEquipment;
+            EquipmentData currentData = currentEq.equipmentData;
+            
+            // Unequip the current equipment
+            currentEq.isEquipped = false;
+            currentEq.Unequip();
+            
+            // Return current equipment to inventory
+            if (currentData != null && Inventory.instance != null)
+            {
+                Inventory.instance.Add(currentData, 1);
+            }
+            
+            // Clear from player controller (call directly instead of SendMessage since null doesn't work with SendMessage)
+            playerController.SetCurrentEquipment(null);
+            
+            // Destroy the equipment object
+            Destroy(currentEq.gameObject);
+            
+            Debug.Log("Unequipped: " + (currentData != null ? currentData.itemName : "unknown"));
         }
 
         // Instantiate the equipment as a child of the player and keep it inactive (inventory holder)

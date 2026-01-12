@@ -9,6 +9,7 @@ public class TutorialAcquireResourceStep : TutorialStep
 
     public override bool IsComplete()
     {
+        if (!HasMinimumFramesPassed()) return false;
         if (string.IsNullOrEmpty(itemResourceName) || Inventory.instance == null) return false;
         int have = 0;
         foreach (var inv in Inventory.instance.inventoryItems)

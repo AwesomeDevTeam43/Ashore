@@ -25,6 +25,8 @@ public class TutorialOpenInventoryStep : TutorialStep
 
     public override bool IsComplete()
     {
+        if (!HasMinimumFramesPassed()) return false;
+        
         bool keyOk = !requireKeyPress || WasInventoryKeyPressedThisFrame();
         if (WasInventoryKeyPressedThisFrame()) keyPressed = true;
 

@@ -40,6 +40,7 @@ public class TutorialUseEquipmentStep : TutorialStep
 
     public override bool IsComplete()
     {
+        if (!HasMinimumFramesPassed()) return false;
         if (player == null) return false;
 
         // If we already received the validated use event, finish regardless of current equipment (it may have been consumed/cleared).

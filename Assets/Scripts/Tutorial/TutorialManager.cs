@@ -358,6 +358,8 @@ public class TutorialManager : MonoBehaviour
     {
         if (!Mathf.Approximately(Time.timeScale, 0f)) return;
         if (respectInventoryPause && IsInventoryOpen()) return;
+        // Don't restore time scale if the game is paused via GamePauseManager
+        if (GamePauseManager.Instance != null && GamePauseManager.Instance.IsPaused) return;
         if (Mathf.Approximately(prevTimeScale, 0f)) return;
         Time.timeScale = prevTimeScale;
     }

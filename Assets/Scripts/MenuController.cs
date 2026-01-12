@@ -442,7 +442,20 @@ public class MenuController : MonoBehaviour
     {
         Debug.Log("[MenuController] CloseMenu called.");
         if (menuRoot == null) return;
-        if (pauseOnOpen) { Debug.Log("[MenuController] Setting Time.timeScale = 1"); Time.timeScale = 1f; }
+        // Only restore time scale if GamePauseManager isn't keeping the game paused
+        if (pauseOnOpen) 
+        { 
+            bool gamePaused = GamePauseManager.Instance != null && GamePauseManager.Instance.IsPaused;
+            if (!gamePaused)
+            {
+                Debug.Log("[MenuController] Setting Time.timeScale = 1"); 
+                Time.timeScale = 1f; 
+            }
+            else
+            {
+                Debug.Log("[MenuController] Not restoring Time.timeScale - GamePauseManager is paused");
+            }
+        }
         if (es != null) es.SetSelectedGameObject(null);
         Debug.Log($"[MenuController] Deactivating menuRoot '{menuRoot.name}' (activeSelf before={menuRoot.activeSelf})");
         menuRoot.SetActive(false);

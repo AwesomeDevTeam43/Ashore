@@ -62,6 +62,7 @@ public class TutorialUsePressurePlateStep : TutorialStep
 
     public override bool IsComplete()
     {
+        if (!HasMinimumFramesPassed()) return false;
         if (target == null || player == null) return false;
 
         // External event shortcut

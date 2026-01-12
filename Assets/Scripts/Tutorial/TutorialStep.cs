@@ -40,11 +40,32 @@ public abstract class TutorialStep : MonoBehaviour
     public float inputUnfreezeCooldown = 0.25f;
     [Tooltip("If true, this step cannot be skipped by the Escape key. The tutorial must complete this step.")]
     public bool isEssential = false;
+    [Tooltip("If true, this step requires at least one frame to pass before it can complete. Prevents instant skip.")]
+    public bool requireFrameDelay = true;
 
     protected TutorialManager manager;
+    
+    /// <summary>
+    /// Frame count when Begin() was called. Used to prevent immediate completion.
+    /// </summary>
+    protected int beginFrameCount = -1;
+    
+    /// <summary>
+    /// Returns true if enough frames have passed since Begin() for the step to complete.
+    /// Call this at the start of IsComplete() to prevent instant skipping.
+    /// </summary>
+    protected bool HasMinimumFramesPassed()
+    {
+        if (!requireFrameDelay) return true;
+        // Require at least 1 frame to pass since Begin was called
+        return Time.frameCount > beginFrameCount;
+    }
 
     public virtual void Begin(TutorialManager mgr)
     {
+        // Record the frame when this step began to prevent instant completion
+        beginFrameCount = Time.frameCount;
+        
         if (gatekeepersToUnlockOnBegin != null)
         {
             foreach (var gate in gatekeepersToUnlockOnBegin)

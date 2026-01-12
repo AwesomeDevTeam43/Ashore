@@ -16,6 +16,7 @@ public class TutorialKillEnemyStep : TutorialStep
 
     public override bool IsComplete()
     {
+        if (!HasMinimumFramesPassed()) return false;
         if (enemy == null) return true; // destroyed
         if (hs != null) return hs.CurrentHealth <= 0;
         return enemy == null;

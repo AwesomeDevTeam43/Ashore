@@ -29,6 +29,7 @@ public class TutorialCraftItemStep : TutorialStep
 
     public override bool IsComplete()
     {
+        if (!HasMinimumFramesPassed()) return false;
         if (Inventory.instance == null || resultItem == null) return false;
         int current = Inventory.instance.GetItemQuantity(resultItem);
         return current >= baseline + Mathf.Max(1, quantityIncrease);

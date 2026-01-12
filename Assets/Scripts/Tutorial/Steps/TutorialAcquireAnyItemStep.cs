@@ -25,6 +25,7 @@ public class TutorialAcquireAnyItemStep : TutorialStep
 
     public override bool IsComplete()
     {
+        if (!HasMinimumFramesPassed()) return false;
         if (Inventory.instance == null) return false;
         // Complete when any item quantity increases beyond baseline (new pickup)
         foreach (var inv in Inventory.instance.inventoryItems)
