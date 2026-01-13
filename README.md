@@ -6,7 +6,7 @@ Projeto Desenvolvido no ambito da Disicplina Projeto Aplicado do curso Engenhari
 
 Link - https://www.youtube.com/watch?v=ozq2ad5gY5M
 
-# Dowload:
+# Download:
 
 Dowload Here - https://github.com/AwesomeDevTeam43/Ashore/releases/download/Master/Ashore.zip
 
